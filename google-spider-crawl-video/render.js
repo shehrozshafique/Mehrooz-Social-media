@@ -1,4 +1,5 @@
 // Renders animation.html frame-by-frame into an MP4 with ffmpeg.
+// Run `python3 make_audio.py` first to include the soundtrack.
 // Usage: node render.js [output.mp4] [--fps 30] [--stills 2,8,15]
 const { chromium } = require('playwright');
 const { spawn } = require('child_process');
@@ -32,10 +33,12 @@ const out = path.resolve(args.find(a => a.endsWith('.mp4')) || path.join(__dirna
   fs.mkdirSync(path.dirname(out), { recursive: true });
   const duration = await page.evaluate(() => window.DURATION);
   const total = Math.round(duration * fps);
+  // soundtrack.wav comes from make_audio.py; falls back to silence if it hasn't been generated
+  const soundtrack = path.join(__dirname, 'output', 'soundtrack.wav');
   const ff = spawn('ffmpeg', ['-y', '-f', 'image2pipe', '-framerate', String(fps), '-i', '-',
-    '-f', 'lavfi', '-i', 'anullsrc=channel_layout=stereo:sample_rate=44100',
+    ...(fs.existsSync(soundtrack) ? ['-i', soundtrack] : ['-f', 'lavfi', '-i', 'anullsrc=channel_layout=stereo:sample_rate=44100']),
     '-c:v', 'libx264', '-preset', 'slow', '-crf', '18', '-pix_fmt', 'yuv420p',
-    '-c:a', 'aac', '-shortest', '-movflags', '+faststart', out], { stdio: ['pipe', 'ignore', 'inherit'] });
+    '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', out], { stdio: ['pipe', 'ignore', 'inherit'] });
   for (let f = 0; f < total; f++) {
     const data = await grab(f / fps);
     if (!ff.stdin.write(Buffer.from(data.split(',')[1], 'base64'))) await new Promise(r => ff.stdin.once('drain', r));
