@@ -1,0 +1,683 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>How Google Crawls Your Website</title>
+<style>
+  html, body { margin: 0; background: #050706; }
+  canvas { display: block; width: 360px; height: 640px; }
+  body.preview canvas { width: auto; height: 96vh; margin: 2vh auto; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+// Deterministic, frame-by-frame animation: draw(t) renders the frame at time t (seconds).
+// render.js calls draw() for every frame; open with ?preview to watch it in a browser.
+const W = 1080, H = 1920;
+const DURATION = 44;
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+
+const NEON = '#c8ff2e', BLUE = '#3a63f5', RED = '#ff4d5e', AMBER = '#ffb547';
+const TEXT = '#eef3e6', MUTED = '#8a9585', BG = '#050706';
+const SANS = 'Inter, "DejaVu Sans", sans-serif';
+const MONO = '"DejaVu Sans Mono", monospace';
+
+const logo = new Image();
+logo.src = 'assets/permanent-seo-logo.png';
+
+// ---------- helpers ----------
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, p) => a + (b - a) * p;
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const easeOut = p => 1 - Math.pow(1 - p, 3);
+const easeInOut = p => p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+const backOut = p => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); };
+const typed = (s, p) => s.slice(0, Math.floor(s.length * clamp(p)));
+function sceneAlpha(t, a, b, f = 0.4) { return Math.min(prog(t, a, a + f), 1 - prog(t, b - f, b)); }
+
+function rr(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function text(s, x, y, { size = 40, weight = 700, color = TEXT, align = 'left', font = SANS, glow = 0, alpha = 1, base = 'alphabetic' } = {}) {
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.font = `${weight} ${size}px ${font}`;
+  ctx.textAlign = align;
+  ctx.textBaseline = base;
+  ctx.fillStyle = color;
+  if (glow) { ctx.shadowColor = color; ctx.shadowBlur = glow; }
+  ctx.fillText(s, x, y);
+  ctx.restore();
+}
+function measure(s, size, weight = 700, font = SANS) {
+  ctx.save(); ctx.font = `${weight} ${size}px ${font}`; const w = ctx.measureText(s).width; ctx.restore(); return w;
+}
+function line(x1, y1, x2, y2, color, w = 3, glow = 0, dash = null) {
+  ctx.save();
+  ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = 'round';
+  if (glow) { ctx.shadowColor = color; ctx.shadowBlur = glow; }
+  if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  ctx.restore();
+}
+function rand(seed) { return () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
+
+// ---------- background ----------
+const bgRows = (() => {
+  const r = rand(42);
+  const paths = ['/blog/crawl-budget', '/blog/broken-links', '/blog/canonical-tags', '/blog/javascript-seo',
+    '/blog/orphan-pages', '/services/local-seo', '/services/entity-seo', '/services/geo-aeo', '/blog/page-speed',
+    '/blog/redirect-chains', '/blog/xml-sitemaps', '/services/technical-seo', '/blog/internal-linking', '/blog/robots-txt'];
+  const months = ['Jan', 'Mar', 'Apr', 'Jun', 'Aug', 'Sep', 'Oct'];
+  const rows = [];
+  for (let i = 0; i < 40; i++) {
+    const p = paths[Math.floor(r() * paths.length)];
+    const d = 1 + Math.floor(r() * 27), m = months[Math.floor(r() * months.length)];
+    const id = 10000000 + Math.floor(r() * 89999999);
+    rows.push(i % 2 === 0
+      ? `URL ${p} · Crawled ${d} ${m} 2026 · 200 OK · ID ${id}`
+      : `Googlebot/2.1 GET ${p} · Indexed · ${Math.floor(r() * 900 + 80)}ms · ID ${id}`);
+  }
+  return rows;
+})();
+
+function drawBackground(t) {
+  ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
+  // scrolling crawl log
+  ctx.save();
+  ctx.font = `500 30px ${MONO}`;
+  ctx.fillStyle = 'rgba(200,255,46,0.055)';
+  const rowH = 58, off = (t * 22) % rowH;
+  const start = Math.floor(t * 22 / rowH);
+  for (let i = -1; i < H / rowH + 2; i++) {
+    const s = bgRows[(start + i + 4000) % bgRows.length];
+    ctx.fillText(s, -40 - ((start + i) % 3) * 120, i * rowH - off + 40);
+  }
+  ctx.restore();
+  // dot grid
+  ctx.fillStyle = 'rgba(200,255,46,0.07)';
+  for (let y = 20; y < H; y += 40) for (let x = 20; x < W; x += 40) ctx.fillRect(x, y, 2, 2);
+  // vignette + brand glow
+  const g = ctx.createRadialGradient(W / 2, H * 0.45, 200, W / 2, H * 0.45, 1200);
+  g.addColorStop(0, 'rgba(5,7,6,0)'); g.addColorStop(1, 'rgba(5,7,6,0.92)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  const b = ctx.createRadialGradient(0, 0, 0, 0, 0, 700);
+  b.addColorStop(0, 'rgba(58,99,245,0.22)'); b.addColorStop(1, 'rgba(58,99,245,0)');
+  ctx.fillStyle = b; ctx.fillRect(0, 0, W, H);
+  // scan line
+  const sy = (t * 420) % (H + 400) - 200;
+  const sg = ctx.createLinearGradient(0, sy - 120, 0, sy);
+  sg.addColorStop(0, 'rgba(200,255,46,0)'); sg.addColorStop(1, 'rgba(200,255,46,0.05)');
+  ctx.fillStyle = sg; ctx.fillRect(0, sy - 120, W, 120);
+}
+
+// ---------- branding ----------
+function drawBranding(t) {
+  const a = prog(t, 0, 0.6);
+  ctx.save();
+  ctx.globalAlpha = a;
+  // logo top-left
+  const s = 104, x = 48, y = 48;
+  ctx.save();
+  ctx.shadowColor = 'rgba(58,99,245,0.8)'; ctx.shadowBlur = 30;
+  rr(x, y, s, s, 22); ctx.fillStyle = BLUE; ctx.fill();
+  ctx.restore();
+  ctx.save(); rr(x, y, s, s, 22); ctx.clip();
+  if (logo.complete && logo.naturalWidth) ctx.drawImage(logo, x, y, s, s);
+  ctx.restore();
+  text('PERMANENT SEO', x + s + 24, y + 52, { size: 38, weight: 800, color: '#ffffff' });
+  text('SEO AGENCY', x + s + 26, y + 90, { size: 22, weight: 600, color: NEON, font: MONO });
+  // name bottom-right
+  text('Created by', W - 48, H - 112, { size: 24, weight: 500, color: MUTED, align: 'right', font: MONO });
+  text('M Mehrooz Shafique', W - 48, H - 66, { size: 40, weight: 800, color: '#ffffff', align: 'right' });
+  const nw = measure('M Mehrooz Shafique', 40, 800);
+  line(W - 48 - nw, H - 46, W - 48, H - 46, NEON, 4, 12);
+  ctx.restore();
+  // progress bar
+  ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.fillRect(0, H - 8, W, 8);
+  ctx.save(); ctx.shadowColor = NEON; ctx.shadowBlur = 14;
+  ctx.fillStyle = NEON; ctx.fillRect(0, H - 8, W * clamp(t / DURATION), 8);
+  ctx.restore();
+}
+
+function stepHeader(t, a, step, title) {
+  const p = easeOut(prog(t, a, a + 0.6));
+  ctx.save();
+  ctx.globalAlpha *= p;
+  ctx.translate(0, (1 - p) * 30);
+  const label = step;
+  ctx.font = `700 26px ${MONO}`;
+  const lw = ctx.measureText(label).width + 40;
+  rr(W / 2 - lw / 2, 222, lw, 50, 25);
+  ctx.strokeStyle = NEON; ctx.lineWidth = 2; ctx.stroke();
+  ctx.fillStyle = 'rgba(200,255,46,0.1)'; ctx.fill();
+  text(label, W / 2, 256, { size: 26, weight: 700, color: NEON, align: 'center', font: MONO });
+  text(title, W / 2, 360, { size: 74, weight: 900, color: '#ffffff', align: 'center' });
+  ctx.restore();
+}
+
+function caption(t, a, lines, color = TEXT) {
+  const p = easeOut(prog(t, a, a + 0.5));
+  if (p <= 0) return;
+  ctx.save();
+  ctx.globalAlpha *= p;
+  const y0 = 1560 + (1 - p) * 20;
+  const h = 40 + lines.length * 52;
+  rr(70, y0, W - 140, h, 22);
+  ctx.fillStyle = 'rgba(10,14,8,0.85)'; ctx.fill();
+  ctx.strokeStyle = 'rgba(200,255,46,0.35)'; ctx.lineWidth = 2; ctx.stroke();
+  lines.forEach((l, i) => {
+    // allow inline highlight with *word*
+    const parts = l.split('*');
+    let total = 0; parts.forEach((s, j) => total += measure(s, 38, j % 2 ? 800 : 600));
+    let x = W / 2 - total / 2;
+    parts.forEach((s, j) => {
+      text(s, x, y0 + 66 + i * 52, { size: 38, weight: j % 2 ? 800 : 600, color: j % 2 ? NEON : color });
+      x += measure(s, 38, j % 2 ? 800 : 600);
+    });
+  });
+  ctx.restore();
+}
+
+// ---------- spider (Googlebot) ----------
+function drawSpider(x, y, s, t, angle = Math.PI / 2, walking = 1) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle - Math.PI / 2);
+  ctx.scale(s, s);
+  ctx.strokeStyle = NEON; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.shadowColor = NEON; ctx.shadowBlur = 18;
+  ctx.lineWidth = 4;
+  for (let side = -1; side <= 1; side += 2) {
+    for (let i = 0; i < 4; i++) {
+      const phase = t * 14 + i * 1.6 + (side > 0 ? Math.PI : 0);
+      const wob = Math.sin(phase) * 6 * walking;
+      const by = -10 + i * 9;
+      const kx = side * (28 + i * 2), ky = by - 20 + i * 8 + wob;
+      const fx = side * (48 + (i === 0 || i === 3 ? 0 : 6)), fy = by + (i - 1.5) * 18 + wob * 1.4;
+      ctx.beginPath(); ctx.moveTo(side * 10, by); ctx.lineTo(kx, ky); ctx.lineTo(fx, fy); ctx.stroke();
+    }
+  }
+  // abdomen
+  ctx.fillStyle = '#0b1205';
+  ctx.beginPath(); ctx.ellipse(0, -26, 20, 26, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  // body / head
+  ctx.beginPath(); ctx.ellipse(0, 8, 15, 15, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  // "G" marking
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = NEON;
+  ctx.font = `900 22px ${SANS}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('G', 0, -26);
+  // eyes
+  ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 10; ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.arc(-6, 16, 3.2, 0, Math.PI * 2); ctx.arc(6, 16, 3.2, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
+// ---------- scene 1: title ----------
+function scene1(t) {
+  const a = sceneAlpha(t, -1, 4.6);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  // spider descending on a thread
+  const d = easeOut(prog(t, 0.1, 1.6));
+  const sy = lerp(-80, 560, d) + Math.sin(t * 3) * 8 * d;
+  const sx = W / 2 + Math.sin(t * 1.6) * 14 * d;
+  line(W / 2, 0, sx, sy - 40, 'rgba(200,255,46,0.8)', 2, 8);
+  drawSpider(sx, sy, 2.1, t, Math.PI / 2, 0.4);
+  const lines = [
+    ['HOW GOOGLE', 112, '#ffffff', 0.7, 790],
+    ['CRAWLS', 176, NEON, 1.0, 960],
+    ['YOUR WEBSITE', 112, '#ffffff', 1.3, 1090],
+  ];
+  lines.forEach(([s, size, color, st, y]) => {
+    const p = easeOut(prog(t, st, st + 0.6));
+    text(s, W / 2, y + (1 - p) * 60, { size, weight: 900, color, align: 'center', alpha: p, glow: color === NEON ? 30 : 0 });
+  });
+  const p4 = easeOut(prog(t, 1.9, 2.4));
+  text('The Googlebot journey, step by step', W / 2, 1190, { size: 40, weight: 500, color: MUTED, align: 'center', alpha: p4 });
+  const steps = ['Discover', 'Crawl', 'Render', 'Index'];
+  let total = 0; const gap = 56;
+  steps.forEach(s => total += measure(s, 36, 700, MONO) + 40);
+  total += gap * 3;
+  let x = W / 2 - total / 2;
+  steps.forEach((s, i) => {
+    const p = backOut(prog(t, 2.4 + i * 0.3, 2.8 + i * 0.3));
+    const w = measure(s, 36, 700, MONO) + 40;
+    ctx.save(); ctx.globalAlpha *= clamp(p);
+    ctx.translate(x + w / 2, 1320); ctx.scale(clamp(p, 0, 1.2), clamp(p, 0, 1.2));
+    rr(-w / 2, -36, w, 72, 36);
+    ctx.fillStyle = 'rgba(200,255,46,0.1)'; ctx.fill();
+    ctx.strokeStyle = NEON; ctx.lineWidth = 2; ctx.stroke();
+    text(s, 0, 12, { size: 36, weight: 700, color: NEON, align: 'center', font: MONO });
+    ctx.restore();
+    if (i < 3 && p > 0.5) text('›', x + w + gap / 2, 1334, { size: 50, weight: 700, color: MUTED, align: 'center', alpha: prog(p, 0.5, 1) });
+    x += w + gap;
+  });
+  ctx.restore();
+}
+
+// ---------- scene 2: discover ----------
+function scene2(t) {
+  const A = 4.5, B = 11.2;
+  const a = sceneAlpha(t, A, B);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  stepHeader(t, A, 'STEP 1 / 4', 'Discover URLs');
+  const sources = [['sitemap.xml', 190], ['Backlinks', 540], ['Search Console', 890]];
+  sources.forEach(([s, cx], i) => {
+    const p = easeOut(prog(t, A + 0.4 + i * 0.2, A + 0.9 + i * 0.2));
+    ctx.save(); ctx.globalAlpha *= p; ctx.translate(0, (1 - p) * 30);
+    rr(cx - 150, 450, 300, 100, 20);
+    ctx.fillStyle = 'rgba(58,99,245,0.18)'; ctx.fill();
+    ctx.strokeStyle = BLUE; ctx.lineWidth = 3; ctx.stroke();
+    text(s, cx, 512, { size: 32, weight: 700, color: '#ffffff', align: 'center', font: s === 'sitemap.xml' ? MONO : SANS });
+    ctx.restore();
+    // flowing arrows into queue
+    const fp = prog(t, A + 1.0, A + 1.4);
+    if (fp > 0) {
+      ctx.save(); ctx.globalAlpha *= fp;
+      ctx.strokeStyle = NEON; ctx.lineWidth = 3; ctx.setLineDash([10, 12]); ctx.lineDashOffset = -t * 60;
+      ctx.shadowColor = NEON; ctx.shadowBlur = 8;
+      ctx.beginPath(); ctx.moveTo(cx, 555); ctx.lineTo(lerp(cx, 540, 0.5), 650); ctx.stroke();
+      ctx.restore();
+    }
+  });
+  // crawl queue
+  const qp = easeOut(prog(t, A + 0.9, A + 1.4));
+  ctx.save(); ctx.globalAlpha *= qp;
+  rr(120, 660, 840, 560, 26);
+  ctx.fillStyle = 'rgba(12,18,8,0.9)'; ctx.fill();
+  ctx.strokeStyle = 'rgba(200,255,46,0.6)'; ctx.lineWidth = 2; ctx.stroke();
+  text('CRAWL QUEUE', 160, 718, { size: 28, weight: 700, color: NEON, font: MONO });
+  drawSpider(880, 705, 0.85, t, Math.PI / 2, 0.6);
+  line(150, 745, 930, 745, 'rgba(200,255,46,0.25)', 2);
+  const urls = ['/', '/blog', '/services', '/about', '/admin', '/promo'];
+  const blockT = A + 5.0;
+  urls.forEach((u, i) => {
+    const st = A + 1.3 + i * 0.32;
+    const p = easeOut(prog(t, st, st + 0.35));
+    if (p <= 0) return;
+    const y = 800 + i * 70;
+    ctx.save(); ctx.globalAlpha *= p; ctx.translate((1 - p) * -40, 0);
+    text(String(i + 1).padStart(2, '0'), 160, y, { size: 28, weight: 500, color: MUTED, font: MONO });
+    const blocked = u === '/admin' && t > blockT;
+    text('permanentseo.com' + u, 220, y, { size: 30, weight: 600, color: blocked ? RED : TEXT, font: MONO });
+    if (blocked) {
+      const bp = prog(t, blockT, blockT + 0.4);
+      line(215, y - 10, lerp(215, 220 + measure('permanentseo.com' + u, 30, 600, MONO) + 5, bp), y - 10, RED, 4, 10);
+      text('BLOCKED', 920, y, { size: 26, weight: 800, color: RED, align: 'right', font: MONO, alpha: bp });
+    } else if (t > blockT + 0.3) {
+      text('✓ allowed', 920, y, { size: 26, weight: 700, color: NEON, align: 'right', font: MONO, alpha: prog(t, blockT + 0.3 + i * 0.08, blockT + 0.6 + i * 0.08) });
+    } else {
+      text('queued', 920, y, { size: 26, weight: 500, color: MUTED, align: 'right', font: MONO });
+    }
+    ctx.restore();
+  });
+  ctx.restore();
+  // robots.txt card
+  const rp = easeOut(prog(t, A + 3.2, A + 3.6));
+  if (rp > 0) {
+    ctx.save(); ctx.globalAlpha *= rp; ctx.translate(0, (1 - rp) * 40);
+    rr(220, 1250, 640, 270, 22);
+    ctx.fillStyle = 'rgba(20,16,6,0.95)'; ctx.fill();
+    ctx.strokeStyle = AMBER; ctx.lineWidth = 2; ctx.stroke();
+    const rl = [['# robots.txt', MUTED], ['User-agent: Googlebot', TEXT], ['Allow: /', NEON], ['Disallow: /admin', RED]];
+    rl.forEach(([s, c], i) => {
+      const st = A + 3.5 + i * 0.35;
+      text(typed(s, prog(t, st, st + 0.35)), 260, 1310 + i * 56, { size: 32, weight: 600, color: c, font: MONO });
+    });
+    ctx.restore();
+  }
+  caption(t, A + 1.6, ['Google finds URLs via *sitemaps*, *links* &', 'Search Console, then checks *robots.txt*.']);
+  ctx.restore();
+}
+
+// ---------- scene 3: crawl the link graph ----------
+const nodes = [
+  { u: '/', x: 540, y: 520, p: -1, s: 200 },
+  { u: '/blog', x: 230, y: 760, p: 0, s: 200 },
+  { u: '/services', x: 540, y: 790, p: 0, s: 200 },
+  { u: '/about', x: 850, y: 760, p: 0, s: 200 },
+  { u: '/blog/crawl-budget', x: 170, y: 1030, p: 1, s: 200 },
+  { u: '/blog/old-post', x: 360, y: 1180, p: 1, s: 404 },
+  { u: '/services/local-seo', x: 610, y: 1050, p: 2, s: 200 },
+  { u: '/promo', x: 870, y: 1010, p: 3, s: 301 },
+  { u: '/offers', x: 860, y: 1260, p: 7, s: 200 },
+  { u: '/blog/javascript-seo', x: 230, y: 1330, p: 4, s: 200 },
+  { u: '/services/entity-seo', x: 580, y: 1400, p: 6, s: 200 },
+];
+const orphan = { u: '/orphan-page', x: 890, y: 1440 };
+const S3 = 11.0, S3E = 21.6, VISIT0 = 12.2, VISIT_DUR = 0.8;
+const statusColor = s => s === 404 ? RED : s === 301 ? AMBER : NEON;
+function visitTime(i) { return i === 0 ? S3 + 0.8 : VISIT0 + (i - 1) * VISIT_DUR; }
+function litTime(i) { return i === 0 ? visitTime(0) : visitTime(i) + VISIT_DUR * 0.85; }
+
+function scene3(t) {
+  const a = sceneAlpha(t, S3, S3E);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  stepHeader(t, S3, 'STEP 2 / 4', 'Crawl & Follow Links');
+  // legend
+  const lp = prog(t, S3 + 0.5, S3 + 1);
+  [['200 OK', NEON, 250], ['301 Redirect', AMBER, 540], ['404 Broken', RED, 830]].forEach(([s, c, x]) => {
+    ctx.save(); ctx.globalAlpha *= lp;
+    ctx.fillStyle = c; ctx.shadowColor = c; ctx.shadowBlur = 10;
+    ctx.beginPath(); ctx.arc(x - measure(s, 26, 600, MONO) / 2 - 20, 421, 8, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    text(s, x + 6, 430, { size: 26, weight: 600, color: c, align: 'center', font: MONO, alpha: lp });
+  });
+  // edges
+  nodes.forEach((n, i) => {
+    if (n.p < 0) return;
+    const par = nodes[n.p];
+    if (t < litTime(n.p)) return;
+    const disc = prog(t, litTime(n.p), litTime(n.p) + 0.3);
+    const col = n.s === 404 ? RED : n.s === 200 && nodes[n.p].s === 301 ? AMBER : NEON;
+    line(par.x, par.y, n.x, n.y, `rgba(200,255,46,${0.25 * disc})`, 2, 0, [8, 10]);
+    const tp = prog(t, visitTime(i) + VISIT_DUR * 0.25, litTime(i));
+    if (tp > 0) line(par.x, par.y, lerp(par.x, n.x, tp), lerp(par.y, n.y, tp), col, 4, 16);
+  });
+  // orphan
+  const op = prog(t, S3 + 1, S3 + 1.5);
+  ctx.save(); ctx.globalAlpha *= op * 0.8;
+  ctx.setLineDash([6, 8]); ctx.strokeStyle = '#6b7266'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(orphan.x, orphan.y, 22, 0, Math.PI * 2); ctx.stroke();
+  ctx.restore();
+  text('?', orphan.x, orphan.y + 11, { size: 30, weight: 800, color: '#6b7266', align: 'center', alpha: op });
+  text(orphan.u, orphan.x, orphan.y + 62, { size: 24, weight: 600, color: '#6b7266', align: 'center', font: MONO, alpha: op });
+  const oc = easeOut(prog(t, 20.3, 20.8));
+  if (oc > 0) {
+    ctx.save(); ctx.globalAlpha *= oc;
+    ctx.strokeStyle = AMBER; ctx.lineWidth = 3; ctx.shadowColor = AMBER; ctx.shadowBlur = 16;
+    ctx.beginPath(); ctx.arc(orphan.x, orphan.y, 30 + Math.sin(t * 8) * 3, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+    text('No links → never found', orphan.x - 10, orphan.y + 98, { size: 24, weight: 700, color: AMBER, align: 'center', font: MONO, alpha: oc });
+  }
+  // nodes
+  nodes.forEach((n, i) => {
+    const dt = i === 0 ? S3 + 0.5 : litTime(n.p);
+    const dp = prog(t, dt, dt + 0.3);
+    if (dp <= 0) return;
+    const lit = t >= litTime(i);
+    const lp2 = prog(t, litTime(i), litTime(i) + 0.3);
+    const col = statusColor(n.s);
+    ctx.save(); ctx.globalAlpha *= dp;
+    const r = i === 0 ? 30 : 20;
+    ctx.fillStyle = lit ? col : '#0d1308';
+    ctx.strokeStyle = lit ? col : 'rgba(200,255,46,0.5)';
+    ctx.lineWidth = 3;
+    if (lit) { ctx.shadowColor = col; ctx.shadowBlur = 30 * (1.4 - lp2 * 0.4); }
+    ctx.beginPath(); ctx.arc(n.x, n.y, r + (lit ? (1 - lp2) * 12 : 0), 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.restore();
+    if (n.s === 404 && lit) {
+      line(n.x - 9, n.y - 9, n.x + 9, n.y + 9, '#1a0507', 4);
+      line(n.x + 9, n.y - 9, n.x - 9, n.y + 9, '#1a0507', 4);
+    }
+    const ly = n.y + (i === 0 ? 68 : 54);
+    text(n.u, n.x, ly, { size: 24, weight: 600, color: lit ? '#ffffff' : MUTED, align: 'center', font: MONO, alpha: dp });
+    if (lit && i > 0) {
+      const bp = backOut(prog(t, litTime(i), litTime(i) + 0.35));
+      const label = n.s === 301 ? '301' : String(n.s);
+      ctx.save(); ctx.globalAlpha *= clamp(bp);
+      ctx.translate(n.x + 46, n.y - 22); ctx.scale(clamp(bp, 0, 1.2), clamp(bp, 0, 1.2));
+      rr(-34, -18, 68, 36, 10); ctx.fillStyle = col; ctx.fill();
+      text(label, 0, 9, { size: 24, weight: 800, color: '#081004', align: 'center', font: MONO });
+      ctx.restore();
+    }
+  });
+  // spider movement
+  let sx = nodes[0].x, sy = nodes[0].y - 70, ang = Math.PI / 2, walking = 0.3;
+  const appear = prog(t, S3 + 0.3, S3 + 0.8);
+  if (t < VISIT0) {
+    sx = nodes[0].x; sy = lerp(nodes[0].y - 160, nodes[0].y, easeOut(appear));
+  } else {
+    const last = nodes.length - 1;
+    const i = Math.min(last, 1 + Math.floor((t - VISIT0) / VISIT_DUR));
+    const local = t - visitTime(i);
+    const n = nodes[i], par = nodes[n.p];
+    const prev = nodes[i - 1];
+    if (t > litTime(last)) { sx = nodes[last].x; sy = nodes[last].y; walking = 0.2; }
+    else if (local < VISIT_DUR * 0.25) {
+      const p = easeInOut(local / (VISIT_DUR * 0.25));
+      sx = lerp(prev.x, par.x, p); sy = lerp(prev.y, par.y, p);
+      ang = Math.atan2(par.y - prev.y, par.x - prev.x); walking = 1;
+      if (prev === par) ang = Math.atan2(n.y - par.y, n.x - par.x);
+    } else {
+      const p = easeInOut(prog(local, VISIT_DUR * 0.25, VISIT_DUR * 0.85));
+      sx = lerp(par.x, n.x, p); sy = lerp(par.y, n.y, p);
+      ang = Math.atan2(n.y - par.y, n.x - par.x); walking = 1;
+    }
+  }
+  ctx.save(); ctx.globalAlpha *= appear;
+  drawSpider(sx, sy, 1.05, t, ang, walking);
+  ctx.restore();
+  caption(t, S3 + 1.2, ['Googlebot follows *internal links*', 'like threads in a web.']);
+  ctx.restore();
+}
+
+// ---------- scene 4: render ----------
+function scene4(t) {
+  const A = 21.4, B = 28.6;
+  const a = sceneAlpha(t, A, B);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  stepHeader(t, A, 'STEP 3 / 4', 'Render the Page');
+  // raw html card
+  const cp = easeOut(prog(t, A + 0.3, A + 0.8));
+  ctx.save(); ctx.globalAlpha *= cp; ctx.translate(0, (1 - cp) * 30);
+  rr(90, 440, 900, 440, 22);
+  ctx.fillStyle = 'rgba(12,16,10,0.95)'; ctx.fill();
+  ctx.strokeStyle = 'rgba(200,255,46,0.45)'; ctx.lineWidth = 2; ctx.stroke();
+  [RED, AMBER, NEON].forEach((c, i) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(130 + i * 30, 478, 9, 0, Math.PI * 2); ctx.fill(); });
+  text('GET /blog/javascript-seo · 200', 960, 487, { size: 24, weight: 600, color: MUTED, align: 'right', font: MONO });
+  line(90, 510, 990, 510, 'rgba(200,255,46,0.2)', 2);
+  const code = [
+    ['<html>', TEXT], ['  <head><title>JS SEO</title></head>', TEXT], ['  <body>', TEXT],
+    ['    <div id="app"></div>', AMBER], ['    <script src="app.js"><\/script>', NEON], ['  </body>', TEXT], ['</html>', TEXT],
+  ];
+  code.forEach(([s, c], i) => {
+    const st = A + 0.7 + i * 0.25;
+    text(typed(s, prog(t, st, st + 0.3)), 130, 560 + i * 46, { size: 29, weight: 500, color: c, font: MONO });
+  });
+  ctx.restore();
+  const np = backOut(prog(t, A + 2.7, A + 3.1));
+  if (np > 0) {
+    ctx.save(); ctx.globalAlpha *= clamp(np); ctx.translate(820, 830); ctx.rotate(-0.06); ctx.scale(clamp(np, 0, 1.2), clamp(np, 0, 1.2));
+    rr(-170, -32, 340, 64, 14); ctx.fillStyle = AMBER; ctx.fill();
+    text('Raw HTML: empty!', 0, 11, { size: 30, weight: 800, color: '#1a1004', align: 'center' });
+    ctx.restore();
+  }
+  // render service
+  const wp = easeOut(prog(t, A + 3.0, A + 3.4));
+  if (wp > 0) {
+    ctx.save(); ctx.globalAlpha *= wp;
+    line(540, 890, 540, 935, NEON, 4, 10);
+    rr(140, 940, 800, 120, 24);
+    ctx.fillStyle = 'rgba(58,99,245,0.2)'; ctx.fill();
+    ctx.strokeStyle = BLUE; ctx.lineWidth = 3; ctx.stroke();
+    // spinning gear
+    ctx.save(); ctx.translate(215, 1000); ctx.rotate(t * 3);
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.arc(0, 0, 22, 0, Math.PI * 2); ctx.stroke();
+    for (let k = 0; k < 8; k++) { ctx.rotate(Math.PI / 4); ctx.fillStyle = '#ffffff'; ctx.fillRect(-5, -36, 10, 14); }
+    ctx.restore();
+    text('Web Rendering Service', 280, 990, { size: 34, weight: 800, color: '#ffffff' });
+    const pp = prog(t, A + 3.3, A + 4.4);
+    text(pp < 1 ? 'Executing JavaScript…' : 'JavaScript executed ✓', 280, 1034, { size: 26, weight: 600, color: pp < 1 ? MUTED : NEON, font: MONO });
+    rr(700, 1015, 200, 14, 7); ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fill();
+    rr(700, 1015, 200 * pp, 14, 7); ctx.fillStyle = NEON; ctx.fill();
+    line(540, 1065, 540, 1110, NEON, 4, 10);
+    ctx.restore();
+  }
+  // rendered page wireframe
+  const fp = easeOut(prog(t, A + 4.2, A + 4.6));
+  if (fp > 0) {
+    ctx.save(); ctx.globalAlpha *= fp;
+    const x = 160, y = 1115, w = 760, h = 420;
+    rr(x, y, w, h, 20); ctx.fillStyle = '#f4f7ef'; ctx.fill();
+    ctx.save(); rr(x, y, w, h, 20); ctx.clip();
+    ctx.fillStyle = '#dfe5d6'; ctx.fillRect(x, y, w, 44);
+    [RED, AMBER, '#5cc26a'].forEach((c, i) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x + 28 + i * 24, y + 22, 7, 0, Math.PI * 2); ctx.fill(); });
+    rr(x + 110, y + 10, 520, 24, 12); ctx.fillStyle = '#ffffff'; ctx.fill();
+    text('permanentseo.com/blog/javascript-seo', x + 126, y + 29, { size: 18, weight: 500, color: '#555', font: MONO });
+    const parts = [
+      [A + 4.6, () => { ctx.fillStyle = BLUE; ctx.fillRect(x, y + 44, w, 56); text('PERMANENT SEO', x + 24, y + 81, { size: 24, weight: 800, color: '#fff' }); }],
+      [A + 4.9, () => text('How Google renders JavaScript', x + 30, y + 150, { size: 36, weight: 800, color: '#111' })],
+      [A + 5.2, () => { ctx.fillStyle = '#c9d0bf'; [0, 1, 2, 3].forEach(k => { rr(x + 30, y + 180 + k * 30, [420, 380, 400, 300][k], 14, 7); ctx.fill(); }); }],
+      [A + 5.5, () => { ctx.fillStyle = BLUE; rr(x + 490, y + 172, 240, 120, 14); ctx.fill(); ctx.fillStyle = '#9fb3ff'; ctx.beginPath(); ctx.moveTo(x + 520, y + 280); ctx.lineTo(x + 590, y + 210); ctx.lineTo(x + 660, y + 280); ctx.fill(); }],
+      [A + 5.8, () => { ctx.fillStyle = '#c9d0bf'; [0, 1, 2].forEach(k => { rr(x + 30, y + 320 + k * 30, [700, 640, 560][k], 14, 7); ctx.fill(); }); }],
+    ];
+    parts.forEach(([st, fn]) => { const p = prog(t, st, st + 0.3); if (p > 0) { ctx.save(); ctx.globalAlpha *= p; fn(); ctx.restore(); } });
+    ctx.restore();
+    ctx.save(); ctx.shadowColor = NEON; ctx.shadowBlur = 24; rr(x, y, w, h, 20); ctx.strokeStyle = NEON; ctx.lineWidth = 3; ctx.stroke(); ctx.restore();
+    ctx.restore();
+  }
+  caption(t, A + 4.0, ['Google *renders JavaScript* to see', 'what real users see.']);
+  ctx.restore();
+}
+
+// ---------- scene 5: index ----------
+function scene5(t) {
+  const A = 28.4, B = 35.6;
+  const a = sceneAlpha(t, A, B);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  stepHeader(t, A, 'STEP 4 / 4', 'Index & Rank');
+  const rows = [
+    ['/', 'INDEXED', NEON], ['/blog/crawl-budget', 'INDEXED', NEON], ['/services/local-seo', 'INDEXED', NEON],
+    ['/blog/javascript-seo', 'INDEXED', NEON], ['/offers', 'INDEXED', NEON], ['/promo', '301 → /offers', AMBER],
+    ['/blog/old-post', '404 · DROPPED', RED], ['/admin', 'BLOCKED', RED], ['/orphan-page', 'NOT FOUND', '#7d8578'],
+  ];
+  rows.forEach(([u, s, c], i) => {
+    const st = A + 0.4 + i * 0.22;
+    const p = easeOut(prog(t, st, st + 0.4));
+    if (p <= 0) return;
+    const y = 440 + i * 104;
+    ctx.save(); ctx.globalAlpha *= p; ctx.translate((1 - p) * 80, 0);
+    rr(70, y, 940, 84, 16);
+    ctx.fillStyle = 'rgba(14,20,10,0.88)'; ctx.fill();
+    ctx.strokeStyle = 'rgba(200,255,46,0.18)'; ctx.lineWidth = 2; ctx.stroke();
+    text('URL', 100, y + 53, { size: 24, weight: 500, color: MUTED, font: MONO });
+    text(u, 160, y + 53, { size: 30, weight: 600, color: TEXT, font: MONO });
+    ctx.restore();
+    const sp = backOut(prog(t, A + 2.6 + i * 0.22, A + 2.95 + i * 0.22));
+    if (sp > 0) {
+      const w = measure(s, 24, 800, MONO) + 36;
+      ctx.save(); ctx.globalAlpha *= clamp(sp);
+      ctx.translate(985 - w / 2, y + 42); ctx.scale(lerp(1.8, 1, clamp(sp)), lerp(1.8, 1, clamp(sp)));
+      rr(-w / 2, -24, w, 48, 10);
+      ctx.strokeStyle = c; ctx.lineWidth = 3; ctx.shadowColor = c; ctx.shadowBlur = 14; ctx.stroke();
+      ctx.shadowBlur = 0; ctx.fillStyle = c === NEON ? 'rgba(200,255,46,0.14)' : 'rgba(0,0,0,0.3)'; ctx.fill();
+      text(s, 0, 9, { size: 24, weight: 800, color: c, align: 'center', font: MONO });
+      ctx.restore();
+    }
+  });
+  const cp = prog(t, A + 4.8, A + 5.6);
+  if (cp > 0) {
+    const n = Math.round(5 * easeOut(cp));
+    text(`Pages in Google's index: ${n} / 9`, W / 2, 1420, { size: 44, weight: 800, color: NEON, align: 'center', glow: 20, alpha: prog(t, A + 4.8, A + 5.1) });
+  }
+  caption(t, A + 2.2, ['Only *crawlable, quality* pages get', 'indexed — and only they can *rank*.']);
+  ctx.restore();
+}
+
+// ---------- scene 6: checklist + CTA ----------
+function scene6(t) {
+  const A = 35.4, B = 40.8;
+  const a = sceneAlpha(t, A, B);
+  if (a > 0) {
+    ctx.save(); ctx.globalAlpha = a;
+    stepHeader(t, A, 'PRO TIPS', 'Help Googlebot Crawl');
+    const tips = ['Submit an XML sitemap', 'Build strong internal links', 'Fix 404s & redirect chains', "Don't block key pages in robots.txt", 'Keep pages fast & renderable'];
+    tips.forEach((s, i) => {
+      const st = A + 0.5 + i * 0.45;
+      const p = easeOut(prog(t, st, st + 0.4));
+      if (p <= 0) return;
+      const y = 470 + i * 170;
+      ctx.save(); ctx.globalAlpha *= p; ctx.translate((1 - p) * -60, 0);
+      rr(90, y, 900, 130, 24);
+      ctx.fillStyle = 'rgba(14,20,10,0.9)'; ctx.fill();
+      ctx.strokeStyle = 'rgba(200,255,46,0.3)'; ctx.lineWidth = 2; ctx.stroke();
+      const cpp = backOut(prog(t, st + 0.2, st + 0.5));
+      ctx.save(); ctx.translate(165, y + 65); ctx.scale(clamp(cpp, 0, 1.2), clamp(cpp, 0, 1.2));
+      ctx.fillStyle = NEON; ctx.shadowColor = NEON; ctx.shadowBlur = 20;
+      ctx.beginPath(); ctx.arc(0, 0, 34, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0; ctx.strokeStyle = '#081004'; ctx.lineWidth = 7; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.beginPath(); ctx.moveTo(-14, 1); ctx.lineTo(-4, 12); ctx.lineTo(15, -11); ctx.stroke();
+      ctx.restore();
+      text(s, 230, y + 78, { size: 38, weight: 700, color: '#ffffff' });
+      ctx.restore();
+    });
+    ctx.restore();
+  }
+  // CTA
+  const c = prog(t, 40.6, 41.2);
+  if (c > 0) {
+    ctx.save(); ctx.globalAlpha = c;
+    const p = backOut(prog(t, 40.7, 41.4));
+    const s = 300 * clamp(p, 0, 1.2);
+    ctx.save();
+    ctx.shadowColor = BLUE; ctx.shadowBlur = 80;
+    rr(W / 2 - s / 2, 700 - s / 2, s, s, 60 * s / 300); ctx.fillStyle = BLUE; ctx.fill();
+    ctx.restore();
+    ctx.save(); rr(W / 2 - s / 2, 700 - s / 2, s, s, 60 * s / 300); ctx.clip();
+    if (logo.complete && logo.naturalWidth) ctx.drawImage(logo, W / 2 - s / 2, 700 - s / 2, s, s);
+    ctx.restore();
+    // orbiting spider
+    const ang = t * 2.2;
+    drawSpider(W / 2 + Math.cos(ang) * 230, 700 + Math.sin(ang) * 230, 0.8, t, ang + Math.PI, 1);
+    const tp = easeOut(prog(t, 41.2, 41.7));
+    text('PERMANENT SEO', W / 2, 1010 + (1 - tp) * 30, { size: 86, weight: 900, color: '#ffffff', align: 'center', alpha: tp });
+    text('Get crawled. Get indexed. Get ranked.', W / 2, 1090 + (1 - tp) * 30, { size: 38, weight: 600, color: MUTED, align: 'center', alpha: tp });
+    const bp = backOut(prog(t, 41.8, 42.3));
+    if (bp > 0) {
+      ctx.save(); ctx.globalAlpha *= clamp(bp); ctx.translate(W / 2, 1230); ctx.scale(clamp(bp, 0, 1.2), clamp(bp, 0, 1.2));
+      const w = 620;
+      rr(-w / 2, -50, w, 100, 50); ctx.fillStyle = NEON; ctx.shadowColor = NEON; ctx.shadowBlur = 40 + Math.sin(t * 6) * 12; ctx.fill();
+      text('Follow for more SEO tips', 0, 14, { size: 40, weight: 800, color: '#081004', align: 'center' });
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+}
+
+function draw(t) {
+  ctx.save();
+  ctx.clearRect(0, 0, W, H);
+  drawBackground(t);
+  scene1(t); scene2(t); scene3(t); scene4(t); scene5(t); scene6(t);
+  drawBranding(t);
+  // fade from/to black at the very start and end
+  const f = 1 - Math.min(prog(t, 0, 0.4), 1 - prog(t, DURATION - 0.5, DURATION));
+  if (f > 0) { ctx.fillStyle = `rgba(0,0,0,${f})`; ctx.fillRect(0, 0, W, H); }
+  ctx.restore();
+}
+
+window.DURATION = DURATION;
+window.draw = draw;
+window.ready = Promise.all([
+  new Promise(r => { if (logo.complete) r(); else { logo.onload = r; logo.onerror = r; } }),
+  document.fonts.load(`900 40px Inter`), document.fonts.load(`700 40px Inter`),
+  document.fonts.load(`600 40px Inter`), document.fonts.load(`500 40px "DejaVu Sans Mono"`),
+]);
+
+if (location.search.includes('preview')) {
+  document.body.classList.add('preview');
+  window.ready.then(() => {
+    const t0 = performance.now();
+    const loop = () => { draw(((performance.now() - t0) / 1000) % DURATION); requestAnimationFrame(loop); };
+    loop();
+  });
+}
+</script>
+</body>
+</html>
