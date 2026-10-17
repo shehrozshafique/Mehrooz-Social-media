@@ -1,0 +1,810 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>What Is Semantic SEO?</title>
+<style>
+  html, body { margin: 0; background: #050706; }
+  canvas { display: block; width: 360px; height: 640px; }
+  body.preview canvas { width: auto; height: 96vh; margin: 2vh auto; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+// Deterministic, frame-by-frame animation: draw(t) renders the frame at time t (seconds).
+// render.js calls draw() for every frame; open with ?preview to watch it in a browser.
+const W = 1080, H = 1920;
+const DURATION = 54;
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+
+const NEON = '#c8ff2e', BLUE = '#3a63f5', RED = '#ff4d5e', AMBER = '#ffb547', CYAN = '#3ee0ff', PINK = '#ff6bd5';
+const TEXT = '#eef3e6', MUTED = '#8a9585', BG = '#050706';
+const SANS = 'Inter, "DejaVu Sans", sans-serif';
+const MONO = '"DejaVu Sans Mono", monospace';
+
+const logo = new Image();
+logo.src = 'assets/permanent-seo-logo.png';
+
+// ---------- helpers ----------
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, p) => a + (b - a) * p;
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const easeOut = p => 1 - Math.pow(1 - p, 3);
+const easeInOut = p => p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+const backOut = p => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); };
+const typed = (s, p) => s.slice(0, Math.floor(s.length * clamp(p)));
+function sceneAlpha(t, a, b, f = 0.4) { return Math.min(prog(t, a, a + f), 1 - prog(t, b - f, b)); }
+function rgba(hex, a) {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`;
+}
+
+function rr(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function text(s, x, y, { size = 40, weight = 700, color = TEXT, align = 'left', font = SANS, glow = 0, alpha = 1, base = 'alphabetic' } = {}) {
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.font = `${weight} ${size}px ${font}`;
+  ctx.textAlign = align;
+  ctx.textBaseline = base;
+  ctx.fillStyle = color;
+  if (glow) { ctx.shadowColor = color; ctx.shadowBlur = glow; }
+  ctx.fillText(s, x, y);
+  ctx.restore();
+}
+function measure(s, size, weight = 700, font = SANS) {
+  ctx.save(); ctx.font = `${weight} ${size}px ${font}`; const w = ctx.measureText(s).width; ctx.restore(); return w;
+}
+function line(x1, y1, x2, y2, color, w = 3, glow = 0, dash = null) {
+  ctx.save();
+  ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = 'round';
+  if (glow) { ctx.shadowColor = color; ctx.shadowBlur = glow; }
+  if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  ctx.restore();
+}
+function check(x, y, s, p, color = NEON) {
+  const k = clamp(p, 0, 1.2);
+  if (k <= 0) return;
+  ctx.save(); ctx.translate(x, y); ctx.scale(k * s / 34, k * s / 34);
+  ctx.fillStyle = color; ctx.shadowColor = color; ctx.shadowBlur = 20;
+  ctx.beginPath(); ctx.arc(0, 0, 34, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowBlur = 0; ctx.strokeStyle = '#081004'; ctx.lineWidth = 7; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(-14, 1); ctx.lineTo(-4, 12); ctx.lineTo(15, -11); ctx.stroke();
+  ctx.restore();
+}
+function pill(s, x, y, { size = 30, color = NEON, fill = null, textColor = null, font = MONO, weight = 700, pad = 22, h = null, scale = 1, alpha = 1, glow = 0 } = {}) {
+  const w = measure(s, size, weight, font) + pad * 2;
+  const hh = h || size * 2;
+  ctx.save(); ctx.globalAlpha *= alpha; ctx.translate(x, y); ctx.scale(scale, scale);
+  rr(-w / 2, -hh / 2, w, hh, hh / 2);
+  ctx.fillStyle = fill || rgba(color, 0.12); ctx.fill();
+  if (glow) { ctx.shadowColor = color; ctx.shadowBlur = glow; }
+  ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.stroke();
+  ctx.shadowBlur = 0;
+  text(s, 0, size * 0.36, { size, weight, color: textColor || color, align: 'center', font });
+  ctx.restore();
+  return w;
+}
+function rand(seed) { return () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
+
+// ---------- background ----------
+const bgRows = (() => {
+  const r = rand(11);
+  const ents = [['Running Shoe', 'Product'], ['Brooks', 'Brand'], ['Flat Feet', 'Condition'], ['Arch Support', 'Attribute'],
+    ['Podiatrist', 'Person'], ['Pronation', 'Concept'], ['Marathon', 'Event'], ['Cushioning', 'Attribute'], ['Semantic SEO', 'Topic'],
+    ['Knowledge Graph', 'Concept'], ['Search Intent', 'Concept'], ['Google', 'Organization']];
+  const rels = ['relatedTo', 'hasAttribute', 'isA', 'helpsWith', 'madeBy', 'recommendedBy', 'partOf', 'about'];
+  const rows = [];
+  for (let i = 0; i < 40; i++) {
+    const a = ents[Math.floor(r() * ents.length)], b = ents[Math.floor(r() * ents.length)];
+    const rel = rels[Math.floor(r() * rels.length)];
+    const id = 'kg:/m/0' + Math.floor(r() * 899999 + 100000).toString(36);
+    rows.push(i % 2 === 0
+      ? `{ "@type": "${a[1]}", "name": "${a[0]}", "${rel}": "${b[0]}" } · ${id}`
+      : `entity("${a[0]}") —${rel}→ entity("${b[0]}") · salience ${(r() * 0.6 + 0.3).toFixed(2)}`);
+  }
+  return rows;
+})();
+
+function drawBackground(t) {
+  ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
+  // scrolling entity / triple log
+  ctx.save();
+  ctx.font = `500 30px ${MONO}`;
+  ctx.fillStyle = 'rgba(200,255,46,0.05)';
+  const rowH = 58, off = (t * 22) % rowH;
+  const start = Math.floor(t * 22 / rowH);
+  for (let i = -1; i < H / rowH + 2; i++) {
+    const s = bgRows[(start + i + 4000) % bgRows.length];
+    ctx.fillText(s, -40 - ((start + i) % 3) * 120, i * rowH - off + 40);
+  }
+  ctx.restore();
+  // dot grid
+  ctx.fillStyle = 'rgba(200,255,46,0.07)';
+  for (let y = 20; y < H; y += 40) for (let x = 20; x < W; x += 40) ctx.fillRect(x, y, 2, 2);
+  // vignette + brand glow
+  const g = ctx.createRadialGradient(W / 2, H * 0.45, 200, W / 2, H * 0.45, 1200);
+  g.addColorStop(0, 'rgba(5,7,6,0)'); g.addColorStop(1, 'rgba(5,7,6,0.92)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  const b = ctx.createRadialGradient(0, 0, 0, 0, 0, 700);
+  b.addColorStop(0, 'rgba(58,99,245,0.22)'); b.addColorStop(1, 'rgba(58,99,245,0)');
+  ctx.fillStyle = b; ctx.fillRect(0, 0, W, H);
+  const b2 = ctx.createRadialGradient(W, H, 0, W, H, 800);
+  b2.addColorStop(0, 'rgba(200,255,46,0.08)'); b2.addColorStop(1, 'rgba(200,255,46,0)');
+  ctx.fillStyle = b2; ctx.fillRect(0, 0, W, H);
+  // scan line
+  const sy = (t * 420) % (H + 400) - 200;
+  const sg = ctx.createLinearGradient(0, sy - 120, 0, sy);
+  sg.addColorStop(0, 'rgba(200,255,46,0)'); sg.addColorStop(1, 'rgba(200,255,46,0.05)');
+  ctx.fillStyle = sg; ctx.fillRect(0, sy - 120, W, 120);
+}
+
+// ---------- branding ----------
+function drawBranding(t) {
+  const a = prog(t, 0, 0.6);
+  ctx.save();
+  ctx.globalAlpha = a;
+  // logo top-left
+  const s = 104, x = 48, y = 48;
+  ctx.save();
+  ctx.shadowColor = 'rgba(58,99,245,0.8)'; ctx.shadowBlur = 30;
+  rr(x, y, s, s, 22); ctx.fillStyle = BLUE; ctx.fill();
+  ctx.restore();
+  ctx.save(); rr(x, y, s, s, 22); ctx.clip();
+  if (logo.complete && logo.naturalWidth) ctx.drawImage(logo, x, y, s, s);
+  ctx.restore();
+  text('PERMANENT SEO', x + s + 24, y + 52, { size: 38, weight: 800, color: '#ffffff' });
+  text('SEO AGENCY', x + s + 26, y + 90, { size: 22, weight: 600, color: NEON, font: MONO });
+  // name bottom-right
+  text('Created by', W - 48, H - 112, { size: 24, weight: 500, color: MUTED, align: 'right', font: MONO });
+  text('M Mehrooz Shafique', W - 48, H - 66, { size: 40, weight: 800, color: '#ffffff', align: 'right' });
+  const nw = measure('M Mehrooz Shafique', 40, 800);
+  line(W - 48 - nw, H - 46, W - 48, H - 46, NEON, 4, 12);
+  ctx.restore();
+  // progress bar
+  ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.fillRect(0, H - 8, W, 8);
+  ctx.save(); ctx.shadowColor = NEON; ctx.shadowBlur = 14;
+  ctx.fillStyle = NEON; ctx.fillRect(0, H - 8, W * clamp(t / DURATION), 8);
+  ctx.restore();
+}
+
+function stepHeader(t, a, step, title) {
+  const p = easeOut(prog(t, a, a + 0.6));
+  ctx.save();
+  ctx.globalAlpha *= p;
+  ctx.translate(0, (1 - p) * 30);
+  ctx.font = `700 26px ${MONO}`;
+  const lw = ctx.measureText(step).width + 40;
+  rr(W / 2 - lw / 2, 222, lw, 50, 25);
+  ctx.strokeStyle = NEON; ctx.lineWidth = 2; ctx.stroke();
+  ctx.fillStyle = 'rgba(200,255,46,0.1)'; ctx.fill();
+  text(step, W / 2, 256, { size: 26, weight: 700, color: NEON, align: 'center', font: MONO });
+  // shrink long titles to fit the frame
+  const size = Math.min(74, Math.floor(74 * (W - 120) / measure(title, 74, 900)));
+  text(title, W / 2, 360, { size, weight: 900, color: '#ffffff', align: 'center' });
+  ctx.restore();
+}
+
+function caption(t, a, lines, color = TEXT) {
+  const p = easeOut(prog(t, a, a + 0.5));
+  if (p <= 0) return;
+  ctx.save();
+  ctx.globalAlpha *= p;
+  const y0 = 1560 + (1 - p) * 20;
+  const h = 40 + lines.length * 52;
+  rr(70, y0, W - 140, h, 22);
+  ctx.fillStyle = 'rgba(10,14,8,0.85)'; ctx.fill();
+  ctx.strokeStyle = 'rgba(200,255,46,0.35)'; ctx.lineWidth = 2; ctx.stroke();
+  lines.forEach((l, i) => {
+    // allow inline highlight with *word*
+    const parts = l.split('*');
+    let total = 0; parts.forEach((s, j) => total += measure(s, 38, j % 2 ? 800 : 600));
+    let x = W / 2 - total / 2;
+    parts.forEach((s, j) => {
+      text(s, x, y0 + 66 + i * 52, { size: 38, weight: j % 2 ? 800 : 600, color: j % 2 ? NEON : color });
+      x += measure(s, 38, j % 2 ? 800 : 600);
+    });
+  });
+  ctx.restore();
+}
+
+// glowing graph node
+function node(x, y, r, color, p = 1, pulse = 0) {
+  if (p <= 0) return;
+  ctx.save();
+  ctx.globalAlpha *= clamp(p);
+  ctx.fillStyle = color; ctx.shadowColor = color; ctx.shadowBlur = 24 + pulse * 20;
+  ctx.beginPath(); ctx.arc(x, y, r * clamp(p, 0, 1.2) + pulse * 6, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
+// ---------- scene 1: title ----------
+function scene1(t) {
+  const a = sceneAlpha(t, -1, 4.7);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  // mini knowledge graph forming above the title
+  const cx = W / 2, cy = 560;
+  const cols = [NEON, CYAN, AMBER, PINK, BLUE, NEON];
+  const cp = backOut(prog(t, 0.1, 0.6));
+  for (let i = 0; i < 6; i++) {
+    const ang = -Math.PI / 2 + i * Math.PI / 3 + t * 0.35;
+    const rad = 200 + Math.sin(t * 2 + i) * 10;
+    const st = 0.3 + i * 0.12;
+    const lp = easeOut(prog(t, st, st + 0.4));
+    const x = cx + Math.cos(ang) * rad * lp, y = cy + Math.sin(ang) * rad * 0.62 * lp;
+    line(cx, cy, x, y, rgba(cols[i], 0.6), 3, 10);
+    const ni = (i + 1) % 6, na = -Math.PI / 2 + ni * Math.PI / 3 + t * 0.35;
+    const np = easeOut(prog(t, 0.3 + ni * 0.12, 0.7 + ni * 0.12)) * prog(t, 1.2, 1.6);
+    if (np > 0) {
+      const nr = 200 + Math.sin(t * 2 + ni) * 10;
+      line(x, y, cx + Math.cos(na) * nr, cy + Math.sin(na) * nr * 0.62, rgba(NEON, 0.2 * np), 2, 0, [6, 8]);
+    }
+    node(x, y, 16, cols[i], backOut(prog(t, st + 0.2, st + 0.5)));
+  }
+  node(cx, cy, 38, NEON, cp, 0.5 + Math.sin(t * 5) * 0.5);
+  text('SEO', cx, cy + 12, { size: 30, weight: 900, color: '#081004', align: 'center', alpha: clamp(cp) });
+
+  const lines = [
+    ['WHAT IS', 112, '#ffffff', 0.7, 860],
+    ['SEMANTIC', 168, NEON, 1.0, 1030],
+    ['SEO?', 150, '#ffffff', 1.3, 1170],
+  ];
+  lines.forEach(([s, size, color, st, y]) => {
+    const p = easeOut(prog(t, st, st + 0.6));
+    text(s, W / 2, y + (1 - p) * 60, { size, weight: 900, color, align: 'center', alpha: p, glow: color === NEON ? 30 : 0 });
+  });
+  const p4 = easeOut(prog(t, 1.9, 2.4));
+  text('Beyond keywords — optimize for meaning', W / 2, 1270, { size: 40, weight: 500, color: MUTED, align: 'center', alpha: p4 });
+  const chips = ['Meaning', 'Context', 'Entities', 'Intent'];
+  const gap = 24;
+  let total = gap * 3;
+  chips.forEach(s => total += measure(s, 34, 700, MONO) + 44);
+  let x = W / 2 - total / 2;
+  chips.forEach((s, i) => {
+    const p = backOut(prog(t, 2.4 + i * 0.3, 2.8 + i * 0.3));
+    const w = measure(s, 34, 700, MONO) + 44;
+    if (p > 0) pill(s, x + w / 2, 1390, { size: 34, scale: clamp(p, 0, 1.2), alpha: clamp(p), pad: 22, h: 72 });
+    x += w + gap;
+  });
+  ctx.restore();
+}
+
+// ---------- scene 2: definition ----------
+const S2 = 4.5, S2E = 12.4;
+const pillars = [
+  ['Meaning', 'what it really is', NEON],
+  ['Context', 'who, where & why', CYAN],
+  ['Entities', 'people, products, brands', AMBER],
+  ['Attributes', 'size, cushioning, price', PINK],
+  ['Relationships', 'how things connect', '#8fa8ff'],
+];
+function scene2(t) {
+  const A = S2;
+  const a = sceneAlpha(t, A, S2E);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  stepHeader(t, A, 'DEFINITION', 'Keywords → Meaning');
+  // part A: keyword-only page
+  const kp = easeOut(prog(t, A + 0.4, A + 0.9)) * (1 - easeInOut(prog(t, A + 3.0, A + 3.5)));
+  if (kp > 0) {
+    ctx.save(); ctx.globalAlpha *= kp; ctx.translate(0, (1 - kp) * 30);
+    rr(110, 460, 860, 520, 24);
+    ctx.fillStyle = 'rgba(14,16,12,0.95)'; ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)'; ctx.lineWidth = 2; ctx.stroke();
+    text('OLD WAY: KEYWORD-ONLY SEO', 150, 520, { size: 26, weight: 700, color: MUTED, font: MONO });
+    line(140, 545, 940, 545, 'rgba(255,255,255,0.12)', 2);
+    const kw = ['Running shoes. Best running', 'shoes. Cheap running shoes.', 'Running shoes running shoes', 'buy running shoes online.', 'Running shoes 2026…'];
+    kw.forEach((s, i) => {
+      const st = A + 0.7 + i * 0.25;
+      text(typed(s, prog(t, st, st + 0.3)), 150, 610 + i * 62, { size: 38, weight: 600, color: '#9aa392' });
+    });
+    const sp = backOut(prog(t, A + 2.1, A + 2.5));
+    if (sp > 0) {
+      ctx.save(); ctx.globalAlpha *= clamp(sp); ctx.translate(700, 900); ctx.rotate(-0.08); ctx.scale(lerp(1.8, 1, clamp(sp)), lerp(1.8, 1, clamp(sp)));
+      rr(-230, -42, 460, 84, 16); ctx.strokeStyle = RED; ctx.lineWidth = 5; ctx.shadowColor = RED; ctx.shadowBlur = 20; ctx.stroke();
+      ctx.shadowBlur = 0; ctx.fillStyle = 'rgba(40,6,10,0.85)'; ctx.fill();
+      text('✗ KEYWORD STUFFING', 0, 13, { size: 36, weight: 900, color: RED, align: 'center' });
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+  // part B: the query and its five semantic layers
+  const B0 = A + 3.4;
+  const qp = backOut(prog(t, B0, B0 + 0.5));
+  if (qp > 0) {
+    const cx = 540, cy = 1000, R = 380;
+    pillars.forEach(([name, desc, col], i) => {
+      const ang = -Math.PI / 2 + i * 2 * Math.PI / 5;
+      const x = cx + Math.cos(ang) * R, y = cy + Math.sin(ang) * R;
+      const st = B0 + 0.5 + i * 0.35;
+      const lp = easeOut(prog(t, st, st + 0.35));
+      if (lp <= 0) return;
+      line(cx, cy, lerp(cx, x, lp), lerp(cy, y, lp), rgba(col, 0.8), 4, 14);
+      // travelling pulse
+      const pp = ((t - st) * 0.8) % 1;
+      if (lp >= 1) node(lerp(cx, x, pp), lerp(cy, y, pp), 6, col, 1);
+      const bp = backOut(prog(t, st + 0.25, st + 0.6));
+      if (bp > 0) {
+        pill(name, x, y, { size: 32, color: col, fill: 'rgba(8,12,6,0.95)', textColor: '#ffffff', font: SANS, weight: 800, h: 74, scale: clamp(bp, 0, 1.2), glow: 18 });
+        text(desc, x, y + 72, { size: 25, weight: 600, color: col, align: 'center', font: MONO, alpha: prog(t, st + 0.5, st + 0.8) });
+      }
+    });
+    ctx.save(); ctx.globalAlpha *= clamp(qp);
+    ctx.translate(cx, cy); ctx.scale(clamp(qp, 0, 1.2), clamp(qp, 0, 1.2));
+    ctx.shadowColor = NEON; ctx.shadowBlur = 40 + Math.sin(t * 5) * 10;
+    rr(-190, -60, 380, 120, 60); ctx.fillStyle = NEON; ctx.fill();
+    ctx.shadowBlur = 0;
+    text('SEARCH QUERY', 0, -14, { size: 20, weight: 700, color: '#25400a', align: 'center', font: MONO });
+    text('“running shoes”', 0, 28, { size: 38, weight: 900, color: '#081004', align: 'center' });
+    ctx.restore();
+  }
+  caption(t, A + 3.6, ['Optimize for the *meaning* behind a query —', 'not just the *keywords* in it.']);
+  ctx.restore();
+}
+
+// ---------- scene 3: why #1 search intent ----------
+const S3 = 12.2, S3E = 18.8;
+function scene3(t) {
+  const A = S3;
+  const a = sceneAlpha(t, A, S3E);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  stepHeader(t, A, 'WHY? 1 / 5', 'Understand Search Intent');
+  // search bar
+  const bp = easeOut(prog(t, A + 0.3, A + 0.7));
+  ctx.save(); ctx.globalAlpha *= bp; ctx.translate(0, (1 - bp) * 30);
+  rr(90, 440, 900, 110, 55);
+  ctx.fillStyle = '#f4f7ef'; ctx.fill();
+  ctx.strokeStyle = NEON; ctx.lineWidth = 3; ctx.shadowColor = NEON; ctx.shadowBlur = 20; ctx.stroke();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = '#6b7266'; ctx.lineWidth = 5;
+  ctx.beginPath(); ctx.arc(160, 490, 18, 0, Math.PI * 2); ctx.stroke();
+  line(173, 503, 188, 518, '#6b7266', 6);
+  const q = 'running shoes for flat feet';
+  const qs = typed(q, prog(t, A + 0.6, A + 1.8));
+  text(qs, 215, 508, { size: 40, weight: 600, color: '#111' });
+  if (Math.floor(t * 3) % 2 === 0 && t < A + 2.4) {
+    const cx = 215 + measure(qs, 40, 600) + 4;
+    ctx.fillStyle = '#111'; ctx.fillRect(cx, 474, 3, 46);
+  }
+  ctx.restore();
+  // what the user really wants
+  const hp = easeOut(prog(t, A + 1.9, A + 2.3));
+  text('What does the user actually want?', W / 2, 640, { size: 40, weight: 700, color: MUTED, align: 'center', alpha: hp });
+  const rows = [['WHO', 'A runner with flat feet', CYAN], ['NEED', 'Arch support & stability', AMBER], ['GOAL', 'Compare, then buy the right pair', NEON]];
+  rows.forEach(([k, v, col], i) => {
+    const st = A + 2.2 + i * 0.4;
+    const p = easeOut(prog(t, st, st + 0.4));
+    if (p <= 0) return;
+    const y = 700 + i * 140;
+    ctx.save(); ctx.globalAlpha *= p; ctx.translate((1 - p) * -60, 0);
+    rr(90, y, 900, 110, 20);
+    ctx.fillStyle = 'rgba(14,20,10,0.9)'; ctx.fill();
+    ctx.strokeStyle = rgba(col, 0.5); ctx.lineWidth = 2; ctx.stroke();
+    rr(115, y + 28, 130, 54, 12); ctx.fillStyle = rgba(col, 0.16); ctx.fill();
+    ctx.strokeStyle = col; ctx.stroke();
+    text(k, 180, y + 65, { size: 26, weight: 800, color: col, align: 'center', font: MONO });
+    text(v, 275, y + 69, { size: 38, weight: 700, color: '#ffffff' });
+    ctx.restore();
+  });
+  // intent types
+  const types = ['Informational', 'Navigational', 'Commercial', 'Transactional'];
+  const tp = prog(t, A + 3.6, A + 4.0);
+  if (tp > 0) {
+    text('SEARCH INTENT TYPES', W / 2, 1160, { size: 26, weight: 700, color: MUTED, align: 'center', font: MONO, alpha: tp });
+    const sel = t > A + 4.5;
+    types.forEach((s, i) => {
+      const p = backOut(prog(t, A + 3.7 + i * 0.12, A + 4.0 + i * 0.12));
+      const x = i % 2 === 0 ? 300 : 780, y = 1240 + Math.floor(i / 2) * 100;
+      const on = sel && s === 'Commercial';
+      const dim = sel && !on;
+      pill(s, x, y, {
+        size: 32, color: on ? NEON : dim ? '#4d5449' : '#8fa8ff', font: SANS, weight: 800, h: 76,
+        fill: on ? NEON : 'rgba(8,12,6,0.9)', textColor: on ? '#081004' : dim ? '#6b7266' : '#ffffff',
+        scale: clamp(p, 0, 1.2) * (on ? 1 + 0.08 * Math.sin(prog(t, A + 4.5, A + 4.9) * Math.PI) : 1), alpha: clamp(p), glow: on ? 30 : 0,
+      });
+    });
+    const mp = easeOut(prog(t, A + 4.8, A + 5.2));
+    text('→ Commercial investigation', W / 2, 1470, { size: 34, weight: 800, color: NEON, align: 'center', font: MONO, alpha: mp });
+  }
+  caption(t, A + 2.0, ['Identify what users *actually want*', 'to know — then answer it.']);
+  ctx.restore();
+}
+
+// ---------- scene 4: why #2 cover topics completely ----------
+const S4 = 18.6, S4E = 25.0;
+function scene4(t) {
+  const A = S4;
+  const a = sceneAlpha(t, A, S4E);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  stepHeader(t, A, 'WHY? 2 / 5', 'Cover Topics Completely');
+  const hp = backOut(prog(t, A + 0.3, A + 0.7));
+  pill('Running Shoes for Flat Feet', W / 2, 475, { size: 36, color: NEON, fill: NEON, textColor: '#081004', font: SANS, weight: 900, h: 86, scale: clamp(hp, 0, 1.2), alpha: clamp(hp), glow: 30 });
+  const qs = ['What are flat feet?', 'Why do flat feet need support?', 'Stability vs. neutral shoes', 'Which features matter most?', 'Best shoes compared', 'How to choose the right size'];
+  const trunk = easeOut(prog(t, A + 0.6, A + 0.6 + qs.length * 0.4));
+  line(150, 520, 150, lerp(520, 580 + (qs.length - 1) * 112 + 46, trunk), rgba(NEON, 0.6), 3, 8);
+  let done = 0;
+  qs.forEach((s, i) => {
+    const st = A + 0.8 + i * 0.4;
+    const p = easeOut(prog(t, st, st + 0.35));
+    if (p <= 0) return;
+    const y = 580 + i * 112;
+    line(150, y + 46, lerp(150, 200, p), y + 46, rgba(NEON, 0.6), 3, 8);
+    ctx.save(); ctx.globalAlpha *= p; ctx.translate((1 - p) * 60, 0);
+    rr(200, y, 800, 92, 18);
+    ctx.fillStyle = 'rgba(14,20,10,0.9)'; ctx.fill();
+    const ok = t > st + 0.35;
+    ctx.strokeStyle = ok ? 'rgba(200,255,46,0.5)' : 'rgba(255,255,255,0.15)'; ctx.lineWidth = 2; ctx.stroke();
+    text(s, 245, y + 59, { size: 34, weight: 700, color: '#ffffff' });
+    ctx.restore();
+    check(945, y + 46, 26, backOut(prog(t, st + 0.35, st + 0.65)));
+    if (t > st + 0.5) done++;
+  });
+  // coverage meter
+  const mp = easeOut(prog(t, A + 1.0, A + 1.4));
+  if (mp > 0) {
+    ctx.save(); ctx.globalAlpha *= mp;
+    const pct = Math.round(lerp(0, 100, easeOut(prog(t, A + 0.8, A + 0.8 + qs.length * 0.4 + 0.3))));
+    text('TOPIC COVERAGE', 90, 1300, { size: 28, weight: 700, color: MUTED, font: MONO });
+    text(pct + '%', 990, 1302, { size: 44, weight: 900, color: pct === 100 ? NEON : '#ffffff', align: 'right', glow: pct === 100 ? 20 : 0 });
+    rr(90, 1330, 900, 34, 17); ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fill();
+    if (pct > 0) {
+      ctx.save(); ctx.shadowColor = NEON; ctx.shadowBlur = 20;
+      rr(90, 1330, Math.max(34, 900 * pct / 100), 34, 17); ctx.fillStyle = NEON; ctx.fill();
+      ctx.restore();
+    }
+    text(`${done} / ${qs.length} questions answered`, W / 2, 1430, { size: 30, weight: 600, color: TEXT, align: 'center', font: MONO });
+    ctx.restore();
+  }
+  caption(t, A + 1.4, ['Answer the *related questions*', 'and *subtopics* users ask next.']);
+  ctx.restore();
+}
+
+// ---------- scene 5: why #3 connect entities ----------
+const S5 = 24.8, S5E = 32.0;
+const ents = [
+  { n: 'Running Shoe', ty: 'PRODUCT', x: 540, y: 880, c: NEON },
+  { n: 'Brooks', ty: 'BRAND', x: 245, y: 560, c: CYAN },
+  { n: 'Flat Feet', ty: 'CONDITION', x: 835, y: 560, c: AMBER },
+  { n: 'Arch Support', ty: 'ATTRIBUTE', x: 245, y: 1210, c: PINK },
+  { n: 'Podiatrist', ty: 'PERSON', x: 835, y: 1210, c: '#8fa8ff' },
+];
+const rels = [[1, 0, 'makes'], [0, 2, 'helps with'], [0, 3, 'has'], [4, 0, 'recommends'], [4, 2, 'treats']];
+function entityCard(e, p) {
+  if (p <= 0) return;
+  const w = Math.max(250, measure(e.n, 36, 800) + 60), h = 116;
+  ctx.save(); ctx.globalAlpha *= clamp(p); ctx.translate(e.x, e.y); ctx.scale(clamp(p, 0, 1.2), clamp(p, 0, 1.2));
+  rr(-w / 2, -h / 2, w, h, 22);
+  ctx.fillStyle = 'rgba(8,12,6,0.96)'; ctx.fill();
+  ctx.shadowColor = e.c; ctx.shadowBlur = 22; ctx.strokeStyle = e.c; ctx.lineWidth = 3; ctx.stroke();
+  ctx.shadowBlur = 0;
+  text(e.ty, 0, -14, { size: 22, weight: 700, color: e.c, align: 'center', font: MONO });
+  text(e.n, 0, 30, { size: 36, weight: 800, color: '#ffffff', align: 'center' });
+  ctx.restore();
+}
+function scene5(t) {
+  const A = S5;
+  const a = sceneAlpha(t, A, S5E);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  stepHeader(t, A, 'WHY? 3 / 5', 'Connect Entities');
+  const appear = i => i === 0 ? A + 0.4 : A + 0.8 + (i - 1) * 0.3;
+  const relT = k => A + 2.2 + k * 0.45;
+  // edges
+  rels.forEach(([f, to, label], k) => {
+    const e1 = ents[f], e2 = ents[to];
+    const p = easeInOut(prog(t, relT(k), relT(k) + 0.4));
+    if (p <= 0) return;
+    const col = e1.c;
+    line(e1.x, e1.y, lerp(e1.x, e2.x, p), lerp(e1.y, e2.y, p), rgba(col, 0.85), 4, 14);
+    // arrowhead + pulse along the edge
+    if (p >= 1) {
+      const pp = ((t - relT(k)) * 0.7) % 1;
+      node(lerp(e1.x, e2.x, pp), lerp(e1.y, e2.y, pp), 7, col);
+    }
+    const lp = backOut(prog(t, relT(k) + 0.3, relT(k) + 0.6));
+    if (lp > 0) {
+      const mx = (e1.x + e2.x) / 2, my = (e1.y + e2.y) / 2;
+      pill(label, mx, my, { size: 26, color: col, fill: 'rgba(8,12,6,0.95)', h: 50, pad: 16, scale: clamp(lp, 0, 1.2), alpha: clamp(lp) });
+    }
+  });
+  ents.forEach((e, i) => entityCard(e, backOut(prog(t, appear(i), appear(i) + 0.4))));
+  // a sample triple
+  const tp = easeOut(prog(t, A + 4.7, A + 5.1));
+  if (tp > 0) {
+    ctx.save(); ctx.globalAlpha *= tp; ctx.translate(0, (1 - tp) * 20);
+    rr(90, 1340, 900, 150, 20);
+    ctx.fillStyle = 'rgba(12,16,10,0.95)'; ctx.fill();
+    ctx.strokeStyle = 'rgba(200,255,46,0.4)'; ctx.lineWidth = 2; ctx.stroke();
+    text('ENTITY RELATIONSHIP (TRIPLE)', 130, 1388, { size: 22, weight: 700, color: MUTED, font: MONO });
+    const parts = [['Running Shoe', NEON], [' → has → ', MUTED], ['Arch Support', PINK]];
+    const parts2 = [['Arch Support', PINK], [' → helps with → ', MUTED], ['Flat Feet', AMBER]];
+    [parts, parts2].forEach((ps, j) => {
+      const st = A + 5.0 + j * 0.5;
+      const pp = prog(t, st, st + 0.4);
+      let x = 130;
+      ps.forEach(([s, c]) => { text(typed(s, pp * 1.0), x, 1432 + j * 44, { size: 30, weight: 700, color: c, font: MONO }); x += measure(s, 30, 700, MONO); });
+    });
+    ctx.restore();
+  }
+  caption(t, A + 2.0, ['Explain how *people, products, concepts*', '& *attributes* relate to each other.']);
+  ctx.restore();
+}
+
+// ---------- scene 6: why #4 contextual relevance ----------
+const S6 = 31.8, S6E = 38.2;
+const para = [
+  'The best running shoes for flat feet',
+  'offer *arch support* and *stability* to',
+  'control *overpronation*. Look for firm',
+  '*cushioning*, a low *heel drop* and a',
+  'wide base, as many *podiatrists* advise.',
+];
+function scene6(t) {
+  const A = S6;
+  const a = sceneAlpha(t, A, S6E);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  stepHeader(t, A, 'WHY? 4 / 5', 'Improve Contextual Relevance');
+  // article card
+  const cp = easeOut(prog(t, A + 0.3, A + 0.7));
+  ctx.save(); ctx.globalAlpha *= cp; ctx.translate(0, (1 - cp) * 30);
+  rr(80, 430, 920, 560, 24);
+  ctx.fillStyle = 'rgba(12,16,10,0.95)'; ctx.fill();
+  ctx.strokeStyle = 'rgba(200,255,46,0.4)'; ctx.lineWidth = 2; ctx.stroke();
+  text('YOUR PAGE', 120, 484, { size: 24, weight: 700, color: MUTED, font: MONO });
+  text('Running Shoes for Flat Feet', 120, 560, { size: 46, weight: 900, color: '#ffffff' });
+  let hl = 0, total = 0;
+  para.forEach(l => total += (l.split('*').length - 1) / 2);
+  const HL0 = A + 1.3, HLD = 0.42;
+  para.forEach((l, i) => {
+    const y = 650 + i * 66;
+    const parts = l.split('*');
+    let x = 120;
+    parts.forEach((s, j) => {
+      const w = measure(s, 36, j % 2 ? 800 : 600);
+      if (j % 2) {
+        const st = HL0 + hl * HLD;
+        const p = easeOut(prog(t, st, st + 0.3));
+        if (p > 0) {
+          ctx.save(); ctx.globalAlpha *= p;
+          rr(x - 6, y - 36, (w + 12) * p, 48, 10); ctx.fillStyle = 'rgba(200,255,46,0.22)'; ctx.fill();
+          ctx.restore();
+        }
+        text(s, x, y, { size: 36, weight: 800, color: p > 0.5 ? NEON : TEXT });
+        hl++;
+      } else {
+        text(s, x, y, { size: 36, weight: 600, color: '#c2c9ba' });
+      }
+      x += w;
+    });
+  });
+  ctx.restore();
+  // relevance gauge
+  const gp = easeOut(prog(t, A + 0.9, A + 1.3));
+  if (gp > 0) {
+    ctx.save(); ctx.globalAlpha *= gp;
+    const cx = 540, cy = 1360, R = 230;
+    const v = lerp(0.18, 0.96, easeOut(prog(t, HL0, HL0 + total * HLD + 0.3)));
+    ctx.lineCap = 'round';
+    ctx.lineWidth = 34; ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.beginPath(); ctx.arc(cx, cy, R, Math.PI, 2 * Math.PI); ctx.stroke();
+    const grad = ctx.createLinearGradient(cx - R, 0, cx + R, 0);
+    grad.addColorStop(0, RED); grad.addColorStop(0.5, AMBER); grad.addColorStop(1, NEON);
+    ctx.strokeStyle = grad; ctx.shadowColor = v > 0.7 ? NEON : AMBER; ctx.shadowBlur = 20;
+    ctx.beginPath(); ctx.arc(cx, cy, R, Math.PI, Math.PI + Math.PI * v); ctx.stroke();
+    ctx.shadowBlur = 0;
+    const na = Math.PI + Math.PI * v;
+    line(cx, cy, cx + Math.cos(na) * (R - 50), cy + Math.sin(na) * (R - 50), '#ffffff', 8, 12);
+    node(cx, cy, 16, '#ffffff');
+    text('LOW', cx - R, cy + 50, { size: 24, weight: 700, color: RED, align: 'center', font: MONO });
+    text('HIGH', cx + R, cy + 50, { size: 24, weight: 700, color: NEON, align: 'center', font: MONO });
+    text(Math.round(v * 100) + '%', cx, cy - 70, { size: 64, weight: 900, color: v > 0.7 ? NEON : '#ffffff', align: 'center', glow: v > 0.7 ? 20 : 0 });
+    text('CONTEXTUAL RELEVANCE', cx, cy + 56, { size: 24, weight: 700, color: MUTED, align: 'center', font: MONO });
+    ctx.restore();
+  }
+  caption(t, A + 3.6, ['Related terms make content *more relevant*', 'to its *subject*.']);
+  ctx.restore();
+}
+
+// ---------- scene 7: why #5 topical authority ----------
+const S7 = 38.0, S7E = 44.6;
+const cluster = ['Flat Feet', 'Trail Shoes', 'Sizing Guide', 'Cushioning', 'Pronation', 'Top Brands', 'Marathon Prep', 'Injury Care'];
+function scene7(t) {
+  const A = S7;
+  const a = sceneAlpha(t, A, S7E);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  stepHeader(t, A, 'WHY? 5 / 5', 'Build Topical Authority');
+  const cx = 540, cy = 860, R = 345;
+  const pos = cluster.map((_, i) => {
+    const ang = -Math.PI / 2 + i * Math.PI / 4;
+    return [cx + Math.cos(ang) * R, cy + Math.sin(ang) * R * 0.9];
+  });
+  const ct = i => A + 1.0 + i * 0.3;
+  // ring links between neighbouring cluster pages
+  pos.forEach(([x, y], i) => {
+    const [x2, y2] = pos[(i + 1) % pos.length];
+    const p = prog(t, ct(cluster.length - 1) + 0.4 + i * 0.06, ct(cluster.length - 1) + 0.7 + i * 0.06);
+    if (p > 0) line(x, y, lerp(x, x2, p), lerp(y, y2, p), rgba(CYAN, 0.45), 3, 8, [8, 8]);
+  });
+  // spokes to the pillar
+  pos.forEach(([x, y], i) => {
+    const p = easeOut(prog(t, ct(i), ct(i) + 0.3));
+    if (p <= 0) return;
+    line(cx, cy, lerp(cx, x, p), lerp(cy, y, p), rgba(NEON, 0.7), 3, 12);
+    if (p >= 1) { const pp = ((t - ct(i)) * 0.9) % 1; node(lerp(x, cx, pp), lerp(y, cy, pp), 5, NEON); }
+  });
+  cluster.forEach((s, i) => {
+    const p = backOut(prog(t, ct(i) + 0.2, ct(i) + 0.5));
+    if (p <= 0) return;
+    pill(s, pos[i][0], pos[i][1], { size: 28, color: CYAN, fill: 'rgba(8,12,6,0.95)', textColor: '#ffffff', font: SANS, weight: 800, h: 66, pad: 20, scale: clamp(p, 0, 1.2), alpha: clamp(p) });
+  });
+  // pillar
+  const pp = backOut(prog(t, A + 0.4, A + 0.8));
+  if (pp > 0) {
+    ctx.save(); ctx.globalAlpha *= clamp(pp); ctx.translate(cx, cy); ctx.scale(clamp(pp, 0, 1.2), clamp(pp, 0, 1.2));
+    ctx.shadowColor = NEON; ctx.shadowBlur = 40 + Math.sin(t * 5) * 10;
+    rr(-170, -72, 340, 144, 26); ctx.fillStyle = NEON; ctx.fill();
+    ctx.shadowBlur = 0;
+    text('PILLAR PAGE', 0, -24, { size: 22, weight: 700, color: '#25400a', align: 'center', font: MONO });
+    text('Running Shoes', 0, 18, { size: 38, weight: 900, color: '#081004', align: 'center' });
+    text('Complete Guide', 0, 54, { size: 28, weight: 700, color: '#25400a', align: 'center' });
+    ctx.restore();
+  }
+  // authority meter
+  const mp = easeOut(prog(t, A + 1.2, A + 1.6));
+  if (mp > 0) {
+    ctx.save(); ctx.globalAlpha *= mp;
+    const lit = cluster.filter((_, i) => t > ct(i) + 0.4).length;
+    const v = easeOut(prog(t, A + 1.0, ct(cluster.length - 1) + 1.0));
+    text('TOPICAL AUTHORITY', 90, 1330, { size: 28, weight: 700, color: MUTED, font: MONO });
+    const label = v < 0.35 ? 'NEW' : v < 0.75 ? 'GROWING' : 'TRUSTED EXPERT';
+    text(label, 990, 1332, { size: 32, weight: 900, color: v >= 0.75 ? NEON : AMBER, align: 'right', font: MONO, glow: v >= 0.75 ? 18 : 0 });
+    for (let k = 0; k < 10; k++) {
+      const on = v * 10 > k + 0.5;
+      rr(90 + k * 92, 1360, 80, 44, 10);
+      ctx.fillStyle = on ? (k < 4 ? AMBER : NEON) : 'rgba(255,255,255,0.1)';
+      if (on) { ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 14; }
+      ctx.fill(); ctx.shadowBlur = 0;
+    }
+    text(`${lit} connected articles`, W / 2, 1470, { size: 30, weight: 600, color: TEXT, align: 'center', font: MONO });
+    ctx.restore();
+  }
+  caption(t, A + 1.4, ['Comprehensive, *connected* coverage', 'builds *topical authority*.']);
+  ctx.restore();
+}
+
+// ---------- scene 8: key concept formula ----------
+const S8 = 44.4, S8E = 50.6;
+const formula = [['Meaning', NEON], ['Context', CYAN], ['Entities', AMBER], ['Relationships', '#8fa8ff'], ['Search Intent', PINK]];
+function scene8(t) {
+  const A = S8;
+  const a = sceneAlpha(t, A, S8E);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  stepHeader(t, A, 'KEY CONCEPT', 'Remember This');
+  const tp = easeOut(prog(t, A + 0.3, A + 0.7));
+  text('SEMANTIC SEO =', W / 2, 500 + (1 - tp) * 30, { size: 72, weight: 900, color: '#ffffff', align: 'center', alpha: tp });
+  formula.forEach(([s, c], i) => {
+    const st = A + 0.8 + i * 0.35;
+    const p = backOut(prog(t, st, st + 0.4));
+    if (p <= 0) return;
+    const y = 600 + i * 108;
+    if (i > 0) text('+', 230, y + 18, { size: 60, weight: 900, color: MUTED, align: 'center', alpha: clamp(p) });
+    ctx.save(); ctx.globalAlpha *= clamp(p); ctx.translate(560, y); ctx.scale(clamp(p, 0, 1.2), clamp(p, 0, 1.2));
+    rr(-260, -42, 520, 84, 42);
+    ctx.fillStyle = rgba(c, 0.14); ctx.fill();
+    ctx.strokeStyle = c; ctx.lineWidth = 3; ctx.shadowColor = c; ctx.shadowBlur = 18; ctx.stroke();
+    ctx.shadowBlur = 0;
+    text(s, 0, 15, { size: 42, weight: 900, color: '#ffffff', align: 'center' });
+    ctx.restore();
+  });
+  // the goal
+  const gp = easeOut(prog(t, A + 3.0, A + 3.4));
+  if (gp > 0) {
+    ctx.save(); ctx.globalAlpha *= gp; ctx.translate(0, (1 - gp) * 30);
+    rr(80, 1160, 920, 360, 24);
+    ctx.fillStyle = 'rgba(12,16,10,0.95)'; ctx.fill();
+    ctx.strokeStyle = 'rgba(200,255,46,0.45)'; ctx.lineWidth = 2; ctx.stroke();
+    text('THE GOAL', 120, 1214, { size: 24, weight: 700, color: MUTED, font: MONO });
+    const xp = prog(t, A + 3.3, A + 3.6);
+    text('Just adding more keywords', 200, 1290, { size: 36, weight: 700, color: '#7d8578', alpha: xp });
+    if (xp > 0) {
+      ctx.save(); ctx.globalAlpha *= xp; ctx.translate(140, 1278);
+      line(-14, -14, 14, 14, RED, 7); line(14, -14, -14, 14, RED, 7);
+      ctx.restore();
+      const sp = prog(t, A + 3.6, A + 3.9);
+      line(195, 1278, lerp(195, 205 + measure('Just adding more keywords', 36, 700), sp), 1278, RED, 4, 10);
+    }
+    const goals = ["Satisfy the user's real needs", 'Communicate the subject clearly', 'to search engines'];
+    [[0, 1370], [1, 1450]].forEach(([i, y]) => {
+      const st = A + 4.0 + i * 0.4;
+      check(140, y - 12, 24, backOut(prog(t, st, st + 0.3)));
+      text(i === 0 ? goals[0] : goals[1] + ' ' + goals[2], 190, y, { size: 31, weight: 800, color: '#ffffff', alpha: prog(t, st, st + 0.3) });
+    });
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+// ---------- scene 9: CTA ----------
+function scene9(t) {
+  const c = prog(t, 50.4, 51.0);
+  if (c <= 0) return;
+  ctx.save(); ctx.globalAlpha = c;
+  const p = backOut(prog(t, 50.5, 51.2));
+  const s = 300 * clamp(p, 0, 1.2);
+  ctx.save();
+  ctx.shadowColor = BLUE; ctx.shadowBlur = 80;
+  rr(W / 2 - s / 2, 700 - s / 2, s, s, 60 * s / 300); ctx.fillStyle = BLUE; ctx.fill();
+  ctx.restore();
+  ctx.save(); rr(W / 2 - s / 2, 700 - s / 2, s, s, 60 * s / 300); ctx.clip();
+  if (logo.complete && logo.naturalWidth) ctx.drawImage(logo, W / 2 - s / 2, 700 - s / 2, s, s);
+  ctx.restore();
+  // orbiting entity nodes
+  const cols = [NEON, CYAN, AMBER, PINK, '#8fa8ff'];
+  for (let i = 0; i < 5; i++) {
+    const ang = t * 1.4 + i * 2 * Math.PI / 5;
+    const x = W / 2 + Math.cos(ang) * 250, y = 700 + Math.sin(ang) * 250;
+    const nx = W / 2 + Math.cos(ang + 2 * Math.PI / 5) * 250, ny = 700 + Math.sin(ang + 2 * Math.PI / 5) * 250;
+    line(x, y, nx, ny, rgba(cols[i], 0.35 * clamp(p)), 2, 0, [6, 8]);
+    node(x, y, 14, cols[i], clamp(p));
+  }
+  const tp = easeOut(prog(t, 51.0, 51.5));
+  text('PERMANENT SEO', W / 2, 1060 + (1 - tp) * 30, { size: 86, weight: 900, color: '#ffffff', align: 'center', alpha: tp });
+  text('Meaning first. Rankings follow.', W / 2, 1140 + (1 - tp) * 30, { size: 40, weight: 600, color: MUTED, align: 'center', alpha: tp });
+  const bp = backOut(prog(t, 51.6, 52.1));
+  if (bp > 0) {
+    ctx.save(); ctx.globalAlpha *= clamp(bp); ctx.translate(W / 2, 1280); ctx.scale(clamp(bp, 0, 1.2), clamp(bp, 0, 1.2));
+    const w = 620;
+    rr(-w / 2, -50, w, 100, 50); ctx.fillStyle = NEON; ctx.shadowColor = NEON; ctx.shadowBlur = 40 + Math.sin(t * 6) * 12; ctx.fill();
+    text('Follow for more SEO tips', 0, 14, { size: 40, weight: 800, color: '#081004', align: 'center' });
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+function draw(t) {
+  ctx.save();
+  ctx.clearRect(0, 0, W, H);
+  drawBackground(t);
+  scene1(t); scene2(t); scene3(t); scene4(t); scene5(t); scene6(t); scene7(t); scene8(t); scene9(t);
+  drawBranding(t);
+  // fade from/to black at the very start and end
+  const f = 1 - Math.min(prog(t, 0, 0.4), 1 - prog(t, DURATION - 0.5, DURATION));
+  if (f > 0) { ctx.fillStyle = `rgba(0,0,0,${f})`; ctx.fillRect(0, 0, W, H); }
+  ctx.restore();
+}
+
+window.DURATION = DURATION;
+window.draw = draw;
+window.ready = Promise.all([
+  new Promise(r => { if (logo.complete) r(); else { logo.onload = r; logo.onerror = r; } }),
+  document.fonts.load(`900 40px Inter`), document.fonts.load(`800 40px Inter`), document.fonts.load(`700 40px Inter`),
+  document.fonts.load(`600 40px Inter`), document.fonts.load(`500 40px "DejaVu Sans Mono"`),
+]);
+
+if (location.search.includes('preview')) {
+  document.body.classList.add('preview');
+  window.ready.then(() => {
+    const t0 = performance.now();
+    const loop = () => { draw(((performance.now() - t0) / 1000) % DURATION); requestAnimationFrame(loop); };
+    loop();
+  });
+}
+</script>
+</body>
+</html>
