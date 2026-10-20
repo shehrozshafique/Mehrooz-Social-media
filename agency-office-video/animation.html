@@ -1,0 +1,391 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Permanent SEO Office</title>
+<style>
+  html, body { margin: 0; background: #050706; }
+  canvas { display: block; width: 360px; height: 640px; }
+  body.preview canvas { width: auto; height: 96vh; margin: 2vh auto; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+// Deterministic, frame-by-frame animation: draw(t) renders the frame at time t (seconds).
+// render.js calls draw() for every frame; open with ?preview to watch it in a browser.
+const W = 1080, H = 1920;
+const DURATION = 30;
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+
+const NEON = '#c8ff2e', BLUE = '#3a63f5', CYAN = '#3ee0ff', AMBER = '#ffb547', PINK = '#ff6bd5';
+const TEXT = '#eef3e6', MUTED = '#8a9585', BG = '#050706';
+const SANS = 'Inter, "DejaVu Sans", sans-serif';
+const MONO = '"DejaVu Sans Mono", monospace';
+
+function loadImg(src) { const i = new Image(); i.src = src; return i; }
+const logo = loadImg('assets/permanent-seo-logo.png');
+const workstations = loadImg('assets/office-workstations.jpg');
+const teamRoom = loadImg('assets/office-team-room.jpg');
+// team clip: 2x slow motion, frame-interpolated to 30 fps (assets/clip/f001.jpg …)
+const CLIP_FRAMES = 91, CLIP_FPS = 30;
+const clip = Array.from({ length: CLIP_FRAMES }, (_, i) => loadImg(`assets/clip/f${String(i + 1).padStart(3, '0')}.jpg`));
+
+// ---------- helpers ----------
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, p) => a + (b - a) * p;
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const easeOut = p => 1 - Math.pow(1 - p, 3);
+const easeInOut = p => p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+const backOut = p => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); };
+function sceneAlpha(t, a, b, f = 0.5) { return Math.min(prog(t, a, a + f), 1 - prog(t, b - f, b)); }
+
+function rr(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function text(s, x, y, { size = 40, weight = 700, color = TEXT, align = 'left', font = SANS, glow = 0, alpha = 1, shadow = 0 } = {}) {
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.font = `${weight} ${size}px ${font}`;
+  ctx.textAlign = align;
+  ctx.fillStyle = color;
+  if (glow) { ctx.shadowColor = color; ctx.shadowBlur = glow; }
+  else if (shadow) { ctx.shadowColor = 'rgba(0,0,0,0.85)'; ctx.shadowBlur = shadow; ctx.shadowOffsetY = 3; }
+  ctx.fillText(s, x, y);
+  ctx.restore();
+}
+function measure(s, size, weight = 700, font = SANS) {
+  ctx.save(); ctx.font = `${weight} ${size}px ${font}`; const w = ctx.measureText(s).width; ctx.restore(); return w;
+}
+function line(x1, y1, x2, y2, color, w = 3, glow = 0) {
+  ctx.save();
+  ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = 'round';
+  if (glow) { ctx.shadowColor = color; ctx.shadowBlur = glow; }
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  ctx.restore();
+}
+function check(x, y, s, p, color = NEON) {
+  const k = clamp(p, 0, 1.2);
+  if (k <= 0) return;
+  ctx.save(); ctx.translate(x, y); ctx.scale(k * s / 34, k * s / 34);
+  ctx.fillStyle = color; ctx.shadowColor = color; ctx.shadowBlur = 20;
+  ctx.beginPath(); ctx.arc(0, 0, 34, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowBlur = 0; ctx.strokeStyle = '#081004'; ctx.lineWidth = 7; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(-14, 1); ctx.lineTo(-4, 12); ctx.lineTo(15, -11); ctx.stroke();
+  ctx.restore();
+}
+// map pin icon, tip at (x, y)
+function pin(x, y, s, color = NEON) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ctx.fillStyle = color; ctx.shadowColor = color; ctx.shadowBlur = 16;
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.bezierCurveTo(-6, -10, -18, -20, -18, -32);
+  ctx.arc(0, -32, 18, Math.PI, 0);
+  ctx.bezierCurveTo(18, -20, 6, -10, 0, 0);
+  ctx.fill();
+  ctx.shadowBlur = 0; ctx.fillStyle = '#081004';
+  ctx.beginPath(); ctx.arc(0, -32, 7, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+function logoTile(x, y, s, glow = 30) {
+  ctx.save();
+  ctx.shadowColor = 'rgba(58,99,245,0.8)'; ctx.shadowBlur = glow;
+  rr(x, y, s, s, s * 0.21); ctx.fillStyle = BLUE; ctx.fill();
+  ctx.restore();
+  ctx.save(); rr(x, y, s, s, s * 0.21); ctx.clip();
+  if (logo.complete && logo.naturalWidth) ctx.drawImage(logo, x, y, s, s);
+  ctx.restore();
+}
+
+// draws an image covering the frame, zoomed by `zoom` and shifted by (dx, dy) as a fraction of the overflow
+function photo(img, zoom = 1, dx = 0, dy = 0, alpha = 1, blur = 0) {
+  if (!img.complete || !img.naturalWidth) return;
+  const base = Math.max(W / img.naturalWidth, H / img.naturalHeight) * zoom;
+  const w = img.naturalWidth * base, h = img.naturalHeight * base;
+  const x = (W - w) / 2 + dx * (w - W) / 2, y = (H - h) / 2 + dy * (h - H) / 2;
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  if (blur) ctx.filter = `blur(${blur}px)`;
+  ctx.drawImage(img, x, y, w, h);
+  ctx.restore();
+}
+// dark gradients top and bottom so text and branding stay readable over photos
+function shade(alpha = 1, mid = 0.15) {
+  ctx.save(); ctx.globalAlpha *= alpha;
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, 'rgba(5,7,6,0.85)'); g.addColorStop(0.18, `rgba(5,7,6,${mid})`);
+  g.addColorStop(0.55, `rgba(5,7,6,${mid})`); g.addColorStop(0.78, 'rgba(5,7,6,0.8)'); g.addColorStop(1, 'rgba(5,7,6,0.95)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+}
+
+// ---------- background ----------
+function drawBackground(t) {
+  ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(200,255,46,0.07)';
+  for (let y = 20; y < H; y += 40) for (let x = 20; x < W; x += 40) ctx.fillRect(x, y, 2, 2);
+  const b = ctx.createRadialGradient(0, 0, 0, 0, 0, 900);
+  b.addColorStop(0, 'rgba(58,99,245,0.3)'); b.addColorStop(1, 'rgba(58,99,245,0)');
+  ctx.fillStyle = b; ctx.fillRect(0, 0, W, H);
+  const b2 = ctx.createRadialGradient(W, H, 0, W, H, 900);
+  b2.addColorStop(0, 'rgba(200,255,46,0.12)'); b2.addColorStop(1, 'rgba(200,255,46,0)');
+  ctx.fillStyle = b2; ctx.fillRect(0, 0, W, H);
+}
+
+// ---------- branding ----------
+function drawBranding(t) {
+  const a = prog(t, 0, 0.6);
+  ctx.save();
+  ctx.globalAlpha = a;
+  const s = 104, x = 48, y = 48;
+  logoTile(x, y, s);
+  text('PERMANENT SEO', x + s + 24, y + 52, { size: 38, weight: 800, color: '#ffffff', shadow: 12 });
+  text('SEO AGENCY · JHANG CITY', x + s + 26, y + 90, { size: 22, weight: 600, color: NEON, font: MONO, shadow: 12 });
+  // creator credit bottom-right
+  text('M Mehrooz Shafique', W - 48, H - 96, { size: 40, weight: 800, color: '#ffffff', align: 'right', shadow: 12 });
+  text('Co-Founder of Permanent SEO', W - 48, H - 56, { size: 24, weight: 600, color: NEON, align: 'right', font: MONO, shadow: 12 });
+  const nw = measure('M Mehrooz Shafique', 40, 800);
+  line(W - 48 - nw, H - 84, W - 48, H - 84, NEON, 3, 10);
+  ctx.restore();
+  // progress bar
+  ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.fillRect(0, H - 8, W, 8);
+  ctx.save(); ctx.shadowColor = NEON; ctx.shadowBlur = 14;
+  ctx.fillStyle = NEON; ctx.fillRect(0, H - 8, W * clamp(t / DURATION), 8);
+  ctx.restore();
+}
+
+// chip + headline + sub-line, sliding up from the lower third
+function lowerThird(t, a, chip, title, sub, y0 = 1420) {
+  const p = easeOut(prog(t, a, a + 0.6));
+  if (p <= 0) return;
+  ctx.save();
+  ctx.globalAlpha *= p;
+  ctx.translate(0, (1 - p) * 40);
+  const cw = measure(chip, 26, 700, MONO) + 40;
+  rr(70, y0, cw, 50, 25);
+  ctx.fillStyle = 'rgba(200,255,46,0.15)'; ctx.fill();
+  ctx.strokeStyle = NEON; ctx.lineWidth = 2; ctx.stroke();
+  text(chip, 90, y0 + 34, { size: 26, weight: 700, color: NEON, font: MONO });
+  const size = Math.min(76, Math.floor(76 * (W - 140) / measure(title, 76, 900)));
+  text(title, 70, y0 + 140, { size, weight: 900, color: '#ffffff', shadow: 20 });
+  const sp = easeOut(prog(t, a + 0.3, a + 0.8));
+  text(sub, 72, y0 + 200, { size: 38, weight: 600, color: TEXT, alpha: sp, shadow: 14 });
+  const lw = lerp(0, 160, easeOut(prog(t, a + 0.2, a + 0.8)));
+  line(72, y0 + 236, 72 + lw, y0 + 236, NEON, 5, 12);
+  ctx.restore();
+}
+
+// ---------- scene 1: intro ----------
+function scene1(t) {
+  const a = sceneAlpha(t, -1, 3.7);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  // faint office photo behind the intro
+  photo(workstations, 1.15 + t * 0.02, 0, -0.2, 0.28 * prog(t, 0.2, 1.2), 14);
+  shade(0.6, 0.5);
+  const lp = backOut(prog(t, 0.2, 0.8));
+  const s = 280 * clamp(lp, 0, 1.2);
+  if (s > 0) logoTile(W / 2 - s / 2, 640 - s / 2, s, 80);
+  // pulse ring
+  const rp = prog(t, 0.6, 1.6);
+  if (rp > 0 && rp < 1) {
+    ctx.save(); ctx.globalAlpha *= 1 - rp;
+    ctx.strokeStyle = NEON; ctx.lineWidth = 4; ctx.shadowColor = NEON; ctx.shadowBlur = 20;
+    ctx.beginPath(); ctx.arc(W / 2, 640, 160 + rp * 220, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  }
+  const tp = easeOut(prog(t, 0.8, 1.4));
+  text('PERMANENT', W / 2, 960 + (1 - tp) * 50, { size: 132, weight: 900, color: '#ffffff', align: 'center', alpha: tp });
+  const tp2 = easeOut(prog(t, 1.0, 1.6));
+  text('SEO', W / 2, 1130 + (1 - tp2) * 50, { size: 170, weight: 900, color: NEON, align: 'center', alpha: tp2, glow: 30 });
+  const pp = backOut(prog(t, 1.7, 2.2));
+  if (pp > 0) {
+    const label = 'Jhang City';
+    const w = measure(label, 44, 800) + 110;
+    ctx.save(); ctx.globalAlpha *= clamp(pp); ctx.translate(W / 2, 1270); ctx.scale(clamp(pp, 0, 1.2), clamp(pp, 0, 1.2));
+    rr(-w / 2, -44, w, 88, 44); ctx.fillStyle = 'rgba(8,12,6,0.9)'; ctx.fill();
+    ctx.strokeStyle = NEON; ctx.lineWidth = 3; ctx.stroke();
+    pin(-w / 2 + 52, 20, 0.95);
+    text(label, -w / 2 + 88, 16, { size: 44, weight: 800, color: '#ffffff' });
+    ctx.restore();
+  }
+  const sp = easeOut(prog(t, 2.2, 2.7));
+  text('Your local SEO agency', W / 2, 1400, { size: 42, weight: 600, color: MUTED, align: 'center', alpha: sp });
+  ctx.restore();
+}
+
+// ---------- scene 2: workstations photo ----------
+function scene2(t) {
+  const A = 3.3, B = 9.6;
+  const a = sceneAlpha(t, A, B, 0.6);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  const p = easeInOut(prog(t, A, B));
+  // tilt down from the ceiling to the desks while slowly zooming in
+  photo(workstations, lerp(1.12, 1.24, p), lerp(0.15, -0.1, p), lerp(-1, 1, p));
+  shade(1, 0.05);
+  lowerThird(t, A + 0.8, 'OUR OFFICE', 'Welcome to Permanent SEO', 'A modern workspace in Jhang City');
+  ctx.restore();
+}
+
+// ---------- scene 3: team room photo ----------
+function scene3(t) {
+  const A = 9.2, B = 15.6;
+  const a = sceneAlpha(t, A, B, 0.6);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  const p = easeInOut(prog(t, A, B));
+  photo(teamRoom, lerp(1.28, 1.1, p), lerp(-0.6, 0.4, p), lerp(0.2, 0.6, p));
+  shade(1, 0.05);
+  lowerThird(t, A + 0.8, 'TEAM ROOM', 'Built for a growing team', 'Space to plan, research & optimize');
+  ctx.restore();
+}
+
+// ---------- scene 4: team at work (video clip) ----------
+const S4 = 15.2, S4E = 19.4;
+function scene4(t) {
+  const a = sceneAlpha(t, S4, S4E, 0.5);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  const fi = clamp(Math.floor((t - S4 - 0.2) * CLIP_FPS), 0, CLIP_FRAMES - 1);
+  photo(clip[fi], lerp(1.06, 1.14, prog(t, S4, S4E)));
+  shade(1, 0.05);
+  // "REC" style badge
+  const bp = prog(t, S4 + 0.4, S4 + 0.8);
+  ctx.save(); ctx.globalAlpha *= bp;
+  rr(W - 250, 200, 200, 56, 28); ctx.fillStyle = 'rgba(8,12,6,0.8)'; ctx.fill();
+  ctx.fillStyle = Math.floor(t * 2) % 2 ? '#ff4d5e' : 'rgba(255,77,94,0.35)';
+  ctx.beginPath(); ctx.arc(W - 216, 228, 10, 0, Math.PI * 2); ctx.fill();
+  text('LIVE', W - 192, 238, { size: 26, weight: 800, color: '#ffffff', font: MONO });
+  ctx.restore();
+  lowerThird(t, S4 + 0.6, 'OUR TEAM', 'Real people. Real SEO work.', 'Growing brands, every single day');
+  ctx.restore();
+}
+
+// ---------- scene 5: services ----------
+const services = [
+  ['Technical SEO', 'Speed, crawling & indexing', NEON],
+  ['Local SEO', 'Rank in your city & on Maps', CYAN],
+  ['Semantic & Entity SEO', 'Content search engines understand', AMBER],
+  ['GEO & AEO', 'Get cited by AI answers', PINK],
+];
+function scene5(t) {
+  const A = 19.0, B = 25.0;
+  const a = sceneAlpha(t, A, B, 0.6);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  photo(teamRoom, 1.2 + prog(t, A, B) * 0.05, 0, 0.3, 1, 18);
+  ctx.fillStyle = 'rgba(5,7,6,0.72)'; ctx.fillRect(0, 0, W, H);
+  const hp = easeOut(prog(t, A + 0.3, A + 0.9));
+  ctx.save(); ctx.globalAlpha *= hp; ctx.translate(0, (1 - hp) * 30);
+  const chip = 'WHAT WE DO';
+  const cw = measure(chip, 26, 700, MONO) + 40;
+  rr(W / 2 - cw / 2, 260, cw, 50, 25);
+  ctx.fillStyle = 'rgba(200,255,46,0.12)'; ctx.fill(); ctx.strokeStyle = NEON; ctx.lineWidth = 2; ctx.stroke();
+  text(chip, W / 2, 294, { size: 26, weight: 700, color: NEON, align: 'center', font: MONO });
+  text('SEO That Grows', W / 2, 410, { size: 80, weight: 900, color: '#ffffff', align: 'center' });
+  text('Your Business', W / 2, 500, { size: 80, weight: 900, color: NEON, align: 'center', glow: 24 });
+  ctx.restore();
+  services.forEach(([name, desc, col], i) => {
+    const st = A + 1.0 + i * 0.45;
+    const p = easeOut(prog(t, st, st + 0.45));
+    if (p <= 0) return;
+    const y = 620 + i * 190;
+    ctx.save(); ctx.globalAlpha *= p; ctx.translate((1 - p) * -80, 0);
+    rr(80, y, 920, 160, 28);
+    ctx.fillStyle = 'rgba(10,14,8,0.88)'; ctx.fill();
+    ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.shadowColor = col; ctx.shadowBlur = 16; ctx.stroke();
+    ctx.shadowBlur = 0;
+    text(name, 230, y + 72, { size: 46, weight: 900, color: '#ffffff' });
+    text(desc, 230, y + 120, { size: 30, weight: 600, color: col, font: SANS });
+    ctx.restore();
+    check(160, y + 80, 36, backOut(prog(t, st + 0.25, st + 0.55)), col);
+  });
+  ctx.restore();
+}
+
+// ---------- scene 6: CTA ----------
+function scene6(t) {
+  const A = 24.6;
+  const c = prog(t, A, A + 0.6);
+  if (c <= 0) return;
+  ctx.save(); ctx.globalAlpha = c;
+  photo(workstations, 1.2, 0, 0.6, 0.35, 16);
+  ctx.fillStyle = 'rgba(5,7,6,0.6)'; ctx.fillRect(0, 0, W, H);
+  const p = backOut(prog(t, A + 0.2, A + 0.9));
+  const s = 280 * clamp(p, 0, 1.2);
+  if (s > 0) logoTile(W / 2 - s / 2, 560 - s / 2, s, 80);
+  // orbiting dots
+  const cols = [NEON, CYAN, AMBER, PINK];
+  for (let i = 0; i < 4; i++) {
+    const ang = t * 1.3 + i * Math.PI / 2;
+    ctx.save(); ctx.globalAlpha *= clamp(p);
+    ctx.fillStyle = cols[i]; ctx.shadowColor = cols[i]; ctx.shadowBlur = 20;
+    ctx.beginPath(); ctx.arc(W / 2 + Math.cos(ang) * 230, 560 + Math.sin(ang) * 230, 13, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+  const tp = easeOut(prog(t, A + 0.7, A + 1.2));
+  text('PERMANENT SEO', W / 2, 900 + (1 - tp) * 30, { size: 96, weight: 900, color: '#ffffff', align: 'center', alpha: tp });
+  text('Rank higher. Get found. Grow.', W / 2, 980 + (1 - tp) * 30, { size: 42, weight: 600, color: MUTED, align: 'center', alpha: tp });
+  const lp = backOut(prog(t, A + 1.3, A + 1.7));
+  if (lp > 0) {
+    ctx.save(); ctx.globalAlpha *= clamp(lp); ctx.translate(W / 2, 1100); ctx.scale(clamp(lp, 0, 1.2), clamp(lp, 0, 1.2));
+    const label = 'Visit us in Jhang City';
+    const w = measure(label, 40, 800) + 110;
+    rr(-w / 2, -42, w, 84, 42); ctx.fillStyle = 'rgba(8,12,6,0.9)'; ctx.fill();
+    ctx.strokeStyle = 'rgba(200,255,46,0.6)'; ctx.lineWidth = 2; ctx.stroke();
+    pin(-w / 2 + 52, 20, 0.9);
+    text(label, -w / 2 + 88, 14, { size: 40, weight: 800, color: '#ffffff' });
+    ctx.restore();
+  }
+  const bp = backOut(prog(t, A + 1.8, A + 2.3));
+  if (bp > 0) {
+    ctx.save(); ctx.globalAlpha *= clamp(bp); ctx.translate(W / 2, 1250); ctx.scale(clamp(bp, 0, 1.2), clamp(bp, 0, 1.2));
+    const w = 640;
+    rr(-w / 2, -52, w, 104, 52); ctx.fillStyle = NEON; ctx.shadowColor = NEON; ctx.shadowBlur = 40 + Math.sin(t * 6) * 12; ctx.fill();
+    text('Follow for more SEO tips', 0, 15, { size: 42, weight: 800, color: '#081004', align: 'center' });
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+function draw(t) {
+  ctx.save();
+  ctx.clearRect(0, 0, W, H);
+  drawBackground(t);
+  scene1(t); scene2(t); scene3(t); scene4(t); scene5(t); scene6(t);
+  drawBranding(t);
+  // fade from/to black at the very start and end
+  const f = 1 - Math.min(prog(t, 0, 0.4), 1 - prog(t, DURATION - 0.5, DURATION));
+  if (f > 0) { ctx.fillStyle = `rgba(0,0,0,${f})`; ctx.fillRect(0, 0, W, H); }
+  ctx.restore();
+}
+
+window.DURATION = DURATION;
+window.draw = draw;
+const loaded = img => new Promise(r => { if (img.complete) r(); else { img.onload = r; img.onerror = r; } });
+window.ready = Promise.all([
+  ...[logo, workstations, teamRoom, ...clip].map(loaded),
+  document.fonts.load(`900 40px Inter`), document.fonts.load(`800 40px Inter`), document.fonts.load(`700 40px Inter`),
+  document.fonts.load(`600 40px Inter`), document.fonts.load(`500 40px "DejaVu Sans Mono"`),
+]);
+
+if (location.search.includes('preview')) {
+  document.body.classList.add('preview');
+  window.ready.then(() => {
+    const t0 = performance.now();
+    const loop = () => { draw(((performance.now() - t0) / 1000) % DURATION); requestAnimationFrame(loop); };
+    loop();
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,794 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>GoHighLevel Expert Guide</title>
+<style>
+  html, body { margin: 0; background: #050706; }
+  canvas { display: block; width: 360px; height: 640px; }
+  body.preview canvas { width: auto; height: 96vh; margin: 2vh auto; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+// Deterministic, frame-by-frame animation: draw(t) renders the frame at time t (seconds).
+// render.js calls draw() for every frame; open with ?preview to watch it in a browser.
+const W = 1080, H = 1920;
+const DURATION = 68;
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+
+const NEON = '#c8ff2e', BLUE = '#3a63f5', RED = '#ff4d5e', AMBER = '#ffb547', CYAN = '#3ee0ff', PINK = '#ff6bd5', LILAC = '#8fa8ff';
+const TEXT = '#eef3e6', MUTED = '#8a9585', BG = '#050706';
+const SANS = 'Inter, "Noto Color Emoji", "DejaVu Sans", sans-serif';
+const MONO = '"DejaVu Sans Mono", "Noto Color Emoji", monospace';
+
+const logo = new Image();
+logo.src = 'assets/permanent-seo-logo.png';
+
+// ---------- helpers ----------
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, p) => a + (b - a) * p;
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const easeOut = p => 1 - Math.pow(1 - p, 3);
+const easeInOut = p => p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+const backOut = p => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); };
+function sceneAlpha(t, a, b, f = 0.4) { return Math.min(prog(t, a, a + f), 1 - prog(t, b - f, b)); }
+function rgba(hex, a) {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`;
+}
+
+function rr(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function text(s, x, y, { size = 40, weight = 700, color = TEXT, align = 'left', font = SANS, glow = 0, alpha = 1 } = {}) {
+  ctx.save();
+  ctx.globalAlpha *= alpha;
+  ctx.font = `${weight} ${size}px ${font}`;
+  ctx.textAlign = align;
+  ctx.fillStyle = color;
+  if (glow) { ctx.shadowColor = color; ctx.shadowBlur = glow; }
+  ctx.fillText(s, x, y);
+  ctx.restore();
+}
+function measure(s, size, weight = 700, font = SANS) {
+  ctx.save(); ctx.font = `${weight} ${size}px ${font}`; const w = ctx.measureText(s).width; ctx.restore(); return w;
+}
+// largest font size <= max that keeps s within width
+const fit = (s, max, width, weight = 900, font = SANS) => Math.min(max, Math.floor(max * width / measure(s, max, weight, font)));
+function line(x1, y1, x2, y2, color, w = 3, glow = 0, dash = null) {
+  ctx.save();
+  ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineCap = 'round';
+  if (glow) { ctx.shadowColor = color; ctx.shadowBlur = glow; }
+  if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  ctx.restore();
+}
+function check(x, y, s, p, color = NEON) {
+  const k = clamp(p, 0, 1.2);
+  if (k <= 0) return;
+  ctx.save(); ctx.translate(x, y); ctx.scale(k * s / 34, k * s / 34);
+  ctx.fillStyle = color; ctx.shadowColor = color; ctx.shadowBlur = 20;
+  ctx.beginPath(); ctx.arc(0, 0, 34, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowBlur = 0; ctx.strokeStyle = '#081004'; ctx.lineWidth = 7; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(-14, 1); ctx.lineTo(-4, 12); ctx.lineTo(15, -11); ctx.stroke();
+  ctx.restore();
+}
+function pill(s, x, y, { size = 30, color = NEON, fill = null, textColor = null, font = MONO, weight = 700, pad = 22, h = null, scale = 1, alpha = 1, glow = 0 } = {}) {
+  const w = measure(s, size, weight, font) + pad * 2;
+  const hh = h || size * 2;
+  ctx.save(); ctx.globalAlpha *= alpha; ctx.translate(x, y); ctx.scale(scale, scale);
+  rr(-w / 2, -hh / 2, w, hh, hh / 2);
+  ctx.fillStyle = fill || rgba(color, 0.12); ctx.fill();
+  if (glow) { ctx.shadowColor = color; ctx.shadowBlur = glow; }
+  ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.stroke();
+  ctx.shadowBlur = 0;
+  text(s, 0, size * 0.36, { size, weight, color: textColor || color, align: 'center', font });
+  ctx.restore();
+  return w;
+}
+function card(x, y, w, h, color, { r = 22, fill = 'rgba(12,16,10,0.92)', glow = 0, lw = 2 } = {}) {
+  rr(x, y, w, h, r);
+  ctx.fillStyle = fill; ctx.fill();
+  ctx.save();
+  if (glow) { ctx.shadowColor = color; ctx.shadowBlur = glow; }
+  ctx.strokeStyle = color; ctx.lineWidth = lw; ctx.stroke();
+  ctx.restore();
+}
+function node(x, y, r, color, p = 1) {
+  if (p <= 0) return;
+  ctx.save(); ctx.globalAlpha *= clamp(p);
+  ctx.fillStyle = color; ctx.shadowColor = color; ctx.shadowBlur = 24;
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+// slide-in transform wrapper: runs fn with alpha + offset driven by p
+function enter(p, dx, dy, fn) {
+  if (p <= 0) return;
+  ctx.save(); ctx.globalAlpha *= clamp(p); ctx.translate((1 - p) * dx, (1 - p) * dy); fn(); ctx.restore();
+}
+function rand(seed) { return () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
+
+// ---------- background ----------
+const bgRows = (() => {
+  const r = rand(23);
+  const trig = ['Form Submitted', 'Tag Added', 'Appointment Booked', 'Stage Changed', 'Invoice Paid', 'Missed Call', 'Review Received'];
+  const act = ['Send SMS', 'Send Email', 'Wait 10 min', 'If/Else', 'Webhook', 'Assign User', 'Create Task', 'AI Reply', 'Add to Pipeline'];
+  const rows = [];
+  for (let i = 0; i < 40; i++) {
+    const a = trig[Math.floor(r() * trig.length)], b = act[Math.floor(r() * act.length)], c = act[Math.floor(r() * act.length)];
+    rows.push(i % 2 === 0
+      ? `WORKFLOW ▸ trigger: ${a} → ${b} → ${c} · sub-account #${Math.floor(r() * 90 + 10)}`
+      : `opportunity.stage = "Booked" · contact.tags += "hot-lead" · $${Math.floor(r() * 1900 + 100)} · ${Math.floor(r() * 59 + 1)}s reply`);
+  }
+  return rows;
+})();
+
+function drawBackground(t) {
+  ctx.fillStyle = BG; ctx.fillRect(0, 0, W, H);
+  ctx.save();
+  ctx.font = `500 30px ${MONO}`;
+  ctx.fillStyle = 'rgba(200,255,46,0.05)';
+  const rowH = 58, off = (t * 22) % rowH;
+  const start = Math.floor(t * 22 / rowH);
+  for (let i = -1; i < H / rowH + 2; i++) {
+    const s = bgRows[(start + i + 4000) % bgRows.length];
+    ctx.fillText(s, -40 - ((start + i) % 3) * 120, i * rowH - off + 40);
+  }
+  ctx.restore();
+  ctx.fillStyle = 'rgba(200,255,46,0.07)';
+  for (let y = 20; y < H; y += 40) for (let x = 20; x < W; x += 40) ctx.fillRect(x, y, 2, 2);
+  const g = ctx.createRadialGradient(W / 2, H * 0.45, 200, W / 2, H * 0.45, 1200);
+  g.addColorStop(0, 'rgba(5,7,6,0)'); g.addColorStop(1, 'rgba(5,7,6,0.92)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  const b = ctx.createRadialGradient(0, 0, 0, 0, 0, 700);
+  b.addColorStop(0, 'rgba(58,99,245,0.22)'); b.addColorStop(1, 'rgba(58,99,245,0)');
+  ctx.fillStyle = b; ctx.fillRect(0, 0, W, H);
+  const b2 = ctx.createRadialGradient(W, H, 0, W, H, 800);
+  b2.addColorStop(0, 'rgba(200,255,46,0.08)'); b2.addColorStop(1, 'rgba(200,255,46,0)');
+  ctx.fillStyle = b2; ctx.fillRect(0, 0, W, H);
+  const sy = (t * 420) % (H + 400) - 200;
+  const sg = ctx.createLinearGradient(0, sy - 120, 0, sy);
+  sg.addColorStop(0, 'rgba(200,255,46,0)'); sg.addColorStop(1, 'rgba(200,255,46,0.05)');
+  ctx.fillStyle = sg; ctx.fillRect(0, sy - 120, W, 120);
+}
+
+// ---------- branding ----------
+function logoTile(x, y, s, glow = 30) {
+  ctx.save();
+  ctx.shadowColor = 'rgba(58,99,245,0.8)'; ctx.shadowBlur = glow;
+  rr(x, y, s, s, s * 0.21); ctx.fillStyle = BLUE; ctx.fill();
+  ctx.restore();
+  ctx.save(); rr(x, y, s, s, s * 0.21); ctx.clip();
+  if (logo.complete && logo.naturalWidth) ctx.drawImage(logo, x, y, s, s);
+  ctx.restore();
+}
+function drawBranding(t) {
+  const a = prog(t, 0, 0.6);
+  ctx.save();
+  ctx.globalAlpha = a;
+  const s = 104, x = 48, y = 48;
+  logoTile(x, y, s);
+  text('PERMANENT SEO', x + s + 24, y + 52, { size: 38, weight: 800, color: '#ffffff' });
+  text('SEO AGENCY', x + s + 26, y + 90, { size: 22, weight: 600, color: NEON, font: MONO });
+  // creator credit bottom-right
+  text('M Mehrooz Shafique', W - 48, H - 96, { size: 40, weight: 800, color: '#ffffff', align: 'right' });
+  text('Co-Founder of Permanent SEO', W - 48, H - 56, { size: 24, weight: 600, color: NEON, align: 'right', font: MONO });
+  const nw = measure('M Mehrooz Shafique', 40, 800);
+  line(W - 48 - nw, H - 84, W - 48, H - 84, NEON, 3, 10);
+  ctx.restore();
+  ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.fillRect(0, H - 8, W, 8);
+  ctx.save(); ctx.shadowColor = NEON; ctx.shadowBlur = 14;
+  ctx.fillStyle = NEON; ctx.fillRect(0, H - 8, W * clamp(t / DURATION), 8);
+  ctx.restore();
+}
+
+function stepHeader(t, a, step, title) {
+  const p = easeOut(prog(t, a, a + 0.6));
+  ctx.save();
+  ctx.globalAlpha *= p;
+  ctx.translate(0, (1 - p) * 30);
+  ctx.font = `700 26px ${MONO}`;
+  const lw = ctx.measureText(step).width + 40;
+  rr(W / 2 - lw / 2, 222, lw, 50, 25);
+  ctx.strokeStyle = NEON; ctx.lineWidth = 2; ctx.stroke();
+  ctx.fillStyle = 'rgba(200,255,46,0.1)'; ctx.fill();
+  text(step, W / 2, 256, { size: 26, weight: 700, color: NEON, align: 'center', font: MONO });
+  text(title, W / 2, 360, { size: fit(title, 74, W - 120), weight: 900, color: '#ffffff', align: 'center' });
+  ctx.restore();
+}
+
+function caption(t, a, lines, color = TEXT) {
+  const p = easeOut(prog(t, a, a + 0.5));
+  if (p <= 0) return;
+  ctx.save();
+  ctx.globalAlpha *= p;
+  const y0 = 1560 + (1 - p) * 20;
+  const h = 40 + lines.length * 52;
+  rr(70, y0, W - 140, h, 22);
+  ctx.fillStyle = 'rgba(10,14,8,0.85)'; ctx.fill();
+  ctx.strokeStyle = 'rgba(200,255,46,0.35)'; ctx.lineWidth = 2; ctx.stroke();
+  lines.forEach((l, i) => {
+    // allow inline highlight with *word*
+    const parts = l.split('*');
+    let total = 0; parts.forEach((s, j) => total += measure(s, 38, j % 2 ? 800 : 600));
+    let x = W / 2 - total / 2;
+    parts.forEach((s, j) => {
+      text(s, x, y0 + 66 + i * 52, { size: 38, weight: j % 2 ? 800 : 600, color: j % 2 ? NEON : color });
+      x += measure(s, 38, j % 2 ? 800 : 600);
+    });
+  });
+  ctx.restore();
+}
+
+// ---------- scene 1: title ----------
+function scene1(t) {
+  const a = sceneAlpha(t, -1, 4.7);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  // hub with orbiting feature icons
+  const cx = W / 2, cy = 560;
+  const icons = ['👥', '💬', '📅', '⚙️', '🤖', '⭐', '🧲', '💳'];
+  icons.forEach((ic, i) => {
+    const st = 0.3 + i * 0.08;
+    const p = easeOut(prog(t, st, st + 0.5));
+    if (p <= 0) return;
+    const ang = -Math.PI / 2 + i * Math.PI / 4 + t * 0.4;
+    const x = cx + Math.cos(ang) * 230 * p, y = cy + Math.sin(ang) * 150 * p;
+    line(cx, cy, x, y, rgba(NEON, 0.35 * p), 2, 0, [6, 8]);
+    ctx.save(); ctx.globalAlpha *= p;
+    rr(x - 38, y - 38, 76, 76, 20); ctx.fillStyle = 'rgba(10,14,8,0.95)'; ctx.fill();
+    ctx.strokeStyle = rgba(NEON, 0.6); ctx.lineWidth = 2; ctx.stroke();
+    text(ic, x, y + 14, { size: 38, align: 'center' });
+    ctx.restore();
+  });
+  const hp = backOut(prog(t, 0.1, 0.6));
+  if (hp > 0) {
+    ctx.save(); ctx.globalAlpha *= clamp(hp); ctx.translate(cx, cy); ctx.scale(clamp(hp, 0, 1.2), clamp(hp, 0, 1.2));
+    ctx.shadowColor = NEON; ctx.shadowBlur = 40 + Math.sin(t * 5) * 12;
+    ctx.beginPath(); ctx.arc(0, 0, 70, 0, Math.PI * 2); ctx.fillStyle = NEON; ctx.fill();
+    ctx.shadowBlur = 0;
+    text('GHL', 0, 16, { size: 46, weight: 900, color: '#081004', align: 'center' });
+    ctx.restore();
+  }
+  const lines = [
+    ['BECOME A', 96, '#ffffff', 0.7, 880],
+    ['GOHIGHLEVEL', 0, NEON, 1.0, 1030],
+    ['EXPERT', 150, '#ffffff', 1.3, 1180],
+  ];
+  lines.forEach(([s, size, color, st, y]) => {
+    const p = easeOut(prog(t, st, st + 0.6));
+    const sz = size || fit(s, 160, W - 100);
+    text(s, W / 2, y + (1 - p) * 60, { size: sz, weight: 900, color, align: 'center', alpha: p, glow: color === NEON ? 30 : 0 });
+  });
+  const p4 = easeOut(prog(t, 1.8, 2.3));
+  ctx.save(); ctx.globalAlpha *= p4;
+  const s1 = '& land clients on ', s2 = 'autopilot';
+  const tw = measure(s1, 46, 600) + measure(s2, 46, 900);
+  text(s1, W / 2 - tw / 2, 1280, { size: 46, weight: 600, color: TEXT });
+  text(s2, W / 2 - tw / 2 + measure(s1, 46, 600), 1280, { size: 46, weight: 900, color: NEON, glow: 16 });
+  ctx.restore();
+  const chips = ['Features', 'Earning', 'Clients', '90-Day Plan'];
+  const gap = 20;
+  let total = gap * 3;
+  chips.forEach(s => total += measure(s, 30, 700, MONO) + 40);
+  let x = W / 2 - total / 2;
+  chips.forEach((s, i) => {
+    const p = backOut(prog(t, 2.4 + i * 0.25, 2.8 + i * 0.25));
+    const w = measure(s, 30, 700, MONO) + 40;
+    if (p > 0) pill(s, x + w / 2, 1400, { size: 30, scale: clamp(p, 0, 1.2), alpha: clamp(p), pad: 20, h: 66 });
+    x += w + gap;
+  });
+  ctx.restore();
+}
+
+// ---------- scene 2: stats ----------
+const S2 = 4.4, S2E = 10.6;
+const stats = [
+  [60000, v => Math.round(v).toLocaleString('en-US') + '+', 'agencies using', 'HighLevel', NEON],
+  [1.4, v => v.toFixed(1) + 'M', 'businesses on', 'the platform', CYAN],
+  [529257, v => Math.round(v).toLocaleString('en-US'), 'live websites built', 'on HighLevel', AMBER],
+  [40, v => Math.round(v) + '%', 'recurring affiliate', 'commission', PINK],
+];
+function scene2(t) {
+  const A = S2;
+  const a = sceneAlpha(t, A, S2E);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  stepHeader(t, A, 'THE OPPORTUNITY', 'HighLevel Is Huge');
+  stats.forEach(([val, fmt, l1, l2, col], i) => {
+    const st = A + 0.5 + i * 0.3;
+    const p = backOut(prog(t, st, st + 0.5));
+    if (p <= 0) return;
+    const x = i % 2 === 0 ? 80 : 560, y = 460 + Math.floor(i / 2) * 400;
+    ctx.save(); ctx.globalAlpha *= clamp(p);
+    ctx.translate(x + 220, y + 175); ctx.scale(clamp(p, 0, 1.2), clamp(p, 0, 1.2)); ctx.translate(-220, -175);
+    card(0, 0, 440, 350, col, { glow: 18, lw: 3, r: 28 });
+    const v = val * easeOut(prog(t, st + 0.2, st + 1.6));
+    const s = fmt(v);
+    text(s, 220, 160, { size: fit(fmt(val), 92, 380), weight: 900, color: col, align: 'center', glow: 20 });
+    text(l1, 220, 235, { size: 32, weight: 700, color: '#ffffff', align: 'center' });
+    text(l2, 220, 280, { size: 32, weight: 700, color: '#ffffff', align: 'center' });
+    ctx.restore();
+  });
+  caption(t, A + 2.0, ['A huge, growing platform =', '*real demand* for GHL experts.']);
+  ctx.restore();
+}
+
+// ---------- scene 3: one platform replaces 6–8 tools ----------
+const S3 = 10.4, S3E = 16.4;
+const tools = [['👥', 'CRM'], ['🧲', 'Funnels'], ['✉️', 'Email'], ['📱', 'SMS'], ['📅', 'Booking'], ['⭐', 'Reviews'], ['🗓️', 'Social'], ['🎓', 'Courses']];
+function scene3(t) {
+  const A = S3;
+  const a = sceneAlpha(t, A, S3E);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  stepHeader(t, A, '01 · WHAT GHL IS', 'One Platform, 6–8 Tools');
+  const cx = 540, cy = 930, R = 360;
+  const merge = easeInOut(prog(t, A + 2.8, A + 3.5));
+  tools.forEach(([ic, name], i) => {
+    const st = A + 0.5 + i * 0.18;
+    const p = backOut(prog(t, st, st + 0.4));
+    if (p <= 0 || merge >= 1) return;
+    const ang = -Math.PI / 2 + i * Math.PI / 4;
+    const x = lerp(cx + Math.cos(ang) * R, cx, merge), y = lerp(cy + Math.sin(ang) * R, cy, merge);
+    const s = clamp(p, 0, 1.2) * (1 - merge * 0.7);
+    ctx.save(); ctx.globalAlpha *= clamp(p) * (1 - merge * 0.8);
+    ctx.translate(x, y); ctx.scale(s, s);
+    card(-90, -80, 180, 160, rgba(TEXT, 0.35), { r: 26 });
+    text(ic, 0, 0, { size: 60, align: 'center' });
+    text(name, 0, 55, { size: 28, weight: 800, color: '#ffffff', align: 'center' });
+    ctx.restore();
+    // a "separate tool" price tag
+    if (merge === 0 && t > st + 0.4) text('$', x + 70, y - 60, { size: 30, weight: 900, color: RED, align: 'center', alpha: prog(t, st + 0.4, st + 0.6) });
+  });
+  const hp = backOut(prog(t, A + 3.3, A + 3.9));
+  if (hp > 0) {
+    ctx.save(); ctx.globalAlpha *= clamp(hp); ctx.translate(cx, cy); ctx.scale(clamp(hp, 0, 1.2), clamp(hp, 0, 1.2));
+    ctx.shadowColor = NEON; ctx.shadowBlur = 50 + Math.sin(t * 5) * 14;
+    rr(-250, -110, 500, 220, 40); ctx.fillStyle = NEON; ctx.fill();
+    ctx.shadowBlur = 0;
+    text('ALL-IN-ONE', 0, -40, { size: 26, weight: 700, color: '#25400a', align: 'center', font: MONO });
+    text('HighLevel', 0, 30, { size: 76, weight: 900, color: '#081004', align: 'center' });
+    text('built for agencies', 0, 78, { size: 28, weight: 700, color: '#25400a', align: 'center' });
+    ctx.restore();
+    // shockwave
+    const rp = prog(t, A + 3.4, A + 4.4);
+    if (rp > 0 && rp < 1) {
+      ctx.save(); ctx.globalAlpha *= 1 - rp;
+      ctx.strokeStyle = NEON; ctx.lineWidth = 4; ctx.shadowColor = NEON; ctx.shadowBlur = 20;
+      rr(cx - 250 - rp * 150, cy - 110 - rp * 150, 500 + rp * 300, 220 + rp * 300, 40 + rp * 60); ctx.stroke();
+      ctx.restore();
+    }
+  }
+  caption(t, A + 1.0, ['CRM, funnels, email/SMS, booking, reviews,', 'social & courses — *in one system*.']);
+  ctx.restore();
+}
+
+// ---------- scene 4: agency vs sub-account ----------
+const S4 = 16.2, S4E = 22.6;
+const subs = [['🦷', 'Dental clinic', 210], ['🏠', 'Roofing company', 540], ['💆', 'Med spa', 870]];
+function scene4(t) {
+  const A = S4;
+  const a = sceneAlpha(t, A, S4E);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  stepHeader(t, A, '01 · THE STRUCTURE', 'Master the 2 Levels');
+  // agency box
+  const ap = easeOut(prog(t, A + 0.3, A + 0.8));
+  enter(ap, 0, 30, () => {
+    card(110, 440, 860, 170, NEON, { glow: 20, lw: 3, r: 28, fill: 'rgba(200,255,46,0.1)' });
+    text('YOUR AGENCY ACCOUNT', 540, 510, { size: 44, weight: 900, color: '#ffffff', align: 'center' });
+    text('Snapshots · Billing · SaaS · White-label', 540, 565, { size: 28, weight: 700, color: NEON, align: 'center', font: MONO });
+  });
+  subs.forEach(([ic, name, x], i) => {
+    const st = A + 0.9 + i * 0.25;
+    const lp = easeOut(prog(t, st, st + 0.3));
+    if (lp > 0) line(540, 612, lerp(540, x, lp), lerp(612, 780, lp), rgba(NEON, 0.6), 3, 10, [8, 8]);
+    const p = backOut(prog(t, st + 0.2, st + 0.6));
+    if (p <= 0) return;
+    ctx.save(); ctx.globalAlpha *= clamp(p); ctx.translate(x, 900); ctx.scale(clamp(p, 0, 1.2), clamp(p, 0, 1.2));
+    card(-150, -120, 300, 240, CYAN, { r: 24, lw: 2.5 });
+    text(`SUB-ACCOUNT ${i + 1}`, 0, -76, { size: 22, weight: 700, color: CYAN, align: 'center', font: MONO });
+    text(ic, 0, 10, { size: 64, align: 'center' });
+    text(name, 0, 70, { size: fit(name, 30, 270, 800), weight: 800, color: '#ffffff', align: 'center' });
+    ctx.restore();
+  });
+  // snapshot travelling to each client
+  subs.forEach(([, , x], i) => {
+    const st = A + 2.4 + i * 0.5;
+    const p = easeInOut(prog(t, st, st + 0.45));
+    if (p > 0 && p < 1) {
+      pill('📦 Snapshot', lerp(540, x, p), lerp(560, 860, p), { size: 24, color: AMBER, fill: 'rgba(30,22,6,0.95)', textColor: '#ffffff', font: SANS, weight: 800, h: 50, pad: 16, glow: 16 });
+    }
+    check(x + 120, 800, 26, backOut(prog(t, st + 0.45, st + 0.75)));
+  });
+  // the two levels explained
+  [['AGENCY LEVEL', 'Your command centre: sub-accounts, snapshots, billing', NEON],
+   ['SUB-ACCOUNT LEVEL', "Each client's business: contacts, pipelines, workflows", CYAN]].forEach(([k, v, col], i) => {
+    const st = A + 4.0 + i * 0.4;
+    const p = easeOut(prog(t, st, st + 0.4));
+    enter(p, -60, 0, () => {
+      const y = 1110 + i * 200;
+      card(80, y, 920, 170, rgba(col, 0.5), { r: 22 });
+      text(k, 120, y + 60, { size: 28, weight: 800, color: col, font: MONO });
+      text(v, 120, y + 118, { size: fit(v, 32, 840, 700), weight: 700, color: '#ffffff' });
+    });
+  });
+  caption(t, A + 3.0, ['One niche → one *Snapshot* → every new', 'client deploys in *minutes*.']);
+  ctx.restore();
+}
+
+// ---------- scene 5: features clients pay for ----------
+const S5 = 22.4, S5E = 28.8;
+const feats = [
+  ['💬', 'Unified Inbox', 'SMS, email, calls, DMs'], ['📅', 'Calendars', 'Booking + reminders'],
+  ['📞', 'LC Phone', 'Missed-call text-back'], ['🧲', 'Funnels & Sites', 'Drag-and-drop builder'],
+  ['⭐', 'Reputation', 'Automated reviews'], ['⚙️', 'Workflows', 'The heart of GHL'],
+  ['🤖', 'Conversation AI', 'Replies & books 24/7', 1], ['🎙️', 'Voice AI', 'AI answers calls', 1],
+  ['📦', 'Snapshots', 'Clone whole systems'], ['💰', 'SaaS Mode', 'Sell GHL as your app'],
+];
+function scene5(t) {
+  const A = S5;
+  const a = sceneAlpha(t, A, S5E);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  stepHeader(t, A, '02 · CORE FEATURES', 'Features Clients Pay For');
+  feats.forEach(([ic, name, sub, ai], i) => {
+    const st = A + 0.5 + i * 0.16;
+    const p = easeOut(prog(t, st, st + 0.4));
+    const x = i % 2 === 0 ? 80 : 560, y = 440 + Math.floor(i / 2) * 200;
+    enter(p, i % 2 === 0 ? -60 : 60, 0, () => {
+      const col = ai ? CYAN : NEON;
+      card(x, y, 440, 176, rgba(col, ai ? 0.8 : 0.4), { r: 24, glow: ai ? 16 : 0 });
+      text(ic, x + 58, y + 82, { size: 52, align: 'center' });
+      text(name, x + 106, y + 72, { size: fit(name, 34, 310, 800), weight: 800, color: '#ffffff' });
+      text(sub, x + 106, y + 114, { size: fit(sub, 24, 310, 600), weight: 600, color: MUTED });
+      pill(ai ? '$ · 2026' : '$ MONEY', x + 106 + (ai ? 72 : 76), y + 148, { size: 18, color: col, h: 32, pad: 12 });
+    });
+  });
+  caption(t, A + 2.4, ['*Workflows* are the heart of GHL —', '*AI agents* are the 2026 wave.']);
+  ctx.restore();
+}
+
+// ---------- scene 6: pricing ----------
+const S6 = 28.6, S6E = 34.6;
+const plans = [
+  ['Starter', '$97', '3 sub-accounts · all core features', 'Learning + your first 1–2 clients', NEON, true],
+  ['Unlimited', '$297', 'Unlimited sub-accounts · white-label app', 'Once you have 3+ paying clients', CYAN],
+  ['Agency Pro', '$497', 'SaaS Mode · rebilling with markup', 'Selling GHL as your own software', PINK],
+];
+function scene6(t) {
+  const A = S6;
+  const a = sceneAlpha(t, A, S6E);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  stepHeader(t, A, '03 · PRICING', 'Which Plan to Start On');
+  plans.forEach(([name, price, unlock, best, col, start], i) => {
+    const st = A + 0.5 + i * 0.35;
+    const p = easeOut(prog(t, st, st + 0.45));
+    const y = 450 + i * 270;
+    enter(p, 80, 0, () => {
+      card(80, y, 920, 240, col, { r: 28, lw: start ? 4 : 2.5, glow: start ? 28 : 10 });
+      text(name, 125, y + 75, { size: 50, weight: 900, color: '#ffffff' });
+      text(price, 930, y + 82, { size: 76, weight: 900, color: col, align: 'right', glow: 16 });
+      text('/mo', 930, y + 116, { size: 24, weight: 700, color: MUTED, align: 'right', font: MONO });
+      text(unlock, 125, y + 140, { size: fit(unlock, 30, 640, 700), weight: 700, color: col });
+      text('Best: ' + best, 125, y + 196, { size: fit('Best: ' + best, 30, 780, 600), weight: 600, color: TEXT });
+    });
+    if (start) {
+      const bp = backOut(prog(t, A + 2.0, A + 2.4));
+      if (bp > 0) {
+        ctx.save(); ctx.globalAlpha *= clamp(bp); ctx.translate(560, y - 2); ctx.rotate(-0.04); ctx.scale(clamp(bp, 0, 1.2), clamp(bp, 0, 1.2));
+        pill('START HERE', 0, 0, { size: 26, color: NEON, fill: NEON, textColor: '#081004', font: SANS, weight: 900, h: 52, glow: 24 });
+        ctx.restore();
+      }
+    }
+  });
+  const fp = easeOut(prog(t, A + 2.3, A + 2.7));
+  check(330, 1320, 26, backOut(prog(t, A + 2.3, A + 2.6)));
+  text('14-day free trial on all plans', 370, 1332, { size: 36, weight: 800, color: '#ffffff', alpha: fp });
+  caption(t, A + 2.8, ['Start on *Starter* — upgrade only after', '*client #3* pays for it.']);
+  ctx.restore();
+}
+
+// ---------- scene 7: 10 ways to earn ----------
+const S7 = 34.4, S7E = 40.8;
+const ways = [
+  ['Done-for-you setups', '$300–$1,200'], ['Monthly retainers', '$300–$1,500/mo'], ['AI Employee / Voice AI', 'from $150'],
+  ['SaaS Mode reselling', '$97–$497/mo'], ['Freelancing: Upwork/Fiverr', '$25–75/hr'], ['Affiliate program', '40% recurring'],
+  ['Selling niche Snapshots', 'one-time / sub'], ['White-label support', 'steady volume'], ['Training & audits', 'e.g. $300'],
+  ['Custom code & integrations', 'higher hourly'],
+];
+function scene7(t) {
+  const A = S7;
+  const a = sceneAlpha(t, A, S7E);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  stepHeader(t, A, '04 · EARNING METHODS', '10 Ways to Earn with GHL');
+  ways.forEach(([name, val], i) => {
+    const st = A + 0.5 + i * 0.22;
+    const p = easeOut(prog(t, st, st + 0.35));
+    const y = 430 + i * 104;
+    const top = i < 3;
+    enter(p, -70, 0, () => {
+      card(80, y, 920, 88, top ? rgba(NEON, 0.6) : 'rgba(255,255,255,0.14)', { r: 18, glow: top ? 10 : 0 });
+      ctx.save();
+      ctx.beginPath(); ctx.arc(132, y + 44, 28, 0, Math.PI * 2);
+      ctx.fillStyle = top ? NEON : 'rgba(200,255,46,0.14)'; ctx.fill();
+      ctx.restore();
+      text(String(i + 1), 132, y + 55, { size: 30, weight: 900, color: top ? '#081004' : NEON, align: 'center' });
+      text(name, 184, y + 56, { size: fit(name, 34, 520, 800), weight: 800, color: '#ffffff' });
+      text(val, 970, y + 54, { size: fit(val, 26, 250, 700, MONO), weight: 700, color: NEON, align: 'right', font: MONO });
+    });
+  });
+  caption(t, A + 2.9, ['Ranked by income, recurring revenue', '& *ease of starting*.']);
+  ctx.restore();
+}
+
+// ---------- scene 8: winning combo ----------
+const S8 = 40.6, S8E = 45.6;
+const combo = [
+  ['#5', 'Freelancing', 'Get your first income', NEON],
+  ['#2', 'Monthly retainer', 'Turn happy clients into recurring', CYAN],
+  ['#3', 'AI agents', 'Add as an upsell', AMBER],
+  ['#4', 'SaaS Mode', 'Once you have 6+ similar clients', PINK],
+  ['#6', 'Affiliate link', 'Everywhere from day one', LILAC],
+];
+function scene8(t) {
+  const A = S8;
+  const a = sceneAlpha(t, A, S8E);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  stepHeader(t, A, 'THE WINNING COMBO', 'Stack Your Income');
+  combo.forEach(([n, name, sub, col], i) => {
+    const st = A + 0.5 + i * 0.4;
+    const p = backOut(prog(t, st, st + 0.4));
+    const y = 440 + i * 200;
+    if (i > 0) {
+      const lp = prog(t, st - 0.15, st + 0.1);
+      if (lp > 0) {
+        line(540, y - 48, 540, lerp(y - 48, y - 12, lp), col, 5, 12);
+        ctx.save(); ctx.globalAlpha *= lp; ctx.fillStyle = col;
+        ctx.beginPath(); ctx.moveTo(526, y - 22); ctx.lineTo(554, y - 22); ctx.lineTo(540, y - 4); ctx.fill(); ctx.restore();
+      }
+    }
+    if (p <= 0) return;
+    ctx.save(); ctx.globalAlpha *= clamp(p); ctx.translate(540, y + 76); ctx.scale(clamp(p, 0, 1.2), clamp(p, 0, 1.2));
+    card(-440, -76, 880, 152, col, { r: 76, lw: 3, glow: 18 });
+    ctx.beginPath(); ctx.arc(-362, 0, 54, 0, Math.PI * 2); ctx.fillStyle = col; ctx.fill();
+    text(n, -362, 14, { size: 38, weight: 900, color: '#081004', align: 'center' });
+    text(name, -282, -8, { size: 44, weight: 900, color: '#ffffff' });
+    text(sub, -282, 40, { size: fit(sub, 30, 680, 600), weight: 600, color: col });
+    ctx.restore();
+  });
+  caption(t, A + 2.6, ['Always offer a monthly plan —', '*recurring income* is where the money is.']);
+  ctx.restore();
+}
+
+// ---------- scene 9: best niches ----------
+const S9 = 45.4, S9E = 51.4;
+const niches = [
+  ['💆 Med spas & aesthetics', 9.5], ['🦷 Dentists & orthodontists', 9.2], ['🏠 Roofing, HVAC, solar', 9.0],
+  ['⚖️ Law firms', 8.8], ['🎓 Coaches & consultants', 8.5], ['🏡 Real estate & mortgage', 8.3],
+  ['🦴 Chiropractors & physio', 8.2], ['🛒 E-commerce (avoid early)', 5.0],
+];
+function scene9(t) {
+  const A = S9;
+  const a = sceneAlpha(t, A, S9E);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  stepHeader(t, A, '06 · WHO TO TARGET', 'Best Clients for GHL');
+  text('NICHE FIT SCORE / 10', 80, 440, { size: 24, weight: 700, color: MUTED, font: MONO, alpha: prog(t, A + 0.4, A + 0.8) });
+  niches.forEach(([name, score], i) => {
+    const st = A + 0.5 + i * 0.2;
+    const p = easeOut(prog(t, st, st + 0.6));
+    if (p <= 0) return;
+    const y = 500 + i * 112;
+    const bad = score < 7;
+    const col = bad ? RED : i < 3 ? NEON : CYAN;
+    text(name, 80, y + 26, { size: 32, weight: 800, color: bad ? '#c9a3a8' : '#ffffff', alpha: clamp(p * 2) });
+    rr(80, y + 44, 840, 26, 13); ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.fill();
+    ctx.save(); ctx.shadowColor = col; ctx.shadowBlur = 14;
+    rr(80, y + 44, Math.max(26, 840 * score / 10 * p), 26, 13); ctx.fillStyle = col; ctx.fill();
+    ctx.restore();
+    text((score * clamp(p)).toFixed(1), 1000, y + 66, { size: 32, weight: 900, color: col, align: 'right' });
+  });
+  const pp = backOut(prog(t, A + 2.6, A + 3.0));
+  if (pp > 0) pill('🎯 Pick ONE niche for 90 days', 540, 1440, { size: 34, color: NEON, fill: NEON, textColor: '#081004', font: SANS, weight: 900, h: 80, scale: clamp(pp, 0, 1.2), alpha: clamp(pp), glow: 30 });
+  caption(t, A + 3.2, ['High value per customer + depends on', '*leads & appointments* = best fit.']);
+  ctx.restore();
+}
+
+// ---------- scene 10: 90-day roadmap ----------
+const S10 = 51.2, S10E = 57.4;
+const months = [['MONTH 1', 'Learn & Build', NEON], ['MONTH 2', 'First Clients', CYAN], ['MONTH 3', 'Scale & Automate', PINK]];
+const weeks = [['WK 1', 'Foundations: CRM, pipelines, calendars'], ['WK 2', 'Funnels & websites'], ['WK 3', 'Workflows — the money skill'], ['WK 4', 'AI agents + your niche Snapshot']];
+function scene10(t) {
+  const A = S10;
+  const a = sceneAlpha(t, A, S10E);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  stepHeader(t, A, '07 · 90-DAY ROADMAP', 'Learner → Paid Expert');
+  months.forEach(([k, v, col], i) => {
+    const p = backOut(prog(t, A + 0.4 + i * 0.2, A + 0.8 + i * 0.2));
+    if (p <= 0) return;
+    const x = 80 + i * 310;
+    ctx.save(); ctx.globalAlpha *= clamp(p); ctx.translate(x + 145, 500); ctx.scale(clamp(p, 0, 1.2), clamp(p, 0, 1.2));
+    card(-145, -60, 290, 120, col, { r: 20, lw: 3, fill: rgba(col, 0.1) });
+    text(k, 0, -12, { size: 24, weight: 800, color: col, align: 'center', font: MONO });
+    text(v, 0, 32, { size: fit(v, 32, 260, 800), weight: 800, color: '#ffffff', align: 'center' });
+    ctx.restore();
+  });
+  weeks.forEach(([k, v], i) => {
+    const st = A + 1.1 + i * 0.25;
+    const p = easeOut(prog(t, st, st + 0.35));
+    enter(p, -50, 0, () => {
+      const y = 600 + i * 78;
+      text(k, 110, y + 46, { size: 26, weight: 800, color: NEON, font: MONO });
+      text(v, 210, y + 46, { size: 32, weight: 700, color: '#ffffff' });
+      check(970, y + 36, 20, backOut(prog(t, st + 0.3, st + 0.6)));
+    });
+  });
+  // income trajectory chart
+  const cp = easeOut(prog(t, A + 2.2, A + 2.6));
+  if (cp > 0) {
+    ctx.save(); ctx.globalAlpha *= cp;
+    const x0 = 150, x1 = 980, y0 = 1420, y1 = 1000;
+    const X = w => lerp(x0, x1, w / 12), Y = v => lerp(y0, y1, v / 3);
+    [0, 1, 2, 3].forEach(k => {
+      line(x0, Y(k), x1, Y(k), 'rgba(255,255,255,0.08)', 2);
+      text('$' + k + 'k', x0 - 16, Y(k) + 9, { size: 22, weight: 600, color: MUTED, align: 'right', font: MONO });
+    });
+    [2, 4, 6, 8, 10, 12].forEach(w => text('Wk ' + w, X(w), y0 + 36, { size: 20, weight: 600, color: MUTED, align: 'center', font: MONO }));
+    const pts = [[0, 0], [2, 0], [4, 0.15], [5, 0.4], [6, 0.7], [8, 1.3], [10, 1.9], [12, 2.5]];
+    const dp = easeInOut(prog(t, A + 2.5, A + 4.5));
+    const end = dp * 12;
+    ctx.save();
+    ctx.beginPath(); ctx.moveTo(X(0), Y(0));
+    let last = [0, 0];
+    for (let k = 1; k < pts.length; k++) {
+      const [w0, v0] = pts[k - 1], [w1, v1] = pts[k];
+      if (end <= w0) break;
+      const f = clamp((end - w0) / (w1 - w0));
+      last = [lerp(w0, w1, f), lerp(v0, v1, f)];
+      ctx.lineTo(X(last[0]), Y(last[1]));
+    }
+    ctx.strokeStyle = NEON; ctx.lineWidth = 6; ctx.lineJoin = 'round'; ctx.shadowColor = NEON; ctx.shadowBlur = 18; ctx.stroke();
+    ctx.lineTo(X(last[0]), Y(0)); ctx.lineTo(X(0), Y(0)); ctx.closePath();
+    ctx.shadowBlur = 0; ctx.fillStyle = 'rgba(200,255,46,0.1)'; ctx.fill();
+    ctx.restore();
+    node(X(last[0]), Y(last[1]), 10, NEON);
+    [[5, 0.4, '1st gig'], [8, 1.3, '1st retainer'], [12, 2.5, '~$2.5k MRR goal']].forEach(([w, v, s]) => {
+      const mp = backOut(prog(end, w - 0.6, w));
+      if (mp <= 0) return;
+      node(X(w), Y(v), 9, '#ffffff', clamp(mp));
+      text(s, X(w) - (w === 12 ? 10 : 0), Y(v) - 22, { size: 24, weight: 800, color: '#ffffff', align: w === 12 ? 'right' : 'center', alpha: clamp(mp) });
+    });
+    text('Realistic goal — not a guarantee', 980, 1500, { size: 22, weight: 600, color: MUTED, align: 'right', font: MONO });
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+// ---------- scene 11: lead-gen machine ----------
+const S11 = 57.2, S11E = 63.4;
+const machine = [
+  ['🎯', 'Attract', 'Cold email, LinkedIn, groups, YouTube'],
+  ['🎁', 'Hook', 'Free missed-lead audit / AI demo'],
+  ['📄', 'Capture', 'GHL funnel + multi-step form'],
+  ['🤖', 'Qualify', 'Conversation AI replies in seconds'],
+  ['📅', 'Book & remind', 'Reminders at 24h, 2h & 10 min'],
+  ['🤝', 'Close', 'Discovery call → contract → invoice'],
+  ['🚀', 'Onboard & expand', 'Reviews at day 30, referrals at day 60'],
+];
+function scene11(t) {
+  const A = S11;
+  const a = sceneAlpha(t, A, S11E);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  stepHeader(t, A, '11 · LEAD GENERATION', 'Your Client-Getting Machine');
+  const y0 = 440, step = 136;
+  const sp = easeOut(prog(t, A + 0.4, A + 0.4 + machine.length * 0.28));
+  line(140, y0 + 56, 140, lerp(y0 + 56, y0 + 56 + (machine.length - 1) * step, sp), rgba(NEON, 0.5), 4, 10);
+  machine.forEach(([ic, name, sub], i) => {
+    const st = A + 0.4 + i * 0.28;
+    const p = easeOut(prog(t, st, st + 0.35));
+    const y = y0 + i * step;
+    enter(p, 60, 0, () => {
+      card(200, y, 800, 112, 'rgba(200,255,46,0.35)', { r: 22 });
+      text(`${i + 1} · ${name}`, 236, y + 50, { size: 36, weight: 900, color: '#ffffff' });
+      text(sub, 236, y + 92, { size: fit(sub, 28, 740, 600), weight: 600, color: MUTED });
+    });
+    const bp = backOut(prog(t, st, st + 0.35));
+    if (bp > 0) {
+      ctx.save(); ctx.globalAlpha *= clamp(bp); ctx.translate(140, y + 56); ctx.scale(clamp(bp, 0, 1.2), clamp(bp, 0, 1.2));
+      ctx.beginPath(); ctx.arc(0, 0, 46, 0, Math.PI * 2); ctx.fillStyle = '#0c1208'; ctx.fill();
+      ctx.strokeStyle = NEON; ctx.lineWidth = 3; ctx.shadowColor = NEON; ctx.shadowBlur = 16; ctx.stroke();
+      ctx.shadowBlur = 0;
+      text(ic, 0, 15, { size: 42, align: 'center' });
+      ctx.restore();
+    }
+  });
+  // a lead travelling down the machine on loop
+  const lt = t - (A + 2.6);
+  if (lt > 0) {
+    const f = (lt / 2.4) % 1;
+    const y = y0 + 56 + f * (machine.length - 1) * step;
+    node(140, y, 14, '#ffffff');
+    text('LEAD', 140, y - 26, { size: 18, weight: 800, color: '#ffffff', align: 'center', font: MONO });
+  }
+  caption(t, A + 2.6, ['Use GHL to sell GHL — your job becomes', 'taking the *sales calls*.']);
+  ctx.restore();
+}
+
+// ---------- scene 12: CTA ----------
+function scene12(t) {
+  const A = 63.2;
+  const c = prog(t, A, A + 0.6);
+  if (c <= 0) return;
+  ctx.save(); ctx.globalAlpha = c;
+  const p = backOut(prog(t, A + 0.1, A + 0.8));
+  const s = 280 * clamp(p, 0, 1.2);
+  if (s > 0) logoTile(W / 2 - s / 2, 620 - s / 2, s, 80);
+  const cols = [NEON, CYAN, AMBER, PINK, LILAC];
+  for (let i = 0; i < 5; i++) {
+    const ang = t * 1.4 + i * 2 * Math.PI / 5;
+    node(W / 2 + Math.cos(ang) * 240, 620 + Math.sin(ang) * 240, 13, cols[i], clamp(p));
+  }
+  const tp = easeOut(prog(t, A + 0.6, A + 1.1));
+  text('Become a GHL Expert', W / 2, 960 + (1 - tp) * 30, { size: 80, weight: 900, color: '#ffffff', align: 'center', alpha: tp });
+  text('Start your 90-day plan today.', W / 2, 1040 + (1 - tp) * 30, { size: 42, weight: 600, color: MUTED, align: 'center', alpha: tp });
+  const pp = easeOut(prog(t, A + 1.0, A + 1.4));
+  text('PERMANENT SEO', W / 2, 1150, { size: 44, weight: 900, color: NEON, align: 'center', alpha: pp, glow: 18 });
+  const bp = backOut(prog(t, A + 1.4, A + 1.9));
+  if (bp > 0) {
+    ctx.save(); ctx.globalAlpha *= clamp(bp); ctx.translate(W / 2, 1290); ctx.scale(clamp(bp, 0, 1.2), clamp(bp, 0, 1.2));
+    const w = 640;
+    rr(-w / 2, -52, w, 104, 52); ctx.fillStyle = NEON; ctx.shadowColor = NEON; ctx.shadowBlur = 40 + Math.sin(t * 6) * 12; ctx.fill();
+    text('Follow for more SEO tips', 0, 15, { size: 42, weight: 800, color: '#081004', align: 'center' });
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+function draw(t) {
+  ctx.save();
+  ctx.clearRect(0, 0, W, H);
+  drawBackground(t);
+  scene1(t); scene2(t); scene3(t); scene4(t); scene5(t); scene6(t);
+  scene7(t); scene8(t); scene9(t); scene10(t); scene11(t); scene12(t);
+  drawBranding(t);
+  const f = 1 - Math.min(prog(t, 0, 0.4), 1 - prog(t, DURATION - 0.5, DURATION));
+  if (f > 0) { ctx.fillStyle = `rgba(0,0,0,${f})`; ctx.fillRect(0, 0, W, H); }
+  ctx.restore();
+}
+
+window.DURATION = DURATION;
+window.draw = draw;
+window.ready = Promise.all([
+  new Promise(r => { if (logo.complete) r(); else { logo.onload = r; logo.onerror = r; } }),
+  document.fonts.load(`900 40px Inter`), document.fonts.load(`800 40px Inter`), document.fonts.load(`700 40px Inter`),
+  document.fonts.load(`600 40px Inter`), document.fonts.load(`500 40px "DejaVu Sans Mono"`),
+  document.fonts.load(`40px "Noto Color Emoji"`, '🤖'),
+]);
+
+if (location.search.includes('preview')) {
+  document.body.classList.add('preview');
+  window.ready.then(() => {
+    const t0 = performance.now();
+    const loop = () => { draw(((performance.now() - t0) / 1000) % DURATION); requestAnimationFrame(loop); };
+    loop();
+  });
+}
+</script>
+</body>
+</html>
