@@ -1,0 +1,79 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@60,700;60,800&family=Plus+Jakarta+Sans:wght@600;700;800&family=Source+Sans+3:wght@500;600;700&family=Roboto+Condensed:wght@700&display=block" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:2000px;height:742px;overflow:hidden}
+body{position:relative;background:#EEF6FE;font-family:'Jost',sans-serif;-webkit-font-smoothing:antialiased}
+.bg{position:absolute;inset:0;overflow:hidden;
+  background:
+   radial-gradient(900px 520px at 50% 45%, rgba(255,255,255,.95), rgba(255,255,255,0) 70%),
+   linear-gradient(180deg,#F3F9FF 0%,#E8F3FE 100%);}
+.grid{position:absolute;inset:0;
+  background-image:linear-gradient(rgba(120,170,230,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(120,170,230,.10) 1px,transparent 1px);
+  background-size:76px 76px;background-position:-10px -6px;
+  -webkit-mask:radial-gradient(1200px 600px at 45% 50%,rgba(0,0,0,.55),#000 90%);}
+.blob{position:absolute;border-radius:50%;filter:blur(2px)}
+.b1{width:380px;height:380px;left:600px;top:-250px;background:radial-gradient(circle at 50% 60%,#CFE6FC,#DDEEFD 70%)}
+.b2{width:760px;height:760px;left:-360px;top:440px;background:radial-gradient(circle at 60% 40%,#D5E9FC,#E2F0FE 70%);filter:blur(4px)}
+.b3{width:420px;height:420px;left:1080px;top:625px;background:radial-gradient(circle at 50% 40%,#D3E8FC,#E0EFFE 70%)}
+.b4{width:300px;height:300px;left:1790px;top:-160px;background:radial-gradient(circle,#E0EFFD,#E9F4FE 70%)}
+
+.logo{position:absolute;left:76px;top:82px;display:flex;align-items:center;gap:15px}
+.mark{width:81px;height:60px;background:linear-gradient(160deg,#3F7BFF,#1F5BF0);
+  -webkit-mask:url({{MARK}}) center/contain no-repeat;mask:url({{MARK}}) center/contain no-repeat}
+.logo .t{font-family:'Plus Jakarta Sans';font-weight:800;font-size:37px;letter-spacing:-.6px;color:#14144F;line-height:1}
+.logo .t b{color:#2563EB;font-weight:800}
+
+.title{position:absolute;left:0;width:1700px;text-align:center;font-family:'Source Serif 4';font-variation-settings:'opsz' 60;font-weight:800;color:#0A0A0A;letter-spacing:-0.045em;line-height:1}
+.l1{top:184px;font-size:128px;left:-6px}
+.l2{top:290px;font-size:128px;left:0}
+.grad{background:linear-gradient(100deg,#0F7FF2 0%,#1AA5F6 45%,#3CCBFB 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 2px 0 rgba(10,90,200,.06))}
+.crown{position:absolute;left:434px;top:158px;width:66px;transform:rotate(-8deg);filter:drop-shadow(0 3px 3px rgba(150,90,0,.25))}
+
+.pill{position:absolute;left:325px;top:436px;width:998px;height:66px;border-radius:40px;border:2.4px solid #3CC4F5;
+  background:rgba(255,255,255,.55);display:flex;align-items:center;justify-content:space-around;
+  font-family:'Source Sans 3';font-weight:600;font-size:33px;color:#111;letter-spacing:-.6px;box-shadow:0 6px 22px rgba(60,170,240,.12)}
+.pill .sep{width:2.4px;height:42px;background:#3CC4F5;border-radius:2px}
+
+.expert{position:absolute;left:285px;top:536px;display:flex;align-items:center;gap:11px;font-family:'Source Sans 3';font-weight:600;font-size:34px;color:#111;letter-spacing:-.7px}
+.expert .lbl{margin-right:6px}
+.expert .more{margin-left:6px}
+.ic{width:81px;height:81px;border-radius:50%;background:#fff;border:2px solid #A9DCF6;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 14px rgba(60,150,230,.10)}
+.ic svg{width:52px;height:52px}
+.ic.ghl svg{width:58px;height:58px}.ic.n8n svg{width:60px;height:60px}.ic.meta svg{width:58px;height:58px}.ic.wp svg{width:50px;height:50px}.ic.gads svg{width:58px;height:58px}.ic.alast svg{width:52px;height:52px}
+.adobe{font-family:'Roboto Condensed';font-weight:700;font-size:28px;color:#FA0F00;letter-spacing:-.6px}
+
+.person{position:absolute;left:1268px;top:58px;width:738px;height:738px;
+  background:url(person.png) center/contain no-repeat;filter:drop-shadow(0 10px 30px rgba(30,80,160,.10))}
+
+.badge{position:absolute;left:1768px;top:224px;transform:rotate(-11deg);transform-origin:center}
+.badge .card{width:208px;height:136px;border-radius:26px;background:linear-gradient(160deg,#FFFFFF,#F2F8FF);
+  box-shadow:0 10px 26px rgba(40,110,220,.20),0 0 0 1px rgba(255,255,255,.9) inset;padding:20px 0 0 18px;
+  font-family:'Plus Jakarta Sans';font-weight:800;font-size:27px;line-height:1.08;color:#1D5BE8;letter-spacing:-.3px}
+.badge svg.arr{position:absolute;left:118px;top:62px;width:84px;height:76px}
+.spark{position:absolute;left:1914px;top:178px;width:60px;height:50px}
+</style></head>
+<body>
+<div class="bg"><div class="grid"></div><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div></div>
+
+<div class="logo"><div class="mark"></div><div class="t">Permanent <b>SEO</b></div></div>
+
+{{CROWN}}
+<div class="title l1">Semantic SEO &amp;</div>
+<div class="title l2"><span class="grad">AI Search</span> Specialist</div>
+
+<div class="pill"><span>Semantic SEO &amp; AI SEO</span><span class="sep"></span><span>AI Automation</span><span class="sep"></span><span>GO High Level Expert</span></div>
+
+<div class="expert"><span class="lbl">Expert in</span>{{ICONS}}<span class="more">&amp;More</span></div>
+
+<div class="person"></div>
+
+<div class="badge"><div class="card">Worked With<br>75+ Happy<br>Clients</div>
+ <svg class="arr" viewBox="0 0 84 76" fill="none" stroke="#1D5BE8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M8 62 C30 70 62 60 72 18"/><path d="M62 24 L72 16 L76 29"/><path d="M8 62 L10 52"/></svg>
+</div>
+<svg class="spark" viewBox="0 0 60 50" stroke="#1D5BE8" stroke-width="3.6" stroke-linecap="round"><line x1="12" y1="22" x2="16" y2="38"/><line x1="36" y1="6" x2="28" y2="32"/><line x1="56" y1="30" x2="40" y2="38"/></svg>
+</body></html>
