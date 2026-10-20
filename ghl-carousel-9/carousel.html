@@ -1,0 +1,395 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>GHL Carousel 9</title>
+<style>
+  /* One 9720x1350 strip = nine 1080x1350 slides. Shapes that cross x = 1080·n continue on the next slide. */
+  :root {
+    --blue: #2563eb; --blue-d: #1d4ed8; --blue-l: #dbe7ff; --blue-xl: #eef4ff;
+    --navy: #0b1b3f; --gray: #5b6b86; --line: #e3eaf7; --green: #22c55e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 9720px; height: 1350px; background: #fff; }
+  body { position: relative; overflow: hidden; font-family: Inter, "Noto Color Emoji", sans-serif; color: var(--navy); }
+  .abs { position: absolute; }
+
+  /* background */
+  .dots { inset: 0; background-image: radial-gradient(#c9d8f5 1.6px, transparent 1.6px); background-size: 36px 36px; opacity: .5; }
+  .blob { border-radius: 50%; background: radial-gradient(circle, #e3ecff 0%, #eef4ff 55%, rgba(238,244,255,0) 72%); }
+  .journey { left: 0; top: 1250px; width: 9720px; height: 4px; background: linear-gradient(90deg, var(--blue-l), var(--blue) 50%, var(--blue-l)); }
+  .seam { width: 92px; height: 92px; border-radius: 50%; background: var(--blue); top: 1206px; display: grid; place-items: center;
+    box-shadow: 0 10px 30px rgba(37,99,235,.35), 0 0 0 10px #fff; color: #fff; font-size: 44px; font-weight: 800; }
+
+  /* slide chrome (inserted by the script at the bottom) */
+  .slide { top: 0; width: 1080px; height: 1350px; }
+  .clip { overflow: hidden; height: 1245px; }
+  .brand { left: 72px; top: 64px; display: flex; align-items: center; gap: 16px; }
+  .brand img { width: 64px; height: 64px; border-radius: 16px; background: var(--blue); box-shadow: 0 8px 20px rgba(37,99,235,.3); }
+  .brand b { font-size: 26px; font-weight: 800; letter-spacing: .5px; display: block; }
+  .brand span { font-size: 16px; font-weight: 700; color: var(--blue); letter-spacing: 2px; }
+  .page { right: 72px; top: 76px; display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 800; color: var(--blue); background: var(--blue-xl);
+    border: 2px solid var(--blue-l); padding: 6px 18px 6px 10px; border-radius: 30px; letter-spacing: 1px; }
+  .page img { height: 30px; }
+  .credit { left: 72px; top: 1282px; font-size: 22px; color: var(--gray); font-weight: 600; }
+  .credit b { color: var(--navy); font-weight: 800; }
+  .swipe { right: 72px; top: 1282px; font-size: 22px; font-weight: 800; color: var(--blue); }
+  .lock { left: 72px; right: 72px; top: 1132px; height: 62px; border-radius: 18px; background: var(--blue-xl); border: 2px dashed #a9c2f5;
+    display: flex; align-items: center; gap: 14px; padding: 0 22px; font-size: 23px; font-weight: 600; color: var(--gray); }
+  .lock b { color: var(--navy); font-weight: 800; }
+  .lock .c { margin-left: auto; background: var(--blue); color: #fff; font-weight: 800; padding: 7px 16px; border-radius: 14px; white-space: nowrap; font-size: 21px; }
+
+  .content { left: 72px; top: 178px; width: 936px; }
+  .chip { display: inline-block; font-size: 21px; font-weight: 800; letter-spacing: 2px; color: var(--blue);
+    background: var(--blue-xl); border: 2px solid var(--blue-l); padding: 9px 18px; border-radius: 30px; }
+  h1 { font-size: 92px; line-height: 1.02; font-weight: 900; letter-spacing: -2px; }
+  h2 { font-size: 60px; line-height: 1.06; font-weight: 900; letter-spacing: -1.5px; margin-top: 18px; }
+  .blue { color: var(--blue); }
+  .muted { color: var(--gray); }
+  .card { background: #fff; border: 2px solid var(--line); border-radius: 24px; box-shadow: 0 12px 34px rgba(11,27,63,.07); }
+  .tip { background: var(--blue); color: #fff; border-radius: 22px; padding: 20px 26px; font-size: 25px; font-weight: 600; line-height: 1.35;
+    box-shadow: 0 14px 36px rgba(37,99,235,.28); }
+  .tip b { font-weight: 900; }
+  .label { font-size: 19px; font-weight: 800; letter-spacing: 2px; color: var(--blue); }
+  .tag { display: inline-block; font-size: 16px; font-weight: 800; letter-spacing: 1px; padding: 3px 10px; border-radius: 10px; background: var(--blue-xl); color: var(--blue); vertical-align: 3px; }
+  .tag.ai { background: var(--blue); color: #fff; }
+
+  /* 1 · cover */
+  .photo-bg { border-radius: 50%; background: linear-gradient(160deg, #3b82f6, #1d4ed8); }
+  .photo { -webkit-mask-image: linear-gradient(to bottom, #000 82%, transparent 99%); mask-image: linear-gradient(to bottom, #000 82%, transparent 99%); }
+  .logo-badge { background: #fff; border-radius: 28px; padding: 18px 20px; box-shadow: 0 18px 44px rgba(11,27,63,.16); border: 2px solid var(--line); }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 470px; }
+  .stat { padding: 14px 18px; }
+  .stat b { display: block; font-size: 34px; font-weight: 900; color: var(--blue); line-height: 1.05; }
+  .stat span { font-size: 17px; font-weight: 600; color: var(--gray); }
+
+  /* 2 · comparison table */
+  table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .cmp { overflow: hidden; padding: 0; }
+  .cmp th { background: var(--blue-xl); font-size: 18px; letter-spacing: 2px; color: var(--blue); text-align: left; padding: 14px 22px; font-weight: 800; }
+  .cmp td { font-size: 22px; font-weight: 700; padding: 0 22px; height: 43px; border-top: 1.5px solid var(--line); }
+  .cmp tr:nth-child(even) td { background: #f8faff; }
+  .cmp td.p { color: #b42318; font-weight: 800; text-decoration: line-through; text-decoration-thickness: 2px; text-decoration-color: rgba(180,35,24,.45); }
+  .cmp td.k { text-align: center; width: 150px; }
+  .tick { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--green); color: #fff; font-size: 17px; font-weight: 900; }
+  .cmp tr.total td { height: 74px; background: var(--navy); color: #fff; font-size: 26px; font-weight: 900; border: none; }
+  .cmp tr.total td.p { color: #ff8a80; text-decoration-color: rgba(255,138,128,.6); }
+  .cmp tr.total td.k { color: #9ef0b5; font-size: 30px; }
+
+  /* 3 · structure */
+  .agency { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #fff; border-radius: 26px; padding: 22px 30px; text-align: center; box-shadow: 0 18px 44px rgba(37,99,235,.3); }
+  .agency b { font-size: 34px; font-weight: 900; display: block; }
+  .agency span { font-size: 21px; font-weight: 600; opacity: .9; }
+  .subs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .sub { padding: 18px 18px; }
+  .sub small { font-size: 16px; font-weight: 800; letter-spacing: 2px; color: var(--blue); }
+  .sub b { display: block; font-size: 26px; font-weight: 800; margin: 6px 0 8px; }
+  .sub p { font-size: 19px; font-weight: 600; color: var(--gray); line-height: 1.35; }
+  .levels .card { padding: 16px 22px; margin-top: 14px; font-size: 21px; font-weight: 600; color: var(--gray); line-height: 1.4; }
+  .levels .card b { color: var(--navy); }
+
+  /* 4 · features */
+  .feats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .feat { padding: 16px 18px; display: flex; gap: 14px; height: 122px; }
+  .feat i { font-style: normal; font-size: 40px; line-height: 1; }
+  .feat b { font-size: 25px; font-weight: 800; display: block; margin-bottom: 4px; }
+  .feat p { font-size: 18px; font-weight: 600; color: var(--gray); line-height: 1.3; }
+
+  /* 5 · pricing */
+  .plan { display: flex; align-items: center; gap: 20px; padding: 16px 24px; margin-bottom: 12px; }
+  .plan .nm { width: 210px; }
+  .plan .nm b { font-size: 30px; font-weight: 900; display: block; }
+  .plan .nm span { font-size: 26px; font-weight: 900; color: var(--blue); }
+  .plan .nm span small { font-size: 17px; color: var(--gray); font-weight: 700; }
+  .plan p { flex: 1; font-size: 20px; font-weight: 600; color: var(--gray); line-height: 1.35; }
+  .plan p b { color: var(--navy); }
+  .plan.on { border-color: var(--blue); border-width: 3px; box-shadow: 0 14px 36px rgba(37,99,235,.18); }
+  .usage { padding: 16px 24px; }
+  .usage .row { display: flex; justify-content: space-between; font-size: 21px; font-weight: 600; color: var(--gray); padding: 7px 0; border-top: 1.5px solid var(--line); }
+  .usage .row:first-of-type { border-top: none; }
+  .usage .row b { color: var(--navy); font-weight: 800; }
+
+  /* 6 · ways */
+  .way { display: flex; align-items: center; gap: 18px; padding: 0 22px; height: 70px; margin-bottom: 9px; }
+  .way .n { width: 46px; height: 46px; border-radius: 50%; background: var(--blue-xl); color: var(--blue); display: grid; place-items: center; font-size: 22px; font-weight: 900; flex: none; }
+  .way.top .n { background: var(--blue); color: #fff; }
+  .way .t { flex: 1; font-size: 25px; font-weight: 800; }
+  .way .t span { font-size: 18px; font-weight: 600; color: var(--gray); margin-left: 8px; }
+  .way .v { font-size: 21px; font-weight: 900; color: var(--blue); background: var(--blue-xl); padding: 7px 14px; border-radius: 12px; white-space: nowrap; }
+
+  /* 7 · niches */
+  .niche { margin-bottom: 18px; }
+  .niche .row { display: flex; justify-content: space-between; align-items: baseline; font-size: 25px; font-weight: 800; margin-bottom: 6px; }
+  .niche .row span { color: var(--blue); }
+  .niche .row em { font-style: normal; font-size: 18px; font-weight: 600; color: var(--gray); margin-left: 10px; }
+  .bar { height: 14px; border-radius: 7px; background: var(--blue-xl); overflow: hidden; }
+  .bar i { display: block; height: 100%; border-radius: 7px; background: linear-gradient(90deg, #60a5fa, var(--blue)); }
+  .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .duo .card { padding: 16px 20px; font-size: 20px; font-weight: 600; color: var(--gray); line-height: 1.35; }
+
+  /* 8 · roadmap */
+  .wk { display: flex; align-items: center; gap: 16px; padding: 12px 20px; margin-bottom: 10px; }
+  .wk small { width: 76px; font-size: 18px; font-weight: 900; letter-spacing: 1px; color: #fff; background: var(--blue); border-radius: 10px; text-align: center; padding: 6px 0; flex: none; }
+  .wk div { font-size: 22px; font-weight: 800; }
+  .wk div span { display: block; font-size: 18px; font-weight: 600; color: var(--gray); }
+  .months { display: flex; gap: 12px; }
+  .month { flex: 1; padding: 14px 16px; }
+  .month small { font-size: 16px; font-weight: 800; letter-spacing: 2px; color: var(--blue); }
+  .month b { display: block; font-size: 22px; font-weight: 800; }
+  .month.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .month.on small { color: #cfe0ff; }
+
+  /* 9 · CTA */
+  .inside { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; }
+  .inside div { display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 700; }
+  .inside div::before { content: "✓"; width: 32px; height: 32px; flex: none; border-radius: 50%; background: var(--blue); color: #fff;
+    display: grid; place-items: center; font-size: 17px; font-weight: 900; }
+  .comment { border: 3px solid var(--blue); border-radius: 28px; padding: 14px 14px 14px 22px; display: flex; align-items: center; gap: 16px; background: #fff;
+    box-shadow: 0 18px 46px rgba(37,99,235,.25); }
+  .comment .av { width: 52px; height: 52px; border-radius: 50%; background: var(--blue-l); display: grid; place-items: center; font-size: 26px; flex: none; }
+  .comment .txt { flex: 1; font-size: 48px; font-weight: 900; letter-spacing: 2px; }
+  .comment .txt::after { content: ""; display: inline-block; width: 4px; height: 46px; background: var(--blue); margin-left: 6px; vertical-align: -6px; }
+  .comment .send { background: var(--blue); color: #fff; font-size: 24px; font-weight: 800; padding: 16px 22px; border-radius: 20px; }
+</style>
+</head>
+<body>
+  <!-- shared background that runs across all nine slides -->
+  <div class="abs dots"></div>
+  <div class="abs blob" style="width:900px;height:900px;left:630px;top:-260px"></div>
+  <div class="abs blob" style="width:820px;height:820px;left:1750px;top:700px"></div>
+  <div class="abs blob" style="width:900px;height:900px;left:2830px;top:-300px"></div>
+  <div class="abs blob" style="width:820px;height:820px;left:3910px;top:680px"></div>
+  <div class="abs blob" style="width:900px;height:900px;left:4990px;top:-260px"></div>
+  <div class="abs blob" style="width:820px;height:820px;left:6070px;top:700px"></div>
+  <div class="abs blob" style="width:900px;height:900px;left:7150px;top:-300px"></div>
+  <div class="abs blob" style="width:820px;height:820px;left:8230px;top:680px"></div>
+  <div class="abs journey"></div>
+
+  <!-- ===================== 1 · COVER ===================== -->
+  <div class="abs slide clip" style="left:0">
+    <div class="abs photo-bg" style="width:620px;height:620px;left:500px;top:600px"></div>
+    <img class="abs photo" src="assets/mehrooz-cutout.png" style="left:430px;top:535px;width:740px">
+  </div>
+  <div class="abs slide" data-n="1">
+    <div class="abs content">
+      <span class="chip">THE COMPLETE GHL GUIDE · 2026</span>
+      <h1 style="margin-top:28px">Become a<br><span class="blue">GoHighLevel</span><br>Expert</h1>
+      <p style="font-size:34px;font-weight:600;color:var(--gray);margin-top:22px;line-height:1.3">&amp; land clients<br>on <b style="color:var(--navy)">autopilot</b></p>
+    </div>
+    <div class="abs logo-badge" style="left:800px;top:420px"><img src="assets/highlevel-logo.png" style="width:170px;display:block"></div>
+    <div class="abs stats" style="left:72px;top:790px">
+      <div class="card stat"><b>60,000+</b><span>agencies use HighLevel</span></div>
+      <div class="card stat"><b>1.4M</b><span>businesses on it</span></div>
+      <div class="card stat"><b>529K+</b><span>live websites built</span></div>
+      <div class="card stat"><b>40%</b><span>recurring commission</span></div>
+    </div>
+    <div class="abs card" style="left:72px;top:1050px;padding:16px 22px;font-size:24px;font-weight:800;color:var(--blue)">💸 $1,612/mo of tools → $97. Swipe →</div>
+  </div>
+
+  <!-- ===================== 2 · COMPARISON ===================== -->
+  <div class="abs slide" data-n="2">
+    <div class="abs content">
+      <span class="chip">01 · WHY AGENCIES SWITCH</span>
+      <h2>15 tools → <span class="blue">1 platform</span></h2>
+      <div class="card cmp" style="margin-top:24px">
+        <table>
+          <tr><th>FEATURE</th><th>OTHER TOOLS</th><th style="text-align:center"><img src="assets/highlevel-mark.png" style="height:26px;vertical-align:-6px"> GHL</th></tr>
+          <tr><td>CRM &amp; pipeline management</td><td class="p">$99/mo</td><td class="k"><span class="tick">✓</span></td></tr>
+          <tr><td>Unlimited sales funnels</td><td class="p">$297/mo</td><td class="k"><span class="tick">✓</span></td></tr>
+          <tr><td>Website builder</td><td class="p">$29/mo</td><td class="k"><span class="tick">✓</span></td></tr>
+          <tr><td>Surveys &amp; forms</td><td class="p">$49/mo</td><td class="k"><span class="tick">✓</span></td></tr>
+          <tr><td>Email marketing</td><td class="p">$99/mo</td><td class="k"><span class="tick">✓</span></td></tr>
+          <tr><td>2-way SMS marketing</td><td class="p">$99/mo</td><td class="k"><span class="tick">✓</span></td></tr>
+          <tr><td>Booking &amp; appointments</td><td class="p">$29/mo</td><td class="k"><span class="tick">✓</span></td></tr>
+          <tr><td>Workflow automations</td><td class="p">$169/mo</td><td class="k"><span class="tick">✓</span></td></tr>
+          <tr><td>Courses / products</td><td class="p">$99/mo</td><td class="k"><span class="tick">✓</span></td></tr>
+          <tr><td>Call tracking</td><td class="p">$49/mo</td><td class="k"><span class="tick">✓</span></td></tr>
+          <tr><td>Reputation management</td><td class="p">$159/mo</td><td class="k"><span class="tick">✓</span></td></tr>
+          <tr><td>Tracking &amp; analytics</td><td class="p">$299/mo</td><td class="k"><span class="tick">✓</span></td></tr>
+          <tr><td>Communities</td><td class="p">$89/mo</td><td class="k"><span class="tick">✓</span></td></tr>
+          <tr><td>Document signing</td><td class="p">$47/mo</td><td class="k"><span class="tick">✓</span></td></tr>
+          <tr><td>Branded mobile app</td><td style="font-size:18px;color:var(--gray)">Unique to GHL</td><td class="k"><span class="tick">✓</span></td></tr>
+          <tr class="total"><td>Overall price</td><td class="p">$1,612/mo</td><td class="k">$97/mo</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== 3 · HOW IT WORKS ===================== -->
+  <div class="abs slide" data-n="3" data-lock="all <b>27 features</b> explained by category">
+    <div class="abs content">
+      <span class="chip">02 · HOW GHL WORKS</span>
+      <h2>Master the <span class="blue">2 levels</span></h2>
+      <div class="agency" style="margin-top:28px"><b>YOUR AGENCY ACCOUNT</b><span>Snapshots · Billing · SaaS · White-label · Team</span></div>
+      <div style="display:flex;justify-content:space-around;padding:0 120px;height:34px">
+        <div style="width:3px;background:var(--blue-l)"></div><div style="width:3px;background:var(--blue-l)"></div><div style="width:3px;background:var(--blue-l)"></div>
+      </div>
+      <div class="subs">
+        <div class="card sub"><small>SUB-ACCOUNT 1</small><b>🦷 Dental clinic</b><p>CRM · Funnels<br>Workflows · AI<br>Reviews · Calendar</p></div>
+        <div class="card sub"><small>SUB-ACCOUNT 2</small><b>🏠 Roofing co.</b><p>Own contacts<br>Own phone number<br>Own pipelines</p></div>
+        <div class="card sub"><small>SUB-ACCOUNT 3</small><b>💆 Med spa</b><p>Deployed from<br>a Snapshot<br>in minutes</p></div>
+      </div>
+      <div class="levels">
+        <div class="card"><b>Agency level</b> = your command centre: create client accounts, build &amp; push Snapshots, white-label, billing, SaaS Mode.</div>
+        <div class="card"><b>Sub-account level</b> = each client's business: contacts, inbox, pipelines, calendars, funnels, workflows, AI agents.</div>
+      </div>
+      <div class="tip" style="margin-top:16px"><b>Expert insight:</b> serve one niche and reuse one Snapshot for every new client — a long build becomes a short deployment.</div>
+    </div>
+  </div>
+
+  <!-- ===================== 4 · FEATURES ===================== -->
+  <div class="abs slide" data-n="4" data-lock="the <b>8 core workflows</b> every client needs">
+    <div class="abs content">
+      <span class="chip">03 · FEATURES THAT PAY</span>
+      <h2>What clients pay you <span class="blue">to set up</span></h2>
+      <div class="feats" style="margin-top:26px">
+        <div class="card feat"><i>💬</i><div><b>Unified inbox</b><p>SMS, email, calls, FB, IG, WhatsApp &amp; chat in one place</p></div></div>
+        <div class="card feat"><i>📅</i><div><b>Calendars</b><p>Round-robin booking + reminders that cut no-shows</p></div></div>
+        <div class="card feat"><i>📞</i><div><b>LC Phone</b><p>Call tracking, IVR &amp; missed-call text-back</p></div></div>
+        <div class="card feat"><i>🧲</i><div><b>Funnels &amp; sites</b><p>A/B tests, order forms, upsells, blogs</p></div></div>
+        <div class="card feat"><i>⭐</i><div><b>Reputation</b><p>Auto review requests + Google review replies</p></div></div>
+        <div class="card feat"><i>⚙️</i><div><b>Workflows</b><p>Triggers + actions — the heart of GHL</p></div></div>
+        <div class="card feat" style="border-color:var(--blue)"><i>🤖</i><div><b>Conversation AI <span class="tag ai">2026</span></b><p>Replies on SMS, chat &amp; DMs, books 24/7</p></div></div>
+        <div class="card feat" style="border-color:var(--blue)"><i>🎙️</i><div><b>Voice AI <span class="tag ai">2026</span></b><p>AI answers calls, qualifies &amp; books</p></div></div>
+      </div>
+      <div class="tip" style="margin-top:18px">Owners don't buy software — they buy <b>booked appointments</b>. Sell the outcome.</div>
+    </div>
+  </div>
+
+  <!-- ===================== 5 · PRICING ===================== -->
+  <div class="abs slide" data-n="5" data-lock="the free <b>GHL training path</b>">
+    <div class="abs content">
+      <span class="chip">04 · PRICING &amp; COSTS</span>
+      <h2>Which plan should <span class="blue">you start on?</span></h2>
+      <div style="margin-top:24px">
+        <div class="card plan on"><div class="nm"><b>Starter</b><span>$97<small>/mo</small></span></div><p><b>3 sub-accounts</b> · all core features<br>Best for: learning + first 1–2 clients</p><span class="tag ai">START HERE</span></div>
+        <div class="card plan"><div class="nm"><b>Unlimited</b><span>$297<small>/mo</small></span></div><p><b>Unlimited sub-accounts</b> · white-label app<br>Best for: 3+ paying clients</p></div>
+        <div class="card plan"><div class="nm"><b>Agency Pro</b><span>$497<small>/mo</small></span></div><p><b>SaaS Mode</b> · rebilling with markup<br>Best for: selling GHL as your own software</p></div>
+      </div>
+      <div class="card usage" style="margin-top:6px">
+        <div class="label" style="margin-bottom:6px">USAGE COSTS · PASS THESE TO CLIENTS</div>
+        <div class="row">Local phone number<b>$1.15/mo</b></div>
+        <div class="row">SMS (US/Canada)<b>$0.00747/segment</b></div>
+        <div class="row">Email<b>$0.675 per 1,000</b></div>
+        <div class="row">AI Employee (per sub-account)<b>$50–$97/mo</b></div>
+        <div class="row">Voice AI pay-per-use<b>≈ $0.163/min</b></div>
+      </div>
+      <div class="tip" style="margin-top:14px">14-day free trial on every plan. Upgrade only after <b>client #3</b> pays for it.</div>
+    </div>
+  </div>
+
+  <!-- ===================== 6 · 10 WAYS TO EARN ===================== -->
+  <div class="abs slide" data-n="6" data-lock="the <b>income calculator</b> + winning combo">
+    <div class="abs content">
+      <span class="chip">05 · MAKE MONEY</span>
+      <h2>10 ways GHL experts <span class="blue">get paid</span></h2>
+      <div style="margin-top:24px">
+        <div class="card way top"><div class="n">1</div><div class="t">Done-for-you setups</div><div class="v">$300–$1,200</div></div>
+        <div class="card way top"><div class="n">2</div><div class="t">Monthly retainers</div><div class="v">$300–$1,500/mo</div></div>
+        <div class="card way top"><div class="n">3</div><div class="t">AI Employee / Voice AI</div><div class="v">from $150</div></div>
+        <div class="card way"><div class="n">4</div><div class="t">SaaS Mode reselling</div><div class="v">$97–$497/mo</div></div>
+        <div class="card way"><div class="n">5</div><div class="t">Upwork &amp; Fiverr<span>fastest first $</span></div><div class="v">$25–$75/hr</div></div>
+        <div class="card way"><div class="n">6</div><div class="t">Affiliate program<span>+5% tier 2</span></div><div class="v">40% recurring</div></div>
+        <div class="card way"><div class="n">7</div><div class="t">Selling niche Snapshots</div><div class="v">one-time / sub</div></div>
+        <div class="card way"><div class="n">8</div><div class="t">White-label agency support</div><div class="v">steady volume</div></div>
+        <div class="card way"><div class="n">9</div><div class="t">1:1 training &amp; audits</div><div class="v">e.g. $300</div></div>
+        <div class="card way"><div class="n">10</div><div class="t">Custom code &amp; integrations</div><div class="v">higher hourly</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== 7 · BEST CLIENTS ===================== -->
+  <div class="abs slide" data-n="7" data-lock="the full <b>10-niche scorecard</b>">
+    <div class="abs content">
+      <span class="chip">06 · WHO PAYS MOST</span>
+      <h2>Best clients <span class="blue">to target</span></h2>
+      <div class="card" style="margin-top:24px;padding:24px 28px 8px">
+        <div class="niche"><div class="row"><div>💆 Med spas<em>one client = thousands/yr</em></div><span>9.5</span></div><div class="bar"><i style="width:95%"></i></div></div>
+        <div class="niche"><div class="row"><div>🦷 Dentists<em>implants &amp; Invisalign = high-ticket</em></div><span>9.2</span></div><div class="bar"><i style="width:92%"></i></div></div>
+        <div class="niche"><div class="row"><div>🏠 Roofing, HVAC, solar<em>missed call = lost job</em></div><span>9.0</span></div><div class="bar"><i style="width:90%"></i></div></div>
+        <div class="niche"><div class="row"><div>⚖️ Law firms<em>one case pays for a year</em></div><span>8.8</span></div><div class="bar"><i style="width:88%"></i></div></div>
+        <div class="niche"><div class="row"><div>🎓 Coaches<em>replaces Kajabi + ClickFunnels</em></div><span>8.5</span></div><div class="bar"><i style="width:85%"></i></div></div>
+      </div>
+      <div class="duo" style="margin-top:14px">
+        <div class="card"><div class="label" style="margin-bottom:6px">🌍 TARGET</div>USA · UK · Canada · Australia — where HighLevel is used most</div>
+        <div class="card"><div class="label" style="margin-bottom:6px;color:#b42318">✗ AVOID EARLY</div>Tiny budgets, "cheap website" clients, pure e-commerce</div>
+      </div>
+      <div class="tip" style="margin-top:14px"><b>Pick ONE niche for 90 days:</b> one Snapshot, one case study, one message, one ad.</div>
+    </div>
+  </div>
+
+  <!-- ===================== 8 · 90-DAY ROADMAP ===================== -->
+  <div class="abs slide" data-n="8" data-lock="the <b>week-by-week 90-day checklist</b>">
+    <div class="abs content">
+      <span class="chip">07 · 90-DAY ROADMAP</span>
+      <h2>From learner to <span class="blue">paid expert</span></h2>
+      <div class="months" style="margin-top:24px">
+        <div class="card month on"><small>MONTH 1</small><b>Learn &amp; build</b></div>
+        <div class="card month"><small>MONTH 2</small><b>Brand &amp; first clients</b></div>
+        <div class="card month"><small>MONTH 3</small><b>Scale &amp; automate</b></div>
+      </div>
+      <div style="margin-top:16px">
+        <div class="card wk"><small>WK 1</small><div>Foundations<span>Free trial, CRM, pipelines, calendars</span></div></div>
+        <div class="card wk"><small>WK 2</small><div>Funnels &amp; websites<span>Lead-gen funnel + 5-page site for your portfolio</span></div></div>
+        <div class="card wk"><small>WK 3</small><div>Workflows — the money skill<span>8 core automations, A2P &amp; email deliverability</span></div></div>
+        <div class="card wk"><small>WK 4</small><div>AI + your first Snapshot<span>Conversation AI, Voice AI, niche Snapshot + demo video</span></div></div>
+      </div>
+      <div class="card" style="margin-top:6px;padding:18px 22px 12px">
+        <div class="label">TARGET INCOME · A REALISTIC GOAL, NOT A GUARANTEE</div>
+        <svg width="890" height="170" viewBox="0 0 890 170" style="display:block;margin-top:8px">
+          <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2563eb" stop-opacity=".22"/><stop offset="1" stop-color="#2563eb" stop-opacity="0"/></linearGradient></defs>
+          <g stroke="#e3eaf7" stroke-width="2"><line x1="40" y1="20" x2="880" y2="20"/><line x1="40" y1="70" x2="880" y2="70"/><line x1="40" y1="120" x2="880" y2="120"/></g>
+          <g font-family="Inter" font-size="16" font-weight="700" fill="#5b6b86"><text x="0" y="26">$3k</text><text x="0" y="76">$2k</text><text x="0" y="126">$1k</text><text x="0" y="170">$0</text>
+            <text x="180" y="168">Wk 4</text><text x="460" y="168">Wk 8</text><text x="830" y="168">Wk 12</text></g>
+          <path d="M40 160 L180 154 L250 150 L320 135 L460 105 L600 75 L860 45 L860 160 Z" fill="url(#g)"/>
+          <path d="M40 160 L180 154 L250 150 L320 135 L460 105 L600 75 L860 45" fill="none" stroke="#2563eb" stroke-width="5" stroke-linejoin="round"/>
+          <g fill="#fff" stroke="#2563eb" stroke-width="4"><circle cx="250" cy="150" r="8"/><circle cx="460" cy="105" r="8"/><circle cx="860" cy="45" r="9"/></g>
+          <g font-family="Inter" font-size="18" font-weight="800" fill="#0b1b3f"><text x="215" y="132">1st gig</text><text x="405" y="88">1st retainer</text><text x="852" y="30" text-anchor="end">~$2.5k MRR</text></g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== 9 · CTA ===================== -->
+  <div class="abs slide clip" style="left:8640px">
+    <div class="abs photo-bg" style="width:520px;height:520px;left:600px;top:760px"></div>
+    <img class="abs photo" src="assets/mehrooz-cutout.png" style="left:540px;top:690px;width:600px">
+  </div>
+  <div class="abs slide" data-n="9">
+    <div class="abs content">
+      <span class="chip">FREE · THE FULL GUIDE</span>
+      <h2 style="font-size:64px">Want the <span class="blue">complete</span><br>GHL expert guide?</h2>
+      <div class="inside" style="margin-top:28px">
+        <div>Every GHL feature explained</div><div>Pricing + usage costs</div>
+        <div>10 ways to earn, ranked</div><div>Interactive income calculator</div>
+        <div>Best clients by niche</div><div>90-day checklist</div>
+        <div>LinkedIn, IG &amp; YouTube bios</div><div>Fiverr gigs + package prices</div>
+        <div>Upwork profile &amp; proposal</div><div>Lead-gen machine in GHL</div>
+        <div>Cold email &amp; DM scripts</div><div>Mistakes to avoid</div>
+      </div>
+    </div>
+    <div class="abs" style="left:72px;top:800px;width:540px">
+      <p style="font-size:28px;font-weight:800;margin-bottom:14px">Comment below 👇</p>
+      <div class="comment"><div class="av">💬</div><div class="txt">GHL</div><div class="send">Post</div></div>
+      <p style="font-size:24px;font-weight:600;color:var(--gray);margin-top:18px;line-height:1.4">…and I'll send you the <b style="color:var(--blue)">full guide</b> in your DMs — <b style="color:var(--navy)">free</b>.</p>
+    </div>
+    <div class="abs logo-badge" style="left:860px;top:176px;padding:12px 14px;border-radius:22px"><img src="assets/highlevel-logo.png" style="width:110px;display:block"></div>
+  </div>
+
+<script>
+  // shared chrome: position slides, add brand / page / credit / swipe / teaser strip and seam arrows
+  const N = 9;
+  document.querySelectorAll('.slide[data-n]').forEach(s => {
+    const n = +s.dataset.n;
+    s.style.left = (n - 1) * 1080 + 'px';
+    s.insertAdjacentHTML('afterbegin', `
+      <div class="abs brand"><img src="assets/permanent-seo-logo.png"><div><b>PERMANENT SEO</b><span>SEO AGENCY</span></div></div>
+      <div class="abs page"><img src="assets/highlevel-mark.png">${String(n).padStart(2, '0')} / ${String(N).padStart(2, '0')}</div>
+      <div class="abs credit"><b>M Mehrooz Shafique</b> · Co-Founder of Permanent SEO</div>
+      ${n < N ? '<div class="abs swipe">Swipe →</div>' : ''}
+      ${s.dataset.lock ? `<div class="abs lock">🔒 <span>In the full guide: ${s.dataset.lock}</span><span class="c">Comment GHL</span></div>` : ''}`);
+  });
+  for (let k = 1; k < N; k++) document.body.insertAdjacentHTML('beforeend', `<div class="abs seam" style="left:${k * 1080 - 46}px">→</div>`);
+</script>
+</body>
+</html>
