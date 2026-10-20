@@ -1,0 +1,242 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>GHL Carousel</title>
+<style>
+  /* One 5400x1350 strip = five 1080x1350 slides. Shapes that cross x = 1080·n continue on the next slide. */
+  :root {
+    --blue: #2563eb; --blue-d: #1d4ed8; --blue-l: #dbe7ff; --blue-xl: #eef4ff;
+    --navy: #0b1b3f; --gray: #5b6b86; --line: #e3eaf7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 5400px; height: 1350px; background: #fff; }
+  body { position: relative; overflow: hidden; font-family: Inter, "Noto Color Emoji", sans-serif; color: var(--navy); }
+  .abs { position: absolute; }
+
+  /* background */
+  .dots { inset: 0; background-image: radial-gradient(#c9d8f5 1.6px, transparent 1.6px); background-size: 36px 36px; opacity: .55; }
+  .blob { border-radius: 50%; background: radial-gradient(circle, #e3ecff 0%, #eef4ff 55%, rgba(238,244,255,0) 72%); }
+  .journey { left: 0; top: 1250px; width: 5400px; height: 4px; background: linear-gradient(90deg, var(--blue-l), var(--blue) 50%, var(--blue-l)); }
+  .seam { width: 92px; height: 92px; border-radius: 50%; background: var(--blue); top: 1206px; display: grid; place-items: center;
+    box-shadow: 0 10px 30px rgba(37,99,235,.35), 0 0 0 10px #fff; color: #fff; font-size: 44px; font-weight: 800; }
+
+  /* slide chrome */
+  .slide { top: 0; width: 1080px; height: 1350px; }
+  .clip { overflow: hidden; }
+  .brand { left: 72px; top: 64px; display: flex; align-items: center; gap: 16px; }
+  .brand img { width: 64px; height: 64px; border-radius: 16px; background: var(--blue); box-shadow: 0 8px 20px rgba(37,99,235,.3); }
+  .brand b { font-size: 26px; font-weight: 800; letter-spacing: .5px; display: block; }
+  .brand span { font-size: 16px; font-weight: 700; color: var(--blue); letter-spacing: 2px; }
+  .page { right: 72px; top: 76px; font-size: 22px; font-weight: 800; color: var(--blue); background: var(--blue-xl);
+    border: 2px solid var(--blue-l); padding: 8px 18px; border-radius: 30px; letter-spacing: 1px; }
+  .credit { left: 72px; top: 1282px; font-size: 22px; color: var(--gray); font-weight: 600; }
+  .credit b { color: var(--navy); font-weight: 800; }
+  .swipe { right: 72px; top: 1282px; font-size: 22px; font-weight: 800; color: var(--blue); }
+
+  .chip { display: inline-block; font-size: 22px; font-weight: 800; letter-spacing: 2px; color: var(--blue);
+    background: var(--blue-xl); border: 2px solid var(--blue-l); padding: 10px 20px; border-radius: 30px; }
+  h1 { font-size: 92px; line-height: 1.02; font-weight: 900; letter-spacing: -2px; }
+  h2 { font-size: 68px; line-height: 1.06; font-weight: 900; letter-spacing: -1.5px; }
+  .blue { color: var(--blue); }
+  .card { background: #fff; border: 2px solid var(--line); border-radius: 28px; box-shadow: 0 14px 40px rgba(11,27,63,.07); }
+  .tip { background: var(--blue); color: #fff; border-radius: 26px; padding: 26px 32px; font-size: 28px; font-weight: 700; line-height: 1.35;
+    box-shadow: 0 16px 40px rgba(37,99,235,.3); }
+  .tip b { font-weight: 900; }
+
+  /* slide 1 */
+  .s1-photo-bg { width: 640px; height: 640px; border-radius: 50%; background: linear-gradient(160deg, #3b82f6, #1d4ed8); left: 470px; top: 560px; }
+  .s1-photo { left: 400px; top: 503px; width: 760px; }
+  .s1-photo, .s5-photo { -webkit-mask-image: linear-gradient(to bottom, #000 82%, transparent 99%); mask-image: linear-gradient(to bottom, #000 82%, transparent 99%); }
+  .stat { background: #fff; border: 2px solid var(--line); border-radius: 22px; padding: 18px 24px; box-shadow: 0 10px 30px rgba(11,27,63,.08); }
+  .stat b { display: block; font-size: 40px; font-weight: 900; color: var(--blue); line-height: 1.05; }
+  .stat span { font-size: 20px; font-weight: 600; color: var(--gray); }
+
+  /* slide 2 */
+  .tools { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  .tool { height: 132px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; font-size: 24px; font-weight: 800; }
+  .tool i { font-style: normal; font-size: 46px; }
+  .arrow-down { width: 0; height: 0; border-left: 26px solid transparent; border-right: 26px solid transparent; border-top: 30px solid var(--blue); }
+  .ghl { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #fff; border-radius: 30px; padding: 30px 40px; display: flex; align-items: center; gap: 26px;
+    box-shadow: 0 20px 50px rgba(37,99,235,.35); }
+  .ghl .logo { width: 96px; height: 96px; border-radius: 24px; background: #fff; color: var(--blue); display: grid; place-items: center; font-size: 34px; font-weight: 900; }
+  .ghl b { font-size: 48px; font-weight: 900; display: block; }
+  .ghl span { font-size: 26px; font-weight: 600; opacity: .9; }
+  .lvl { display: flex; gap: 18px; align-items: stretch; }
+  .lvl .card { flex: 1; padding: 22px 26px; }
+  .lvl small { display: block; font-size: 18px; font-weight: 800; letter-spacing: 2px; color: var(--blue); margin-bottom: 6px; }
+  .lvl p { font-size: 24px; font-weight: 600; color: var(--gray); line-height: 1.3; }
+  .lvl p b { color: var(--navy); }
+
+  /* slide 3 */
+  .way { display: flex; align-items: center; gap: 24px; padding: 0 30px; height: 118px; }
+  .way .n { width: 64px; height: 64px; border-radius: 50%; background: var(--blue-xl); color: var(--blue); display: grid; place-items: center; font-size: 30px; font-weight: 900; flex: none; }
+  .way.top .n { background: var(--blue); color: #fff; }
+  .way .t { flex: 1; }
+  .way .t b { display: block; font-size: 32px; font-weight: 800; }
+  .way .t span { font-size: 21px; font-weight: 600; color: var(--gray); }
+  .way .v { font-size: 26px; font-weight: 900; color: var(--blue); background: var(--blue-xl); padding: 10px 18px; border-radius: 16px; white-space: nowrap; }
+
+  /* slide 4 */
+  .niche { margin-bottom: 26px; }
+  .niche .row { display: flex; justify-content: space-between; font-size: 30px; font-weight: 800; margin-bottom: 12px; }
+  .niche .row span { color: var(--blue); }
+  .bar { height: 22px; border-radius: 11px; background: var(--blue-xl); overflow: hidden; }
+  .bar i { display: block; height: 100%; border-radius: 11px; background: linear-gradient(90deg, #60a5fa, var(--blue)); }
+  .months { display: flex; align-items: center; gap: 12px; }
+  .month { flex: 1; text-align: center; padding: 20px 10px; }
+  .month small { display: block; font-size: 18px; font-weight: 800; letter-spacing: 2px; color: var(--blue); }
+  .month b { font-size: 25px; font-weight: 800; }
+  .month.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .month.on small { color: #cfe0ff; }
+  .chev { color: var(--blue); font-size: 34px; font-weight: 900; }
+
+  /* slide 5 */
+  .s5-photo-bg { width: 560px; height: 560px; border-radius: 50%; background: linear-gradient(160deg, #3b82f6, #1d4ed8); left: 630px; top: 640px; }
+  .s5-photo { left: 580px; top: 581px; width: 680px; }
+  .inside li { list-style: none; display: flex; align-items: center; gap: 16px; font-size: 27px; font-weight: 700; margin-bottom: 18px; }
+  .inside li::before { content: "✓"; width: 40px; height: 40px; flex: none; border-radius: 50%; background: var(--blue); color: #fff;
+    display: grid; place-items: center; font-size: 22px; font-weight: 900; }
+  .comment { border: 3px solid var(--blue); border-radius: 30px; padding: 18px 18px 18px 28px; display: flex; align-items: center; gap: 18px; background: #fff;
+    box-shadow: 0 18px 46px rgba(37,99,235,.25); }
+  .comment .av { width: 58px; height: 58px; border-radius: 50%; background: var(--blue-l); display: grid; place-items: center; font-size: 30px; flex: none; }
+  .comment .txt { flex: 1; font-size: 52px; font-weight: 900; color: var(--navy); letter-spacing: 2px; }
+  .comment .txt::after { content: ""; display: inline-block; width: 4px; height: 50px; background: var(--blue); margin-left: 6px; vertical-align: -6px; }
+  .comment .send { background: var(--blue); color: #fff; font-size: 26px; font-weight: 800; padding: 18px 26px; border-radius: 22px; }
+</style>
+</head>
+<body>
+  <!-- shared background that runs across all five slides -->
+  <div class="abs dots"></div>
+  <div class="abs blob" style="width:900px;height:900px;left:630px;top:-260px"></div>
+  <div class="abs blob" style="width:820px;height:820px;left:1750px;top:700px"></div>
+  <div class="abs blob" style="width:900px;height:900px;left:2830px;top:-300px"></div>
+  <div class="abs blob" style="width:820px;height:820px;left:3910px;top:680px"></div>
+  <div class="abs journey"></div>
+
+  <!-- ===================== SLIDE 1 · COVER ===================== -->
+  <div class="abs slide clip" style="left:0;height:1245px">
+    <div class="abs s1-photo-bg"></div>
+    <img class="abs s1-photo" src="assets/mehrooz-cutout.png">
+  </div>
+  <div class="abs slide" style="left:0">
+    <div class="abs brand"><img src="assets/permanent-seo-logo.png"><div><b>PERMANENT SEO</b><span>SEO AGENCY</span></div></div>
+    <div class="abs page">01 / 05</div>
+    <div class="abs" style="left:72px;top:230px;width:640px">
+      <span class="chip">GOHIGHLEVEL GUIDE</span>
+      <h1 style="margin-top:30px">Become a<br><span class="blue">GoHighLevel</span><br>Expert</h1>
+      <p style="font-size:36px;font-weight:600;color:var(--gray);margin-top:26px;line-height:1.3">&amp; land clients<br>on <b style="color:var(--navy)">autopilot</b></p>
+    </div>
+    <div class="abs stat" style="left:72px;top:820px"><b>60,000+</b><span>agencies use HighLevel</span></div>
+    <div class="abs stat" style="left:72px;top:960px"><b>1.4M</b><span>businesses on the platform</span></div>
+    <div class="abs stat" style="left:72px;top:1100px;padding:14px 22px"><b style="font-size:30px">40%</b><span>recurring affiliate commission</span></div>
+  </div>
+
+  <!-- ===================== SLIDE 2 · WHAT IS GHL ===================== -->
+  <div class="abs slide" style="left:1080px">
+    <div class="abs brand"><img src="assets/permanent-seo-logo.png"><div><b>PERMANENT SEO</b><span>SEO AGENCY</span></div></div>
+    <div class="abs page">02 / 05</div>
+    <div class="abs" style="left:72px;top:190px;width:936px">
+      <span class="chip">01 · WHAT IS GHL?</span>
+      <h2 style="margin-top:24px">One platform that<br>replaces <span class="blue">6–8 tools</span></h2>
+      <div class="tools" style="margin-top:40px">
+        <div class="card tool"><i>👥</i>CRM</div><div class="card tool"><i>🧲</i>Funnels</div>
+        <div class="card tool"><i>✉️</i>Email</div><div class="card tool"><i>📱</i>SMS</div>
+        <div class="card tool"><i>📅</i>Booking</div><div class="card tool"><i>⭐</i>Reviews</div>
+        <div class="card tool"><i>🗓️</i>Social</div><div class="card tool"><i>🎓</i>Courses</div>
+      </div>
+      <div style="display:flex;justify-content:center;margin:22px 0"><div class="arrow-down"></div></div>
+      <div class="ghl"><div class="logo">GHL</div><div><b>HighLevel</b><span>All-in-one system built for agencies</span></div></div>
+      <div class="lvl" style="margin-top:26px">
+        <div class="card"><small>AGENCY LEVEL</small><p><b>Your command centre:</b> clients, Snapshots, billing</p></div>
+        <div class="card"><small>SUB-ACCOUNT</small><p><b>Each client's business:</b> CRM, funnels, workflows</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== SLIDE 3 · WAYS TO EARN ===================== -->
+  <div class="abs slide" style="left:2160px">
+    <div class="abs brand"><img src="assets/permanent-seo-logo.png"><div><b>PERMANENT SEO</b><span>SEO AGENCY</span></div></div>
+    <div class="abs page">03 / 05</div>
+    <div class="abs" style="left:72px;top:190px;width:936px">
+      <span class="chip">02 · MAKE MONEY</span>
+      <h2 style="margin-top:24px">Top 5 ways GHL<br>experts <span class="blue">get paid</span></h2>
+      <div style="display:flex;flex-direction:column;gap:16px;margin-top:40px">
+        <div class="card way top"><div class="n">1</div><div class="t"><b>Done-for-you setups</b><span>CRM + funnel + workflows</span></div><div class="v">$300–$1,200</div></div>
+        <div class="card way top"><div class="n">2</div><div class="t"><b>Monthly retainers</b><span>Run the system for clients</span></div><div class="v">$300–$1,500/mo</div></div>
+        <div class="card way top"><div class="n">3</div><div class="t"><b>AI receptionists</b><span>Voice AI &amp; chat agents</span></div><div class="v">from $150</div></div>
+        <div class="card way"><div class="n">4</div><div class="t"><b>SaaS Mode reselling</b><span>Sell GHL as your own app</span></div><div class="v">$97–$497/mo</div></div>
+        <div class="card way"><div class="n">5</div><div class="t"><b>Affiliate program</b><span>Lifetime recurring payouts</span></div><div class="v">40% recurring</div></div>
+      </div>
+      <div class="tip" style="margin-top:30px"><b>Winning combo:</b> Freelance → turn clients into retainers → upsell AI agents → move to SaaS Mode</div>
+    </div>
+  </div>
+
+  <!-- ===================== SLIDE 4 · BEST CLIENTS ===================== -->
+  <div class="abs slide" style="left:3240px">
+    <div class="abs brand"><img src="assets/permanent-seo-logo.png"><div><b>PERMANENT SEO</b><span>SEO AGENCY</span></div></div>
+    <div class="abs page">04 / 05</div>
+    <div class="abs" style="left:72px;top:190px;width:936px">
+      <span class="chip">03 · WHO PAYS MOST</span>
+      <h2 style="margin-top:24px">Best clients<br>to <span class="blue">target</span></h2>
+      <div class="card" style="margin-top:40px;padding:36px 36px 12px">
+        <div class="niche"><div class="row">💆 Med spas &amp; aesthetics<span>9.5</span></div><div class="bar"><i style="width:95%"></i></div></div>
+        <div class="niche"><div class="row">🦷 Dentists &amp; orthodontists<span>9.2</span></div><div class="bar"><i style="width:92%"></i></div></div>
+        <div class="niche"><div class="row">🏠 Roofing, HVAC &amp; solar<span>9.0</span></div><div class="bar"><i style="width:90%"></i></div></div>
+        <div class="niche"><div class="row">⚖️ Law firms<span>8.8</span></div><div class="bar"><i style="width:88%"></i></div></div>
+        <div class="niche"><div class="row">🎓 Coaches &amp; consultants<span>8.5</span></div><div class="bar"><i style="width:85%"></i></div></div>
+      </div>
+      <div style="font-size:22px;font-weight:800;letter-spacing:2px;color:var(--blue);margin:34px 0 14px">YOUR 90-DAY PLAN · PICK ONE NICHE</div>
+      <div class="months">
+        <div class="card month on"><small>MONTH 1</small><b>Learn &amp; build</b></div><div class="chev">›</div>
+        <div class="card month"><small>MONTH 2</small><b>First clients</b></div><div class="chev">›</div>
+        <div class="card month"><small>MONTH 3</small><b>Scale up</b></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== SLIDE 5 · CTA ===================== -->
+  <div class="abs slide clip" style="left:4320px;height:1245px">
+    <div class="abs s5-photo-bg"></div>
+    <img class="abs s5-photo" src="assets/mehrooz-cutout.png">
+  </div>
+  <div class="abs slide" style="left:4320px">
+    <div class="abs brand"><img src="assets/permanent-seo-logo.png"><div><b>PERMANENT SEO</b><span>SEO AGENCY</span></div></div>
+    <div class="abs page">05 / 05</div>
+    <div class="abs" style="left:72px;top:190px;width:600px">
+      <span class="chip">FREE FULL GUIDE</span>
+      <h2 style="margin-top:24px;font-size:72px">Want the <span class="blue">full</span><br>GHL guide?</h2>
+      <ul class="inside" style="margin-top:34px">
+        <li>Every GHL feature explained</li>
+        <li>Pricing &amp; which plan to pick</li>
+        <li>10 ways to earn with GHL</li>
+        <li>Best clients + 90-day plan</li>
+        <li>Fiverr &amp; Upwork profiles</li>
+        <li>Lead-gen machine in GHL</li>
+      </ul>
+    </div>
+    <div class="abs" style="left:72px;top:870px;width:520px">
+      <p style="font-size:30px;font-weight:800;margin-bottom:16px">Comment below 👇</p>
+      <div class="comment"><div class="av">💬</div><div class="txt">GHL</div><div class="send">Post</div></div>
+      <p style="font-size:26px;font-weight:600;color:var(--gray);margin-top:22px;line-height:1.35">…and I'll send you the <b style="color:var(--blue)">full guide</b> in your DMs.</p>
+    </div>
+  </div>
+
+  <!-- seam connectors: half on each slide, so the swipe reads as one flow -->
+  <div class="abs seam" style="left:1034px">→</div>
+  <div class="abs seam" style="left:2114px">→</div>
+  <div class="abs seam" style="left:3194px">→</div>
+  <div class="abs seam" style="left:4274px">→</div>
+
+  <!-- footers -->
+  <div class="abs credit" style="left:72px;width:600px;background:rgba(255,255,255,.85);padding:2px 8px 2px 0"><b>M Mehrooz Shafique</b> · Co-Founder of Permanent SEO</div>
+  <div class="abs credit" style="left:1152px"><b>M Mehrooz Shafique</b> · Co-Founder of Permanent SEO</div>
+  <div class="abs credit" style="left:2232px"><b>M Mehrooz Shafique</b> · Co-Founder of Permanent SEO</div>
+  <div class="abs credit" style="left:3312px"><b>M Mehrooz Shafique</b> · Co-Founder of Permanent SEO</div>
+  <div class="abs credit" style="left:4752px"><b>M Mehrooz Shafique</b> · Co-Founder of Permanent SEO</div>
+  <div class="abs swipe" style="right:4392px">Swipe →</div>
+  <div class="abs swipe" style="right:3312px">Swipe →</div>
+  <div class="abs swipe" style="right:2232px">Swipe →</div>
+  <div class="abs swipe" style="right:1152px">Swipe →</div>
+</body>
+</html>
