@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>SEO Is Not Just Content</title>
+<style>
+  /* Design tokens: one accent, warm neutrals, 8pt spacing, type scale 92 / 28 / 24 / 19 / 16.5 / 15 */
+  :root {
+    --bg: #fafaf9; --surface: #ffffff; --ink: #0c0a09; --ink-2: #292524; --muted: #78716c; --line: #e7e5e4;
+    --chip: #f5f5f4; --accent: #e11d48; --accent-soft: #fff1f2; --accent-line: #fecdd3;
+    --display: "Inter Display", Inter, sans-serif; --sans: Inter, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1350px; }
+  body { position: relative; overflow: hidden; background: var(--bg); font-family: var(--sans); color: var(--ink); -webkit-font-smoothing: antialiased; }
+  svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+  /* background: faint grid fading out + soft accent glow */
+  .grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(12,10,9,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(12,10,9,.04) 1px, transparent 1px);
+    background-size: 48px 48px; -webkit-mask-image: radial-gradient(ellipse at 70% 0%, #000 0%, transparent 70%); }
+  .glow { position: absolute; width: 760px; height: 760px; right: -260px; top: -320px; border-radius: 50%; background: radial-gradient(circle, rgba(225,29,72,.12), rgba(225,29,72,0) 65%); }
+
+  .wrap { position: absolute; left: 64px; right: 64px; top: 56px; bottom: 0; display: flex; flex-direction: column; }
+
+  /* top bar */
+  .top { display: flex; justify-content: space-between; align-items: center; }
+  .eyebrow { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; letter-spacing: .14em; color: var(--ink-2); }
+  .eyebrow i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+  .brand { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 800; letter-spacing: .1em; }
+  .brand img { height: 22px; }
+
+  /* headline */
+  h1 { font-family: var(--display); font-weight: 800; font-size: 104px; line-height: .96; letter-spacing: -.045em; margin-top: 40px; }
+  h1 em { font-style: normal; color: var(--accent); }
+
+  /* myth vs reality */
+  .myth { margin-top: 32px; display: flex; flex-direction: column; gap: 14px; }
+  .myth .row { display: flex; align-items: center; gap: 12px; font-size: 24px; line-height: 1.3; }
+  .myth .row.a { color: var(--muted); font-weight: 500; }
+  .myth .row.b { color: var(--ink); font-weight: 700; }
+  .myth .row.b em { font-style: normal; color: var(--accent); }
+  .content-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border: 2px dashed #d6d3d1; border-radius: 12px; color: #a8a29e;
+    font-weight: 700; font-size: 20px; letter-spacing: .08em; text-decoration: line-through; text-decoration-color: var(--accent); text-decoration-thickness: 2.5px; }
+  .content-chip svg { width: 20px; height: 20px; }
+  .arrow { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; }
+  .arrow svg { width: 22px; height: 22px; stroke-width: 2.5; }
+
+  /* bento grid of the four layers */
+  .bento { margin-top: 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .card { background: var(--surface); border: 1.5px solid var(--line); border-radius: 28px; padding: 26px 26px 26px; display: flex; flex-direction: column;
+    box-shadow: 0 1px 2px rgba(12,10,9,.04), 0 12px 32px -12px rgba(12,10,9,.10); }
+  .card .head { display: flex; justify-content: space-between; align-items: flex-start; }
+  .ic { width: 48px; height: 48px; border-radius: 14px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; border: 1px solid var(--accent-line); }
+  .num { font-family: var(--display); font-size: 15px; font-weight: 700; letter-spacing: .14em; color: var(--muted); padding-top: 4px; }
+  .card h3 { font-family: var(--display); font-size: 28px; font-weight: 800; letter-spacing: -.02em; margin-top: 18px; }
+  .card p.tag { font-size: 18px; font-weight: 500; color: var(--muted); margin-top: 6px; line-height: 1.35; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .chips span { font-size: 16px; font-weight: 600; color: var(--ink-2); background: var(--chip); border: 1px solid var(--line); border-radius: 10px; padding: 6px 11px; }
+  .stat { margin-top: 14px; display: flex; align-items: center; gap: 10px; background: var(--ink); color: #fff; border-radius: 12px; padding: 10px 14px;
+    font-size: 15.5px; font-weight: 600; line-height: 1.3; }
+  .stat i { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex: none; }
+
+  /* layer 04 is the one that matters: inverted card */
+  .card.dark { background: var(--ink); border-color: var(--ink); box-shadow: 0 20px 44px -16px rgba(12,10,9,.45); }
+  .card.dark h3 { color: #fff; }
+  .card.dark p.tag { color: #a8a29e; }
+  .card.dark .num { color: #78716c; }
+  .card.dark .ic { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .card.dark .chips span { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.12); color: #e7e5e4; }
+  .card.dark .stat { background: #fff; color: var(--ink); }
+
+  /* footer */
+  .foot { margin-top: auto; margin-bottom: 40px; padding-top: 24px; border-top: 1.5px solid var(--line); display: flex; align-items: center; gap: 20px; }
+  .avatar { width: 68px; height: 68px; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 3px #fff, 0 6px 16px rgba(12,10,9,.18); }
+  .who b { display: block; font-family: var(--display); font-size: 22px; font-weight: 800; letter-spacing: -.01em; }
+  .who span { font-size: 16px; font-weight: 500; color: var(--muted); }
+  .mission { padding-left: 20px; border-left: 1.5px solid var(--line); font-size: 15.5px; font-weight: 500; color: var(--muted); line-height: 1.4; }
+  .mission b { color: var(--ink-2); font-weight: 700; }
+  .repost { margin-left: auto; display: flex; align-items: center; gap: 10px; background: var(--accent); color: #fff; font-size: 18px; font-weight: 700;
+    padding: 14px 22px; border-radius: 16px; box-shadow: 0 10px 24px -8px rgba(225,29,72,.55); }
+  .repost svg { width: 20px; height: 20px; stroke-width: 2.4; }
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="glow"></div>
+
+  <div class="wrap">
+    <div class="top">
+      <div class="eyebrow"><i></i>WHAT SEO LOOKS LIKE IN 2026</div>
+      <div class="brand"><img src="assets/logo-mark-dark.png" alt="">PERMANENT SEO</div>
+    </div>
+
+    <h1>SEO is <em>not</em><br>just content.</h1>
+
+    <div class="myth">
+      <div class="row a"><span>What most people think SEO is:</span>
+        <span class="content-chip"><svg class="i" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>CONTENT</span>
+      </div>
+      <div class="row b"><span class="arrow"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></span><span>What actually ranks you and <em>gets you cited</em>:</span></div>
+    </div>
+
+    <div class="bento">
+      <div class="card">
+        <div class="head">
+          <div class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></div>
+          <div class="num">LAYER 01</div>
+        </div>
+        <h3>Technical foundation</h3>
+        <p class="tag">Google can't rank what it can't crawl.</p>
+        <div class="chips"><span>Crawl + index</span><span>Core Web Vitals</span><span>Mobile UX</span><span>Site architecture</span><span>Internal links</span></div>
+      </div>
+
+      <div class="card">
+        <div class="head">
+          <div class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></div>
+          <div class="num">LAYER 02</div>
+        </div>
+        <h3>Authority</h3>
+        <p class="tag">Who else vouches for you.</p>
+        <div class="chips"><span>Backlinks + PR</span><span>Reddit + forums</span><span>Reviews</span><span>"Best X" lists</span><span>E-E-A-T</span></div>
+        <div class="stat"><i></i>~85% of AI citations come from third-party sites</div>
+      </div>
+
+      <div class="card">
+        <div class="head">
+          <div class="ic"><svg class="i" viewBox="0 0 24 24"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg></div>
+          <div class="num">LAYER 03</div>
+        </div>
+        <h3>AI search (GEO)</h3>
+        <p class="tag">Getting cited, not just ranked.</p>
+        <div class="chips"><span>AI Overviews</span><span>ChatGPT citations</span><span>Entity clarity</span><span>Schema</span><span>Answer-first pages</span><span>Query fan-out</span></div>
+      </div>
+
+      <div class="card dark">
+        <div class="head">
+          <div class="ic"><svg class="i" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+          <div class="num">LAYER 04</div>
+        </div>
+        <h3>Revenue</h3>
+        <p class="tag">The only layer your CFO cares about.</p>
+        <div class="chips"><span>CRO</span><span>Lead tracking</span><span>GSC + GA4</span><span>Revenue per page</span></div>
+        <div class="stat"><i></i>Rankings are the means. Revenue is the point.</div>
+      </div>
+    </div>
+
+    <div class="foot">
+      <img class="avatar" src="assets/avatar.png" alt="">
+      <div class="who"><b>Shehroz Shafique</b><span>CEO of Permanent SEO</span></div>
+      <div class="mission">Helping businesses build their<br><b>brand &amp; permanent growth</b></div>
+      <div class="repost"><svg class="i" viewBox="0 0 24 24"><path d="m2 9 3-3 3 3"/><path d="M13 18H7a2 2 0 0 1-2-2V6"/><path d="m22 15-3 3-3-3"/><path d="M11 6h6a2 2 0 0 1 2 2v10"/></svg>Repost</div>
+    </div>
+  </div>
+</body>
+</html>
