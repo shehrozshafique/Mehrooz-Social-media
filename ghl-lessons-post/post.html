@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GHL Freelance Lessons</title>
+<style>
+  @font-face { font-family: 'Jakarta'; src: url(assets/PlusJakartaSans.woff2) format('woff2'); font-weight: 200 800; }
+  @font-face { font-family: 'Serif'; src: url(assets/InstrumentSerif-Italic.woff2) format('woff2'); font-style: italic; }
+
+  :root {
+    --blue: #3461F5;
+    --blue-dark: #1E2C7A;
+    --blue-soft: #EAF0FF;
+    --blue-line: #C9D7FF;
+    --ink: #0F1A3D;
+    --muted: #5B6685;
+    --bg: #F7F9FF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1350px; }
+  body {
+    font-family: 'Jakarta', sans-serif; color: var(--ink); background: var(--bg);
+    background-image:
+      linear-gradient(rgba(52,97,245,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(52,97,245,.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    position: relative; overflow: hidden;
+  }
+  .wrap { padding: 50px 56px 0; }
+
+  /* Header */
+  .top { display: flex; align-items: center; justify-content: space-between; }
+  .label {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 17px; font-weight: 700; letter-spacing: .14em; color: var(--blue);
+    background: #fff; border: 1.5px solid var(--blue-line); border-radius: 99px; padding: 9px 18px;
+  }
+  .label .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); }
+  .ghl { background: #fff; border: 1.5px solid var(--blue-line); border-radius: 16px; padding: 10px 18px; display: flex; }
+  .ghl img { height: 38px; display: block; }
+
+  h1 { margin-top: 26px; font-size: 62px; line-height: 1.06; font-weight: 800; letter-spacing: -.025em; }
+  h1 .money { color: var(--blue); }
+  h1 em { font-family: 'Serif'; font-weight: 400; font-size: 74px; color: var(--blue); letter-spacing: -.01em; }
+  .sub { margin-top: 14px; font-size: 25px; line-height: 1.4; color: var(--muted); font-weight: 500; }
+  .sub b { color: var(--ink); font-weight: 700; }
+
+  /* Lessons */
+  .lessons { margin-top: 30px; display: grid; gap: 14px; }
+  .lesson {
+    display: flex; align-items: center; gap: 22px;
+    background: #fff; border: 1.5px solid var(--blue-line); border-radius: 22px;
+    padding: 18px 24px; box-shadow: 0 10px 30px rgba(30,44,122,.06);
+  }
+  .n {
+    width: 58px; height: 58px; border-radius: 16px; flex: none;
+    background: var(--blue); color: #fff; font-weight: 800; font-size: 27px;
+    display: grid; place-items: center;
+  }
+  .lesson h2 { font-size: 26px; font-weight: 800; letter-spacing: -.01em; line-height: 1.15; }
+  .lesson h2 em { font-family: 'Serif'; font-weight: 400; font-size: 31px; color: var(--blue); }
+  .lesson p { font-size: 19px; color: var(--muted); font-weight: 500; margin-top: 4px; line-height: 1.3; }
+  .lesson .ico { margin-left: auto; color: var(--blue); opacity: .9; flex: none; }
+  .lesson .ico svg { width: 34px; height: 34px; stroke-width: 2; }
+
+  /* Comment CTA */
+  .cta {
+    margin-top: 22px; position: relative;
+    background: #fff; border: 3px dashed var(--blue); border-radius: 26px;
+    padding: 22px 26px; display: flex; align-items: center; gap: 24px;
+  }
+  .bubble {
+    width: 92px; height: 92px; border-radius: 26px; flex: none;
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark)); color: #fff;
+    display: grid; place-items: center; box-shadow: 0 10px 24px rgba(52,97,245,.35);
+  }
+  .bubble svg { width: 46px; height: 46px; stroke-width: 2.2; }
+  .cta .say { font-size: 24px; font-weight: 700; line-height: 1.2; }
+  .cta .say .kw {
+    display: inline-block; background: var(--blue); color: #fff; font-weight: 800;
+    padding: 4px 14px 6px; border-radius: 12px; margin: 0 4px; font-size: 28px;
+  }
+  .cta .get { font-size: 19px; color: var(--muted); font-weight: 500; margin-top: 8px; }
+  .cta .get b { color: var(--ink); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .chips span {
+    font-size: 15px; font-weight: 700; color: var(--blue); background: var(--blue-soft);
+    padding: 5px 12px; border-radius: 99px;
+  }
+
+  /* Footer (shared brand footer) */
+  footer {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 150px;
+    background: linear-gradient(100deg, var(--blue) 0%, var(--blue-dark) 100%);
+    color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 36px; white-space: nowrap;
+  }
+  .f { display: flex; align-items: center; gap: 14px; }
+  .sep { width: 1px; height: 70px; background: rgba(255,255,255,.28); flex: none; }
+  .me img { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; flex: none; }
+  .me b { display: block; font-size: 21px; font-weight: 800; line-height: 1.15; }
+  .me span { display: block; font-size: 16px; opacity: .85; margin-top: 4px; font-weight: 500; }
+  .fi {
+    width: 48px; height: 48px; border-radius: 14px; flex: none;
+    background: rgba(255,255,255,.16); display: grid; place-items: center;
+  }
+  .fi svg { width: 25px; height: 25px; stroke-width: 2.3; }
+  .svc { font-size: 17px; line-height: 1.25; font-weight: 700; }
+  .svc small { display: block; font-size: 14px; opacity: .85; font-weight: 500; margin-top: 3px; }
+  .rp b { display: block; font-size: 20px; font-weight: 800; }
+  .rp span { display: block; font-size: 14px; opacity: .85; font-weight: 500; }
+  .brand img { width: 58px; height: 50px; border-radius: 12px; object-fit: cover; box-shadow: 0 0 0 2px rgba(255,255,255,.5); }
+  .brand b { font-size: 21px; font-weight: 800; line-height: 1.1; display: block; }
+  .brand span { display: block; margin-top: 2px; font-size: 14px; opacity: .85; font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="label"><span class="dot"></span>MY FREELANCE JOURNEY</div>
+    <div class="ghl"><img src="assets/highlevel.png" alt="HighLevel"></div>
+  </div>
+
+  <h1><span class="money">$9,043</span> in 4 months<br>with <em>GoHighLevel.</em></h1>
+  <p class="sub">A tool I didn't even know existed when I started.<br><b>5 lessons I wish someone told me earlier:</b></p>
+
+  <div class="lessons">
+    <div class="lesson"><div class="n">1</div>
+      <div><h2>Take the job you're <em>still learning.</em></h2><p>Real problems teach more than 50 tutorials.</p></div>
+      <div class="ico"><i data-lucide="rocket"></i></div></div>
+    <div class="lesson"><div class="n">2</div>
+      <div><h2>Your first client is worth <em>more</em> than they pay.</h2><p>Experience, portfolio, testimonial, referrals.</p></div>
+      <div class="ico"><i data-lucide="gem"></i></div></div>
+    <div class="lesson"><div class="n">3</div>
+      <div><h2>Be the one who <em>figures it out.</em></h2><p>Clients pay you to own the problem, not know it all.</p></div>
+      <div class="ico"><i data-lucide="puzzle"></i></div></div>
+    <div class="lesson"><div class="n">4</div>
+      <div><h2>Relationships bring <em>repeat work.</em></h2><p>Talk clearly, hit deadlines, never disappear.</p></div>
+      <div class="ico"><i data-lucide="handshake"></i></div></div>
+    <div class="lesson"><div class="n">5</div>
+      <div><h2>Let your work <em>sell for you.</em></h2><p>Referrals beat fancy proposals.</p></div>
+      <div class="ico"><i data-lucide="megaphone"></i></div></div>
+  </div>
+
+  <div class="cta">
+    <div class="bubble"><i data-lucide="message-circle-more"></i></div>
+    <div>
+      <div class="say">Comment <span class="kw">GHL Planning</span> below</div>
+      <div class="get">and I'll send you my <b>complete GHL roadmap</b>, free.</div>
+      <div class="chips"><span>All features</span><span>Pricing</span><span>10 ways to earn</span><span>Best clients</span><span>90-day plan</span><span>Fiverr &amp; Upwork</span></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="f me">
+    <img src="assets/mehrooz.jpg" alt="">
+    <div><b>Muhammad<br>Mehrooz Shafique</b><span>CEO, Permanent SEO</span></div>
+  </div>
+  <div class="sep"></div>
+  <div class="f">
+    <div class="fi"><i data-lucide="trending-up"></i></div>
+    <div class="svc">Helping brands grow<br>permanently<small>GHL · Semantic SEO · AI</small></div>
+  </div>
+  <div class="sep"></div>
+  <div class="f rp">
+    <div class="fi"><i data-lucide="repeat-2"></i></div>
+    <div><b>Repost</b><span>Share with<br>your network</span></div>
+  </div>
+  <div class="sep"></div>
+  <div class="f brand">
+    <img src="assets/logo-tile.png" alt="">
+    <div><b>Permanent<br>SEO</b><span>Agency</span></div>
+  </div>
+</footer>
+
+<script src="assets/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>
