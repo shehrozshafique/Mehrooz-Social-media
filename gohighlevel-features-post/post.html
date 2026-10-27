@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Grow Faster with GoHighLevel</title>
+<style>
+  @font-face { font-family: 'Jakarta'; src: url(assets/PlusJakartaSans.woff2) format('woff2'); font-weight: 200 800; }
+  @font-face { font-family: 'Serif'; src: url(assets/InstrumentSerif-Italic.woff2) format('woff2'); font-style: italic; }
+
+  :root {
+    --blue: #3461F5;
+    --blue-dark: #1E2C7A;
+    --navy: #121C52;
+    --blue-soft: #EAF0FF;
+    --blue-line: #D3DEFF;
+    --ink: #0F1A3D;
+    --muted: #5B6685;
+    --bg: #F4F7FF;
+    --yellow: #FFBC00;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1350px; }
+  body { font-family: 'Jakarta', sans-serif; color: var(--ink); background: var(--bg); position: relative; overflow: hidden; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative; height: 410px; padding: 34px 56px 0; text-align: center; color: #fff;
+    background:
+      radial-gradient(520px 300px at 90% 6%, rgba(26,155,255,.45), transparent 70%),
+      radial-gradient(460px 280px at 4% 100%, rgba(122,140,255,.3), transparent 70%),
+      linear-gradient(160deg, #3461F5 0%, #1E2C7A 62%, #121C52 100%);
+    border-radius: 0 0 44px 44px; overflow: hidden;
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+    background-size: 44px 44px;
+    -webkit-mask-image: linear-gradient(#000, transparent 92%);
+  }
+  .hero > * { position: relative; }
+  .logo-pill {
+    display: inline-flex; align-items: center; background: #fff; border-radius: 22px;
+    padding: 12px 28px; box-shadow: 0 0 0 8px rgba(255,255,255,.14), 0 18px 40px rgba(0,0,0,.25);
+  }
+  .logo-pill img { height: 52px; display: block; }
+  h1 { margin-top: 24px; font-size: 96px; line-height: .98; font-weight: 800; letter-spacing: -.04em; white-space: nowrap; }
+  h1 .hl { display: inline-block; position: relative; isolation: isolate; }
+  h1 .hl::after {
+    content: ""; position: absolute; left: -8px; right: -8px; bottom: 6px; height: 24px; z-index: -1;
+    background: var(--yellow); border-radius: 8px; transform: rotate(-1.5deg);
+  }
+  .h2 { margin-top: 6px; font-size: 68px; font-weight: 800; letter-spacing: -.035em; line-height: 1.05; white-space: nowrap; }
+  .h2 em { font-family: 'Serif'; font-weight: 400; font-size: 84px; letter-spacing: -.01em; color: #BFD3FF; }
+  .lead {
+    margin-top: 16px; display: inline-flex; align-items: center; gap: 12px;
+    background: rgba(255,255,255,.12); border: 1.5px solid rgba(255,255,255,.25);
+    border-radius: 99px; padding: 9px 24px 9px 10px; font-size: 21px; font-weight: 600;
+  }
+  .lead .ic { width: 34px; height: 34px; border-radius: 50%; background: var(--yellow); color: var(--navy); display: grid; place-items: center; }
+  .lead .ic svg { width: 19px; height: 19px; stroke-width: 2.6; }
+
+  /* ---------- Features ---------- */
+  .grid { padding: 18px 48px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+  .card {
+    position: relative; display: flex; gap: 16px; align-items: center;
+    background: #fff; border: 1.5px solid var(--blue-line); border-radius: 24px;
+    padding: 0 20px; height: 138px; box-shadow: 0 10px 26px rgba(30,44,122,.06);
+  }
+  .wide { grid-column: span 2; height: 118px; background: linear-gradient(135deg, #FFFFFF 40%, #EAF0FF); border-color: #B9CCFF; }
+  .tile {
+    width: 62px; height: 62px; border-radius: 18px; flex: none; color: #fff;
+    display: grid; place-items: center; box-shadow: 0 8px 18px var(--sh);
+    background: linear-gradient(135deg, var(--c1), var(--c2));
+  }
+  .tile svg { width: 31px; height: 31px; stroke-width: 2.2; }
+  .card h3 { font-size: 24px; font-weight: 800; letter-spacing: -.015em; line-height: 1.1; }
+  .card p { font-size: 18px; color: var(--muted); font-weight: 500; margin-top: 6px; line-height: 1.3; }
+  .tag {
+    display: inline-block; vertical-align: middle; margin-left: 10px;
+    font-size: 12px; font-weight: 800; letter-spacing: .08em; padding: 4px 10px; border-radius: 99px;
+    background: var(--yellow); color: var(--navy);
+  }
+
+  .c-blue   { --c1: #5B82FF; --c2: #3461F5; --sh: rgba(52,97,245,.3); }
+  .c-sky    { --c1: #4DB5FF; --c2: #1A7FFF; --sh: rgba(26,127,255,.3); }
+  .c-violet { --c1: #9B7BFF; --c2: #6A44F2; --sh: rgba(106,68,242,.3); }
+  .c-teal   { --c1: #2BD4C2; --c2: #0FA394; --sh: rgba(15,163,148,.3); }
+  .c-green  { --c1: #3BDB68; --c2: #14A83C; --sh: rgba(20,168,60,.3); }
+  .c-amber  { --c1: #FFCE3A; --c2: #F09A00; --sh: rgba(240,154,0,.32); }
+  .c-coral  { --c1: #FF8A7A; --c2: #EC4E3E; --sh: rgba(236,78,62,.3); }
+
+  /* ---------- Checkmark chips ---------- */
+  .chips { margin: 16px 48px 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .chips span {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    height: 54px; border-radius: 16px; background: #fff; border: 1.5px solid var(--blue-line);
+    font-size: 16px; font-weight: 800; color: var(--ink); white-space: nowrap;
+  }
+  .chips i { width: 22px; height: 22px; color: var(--blue); flex: none; }
+  .chips svg { width: 22px; height: 22px; stroke-width: 2.6; color: #14A83C; }
+
+  /* ---------- Dark CTA ---------- */
+  .cta {
+    position: absolute; left: 48px; right: 48px; top: 1078px; height: 112px; border-radius: 26px; padding: 0 30px;
+    background: linear-gradient(150deg, #1E2C7A, #121C52); color: #fff; overflow: hidden;
+    display: flex; align-items: center; justify-content: space-between; box-shadow: 0 16px 34px rgba(18,28,82,.3);
+  }
+  .cta::after {
+    content: ""; position: absolute; width: 260px; height: 260px; right: -90px; bottom: -150px; border-radius: 50%;
+    background: radial-gradient(rgba(26,155,255,.55), transparent 70%);
+  }
+  .cta > * { position: relative; z-index: 1; }
+  .cta .say { font-size: 30px; font-weight: 800; line-height: 1.1; letter-spacing: -.01em; }
+  .cta .say em { font-family: 'Serif'; font-weight: 400; font-size: 34px; color: #9FC0FF; }
+  .cta .sub { font-size: 17px; color: rgba(255,255,255,.75); margin-top: 6px; font-weight: 500; }
+  .cta .go {
+    display: flex; align-items: center; gap: 10px; background: var(--yellow); color: var(--navy);
+    font-size: 19px; font-weight: 800; padding: 16px 24px; border-radius: 99px; white-space: nowrap;
+    box-shadow: 0 10px 22px rgba(255,168,0,.35);
+  }
+  .cta .go svg { width: 22px; height: 22px; stroke-width: 2.6; }
+
+  /* ---------- Footer (shared brand footer) ---------- */
+  footer {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 150px;
+    background: linear-gradient(100deg, var(--blue) 0%, var(--blue-dark) 100%);
+    color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 36px; white-space: nowrap;
+  }
+  .f { display: flex; align-items: center; gap: 14px; }
+  .sep { width: 1px; height: 70px; background: rgba(255,255,255,.28); flex: none; }
+  .me img { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; flex: none; }
+  .me b { display: block; font-size: 21px; font-weight: 800; line-height: 1.15; }
+  .me span { display: block; font-size: 16px; opacity: .85; margin-top: 4px; font-weight: 500; }
+  .fi { width: 48px; height: 48px; border-radius: 14px; flex: none; background: rgba(255,255,255,.16); display: grid; place-items: center; }
+  .fi svg { width: 25px; height: 25px; stroke-width: 2.3; }
+  .svc { font-size: 17px; line-height: 1.25; font-weight: 700; }
+  .svc small { display: block; font-size: 14px; opacity: .85; font-weight: 500; margin-top: 3px; }
+  .rp b { display: block; font-size: 20px; font-weight: 800; }
+  .rp span { display: block; font-size: 14px; opacity: .85; font-weight: 500; }
+  .brand img { width: 58px; height: 50px; border-radius: 12px; object-fit: cover; box-shadow: 0 0 0 2px rgba(255,255,255,.5); }
+  .brand b { font-size: 21px; font-weight: 800; line-height: 1.1; display: block; }
+  .brand span { display: block; margin-top: 2px; font-size: 14px; opacity: .85; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="logo-pill"><img src="assets/highlevel.png" alt="HighLevel"></div>
+  <h1><span class="hl">Grow Faster</span></h1>
+  <div class="h2">with <em>GoHighLevel</em></div>
+  <div class="lead"><span class="ic"><i data-lucide="layers"></i></span>All-in-one marketing &amp; sales platform</div>
+</section>
+
+<div class="grid">
+  <div class="card wide c-blue">
+    <div class="tile"><i data-lucide="kanban"></i></div>
+    <div><h3>CRM &amp; Pipeline<span class="tag">START HERE</span></h3>
+      <p>Track every lead from first contact to closed deal.</p></div>
+  </div>
+  <div class="card c-sky">
+    <div class="tile"><i data-lucide="mail"></i></div>
+    <div><h3>Email &amp; SMS</h3><p>Follow up automatically, every time.</p></div>
+  </div>
+  <div class="card c-violet">
+    <div class="tile"><i data-lucide="calendar-check"></i></div>
+    <div><h3>Booking</h3><p>Fill your calendar around the clock.</p></div>
+  </div>
+  <div class="card c-teal">
+    <div class="tile"><i data-lucide="layout-template"></i></div>
+    <div><h3>Websites &amp; Funnels</h3><p>Pages built to turn visitors into leads.</p></div>
+  </div>
+  <div class="card c-green">
+    <div class="tile"><i data-lucide="workflow"></i></div>
+    <div><h3>Automation</h3><p>Set it up once and let it run.</p></div>
+  </div>
+  <div class="card c-amber">
+    <div class="tile"><i data-lucide="star"></i></div>
+    <div><h3>Reputation</h3><p>Get more five-star reviews on autopilot.</p></div>
+  </div>
+  <div class="card c-coral">
+    <div class="tile"><i data-lucide="chart-column"></i></div>
+    <div><h3>Reporting</h3><p>See exactly what is making money.</p></div>
+  </div>
+</div>
+
+<div class="chips">
+  <span><svg data-lucide="check-circle-2"></svg>Easy to use</span>
+  <span><svg data-lucide="check-circle-2"></svg>Save time</span>
+  <span><svg data-lucide="check-circle-2"></svg>Scale fast</span>
+  <span><svg data-lucide="check-circle-2"></svg>24/7 support</span>
+</div>
+
+<div class="cta">
+  <div>
+    <div class="say">One platform. <em>Unlimited</em> possibilities.</div>
+    <div class="sub">Replace multiple tools and save big.</div>
+  </div>
+  <div class="go">Start today <i data-lucide="arrow-right"></i></div>
+</div>
+
+<footer>
+  <div class="f me">
+    <img src="assets/mehrooz.jpg" alt="">
+    <div><b>Muhammad<br>Mehrooz Shafique</b><span>CEO, Permanent SEO</span></div>
+  </div>
+  <div class="sep"></div>
+  <div class="f">
+    <div class="fi"><i data-lucide="trending-up"></i></div>
+    <div class="svc">Helping brands grow<br>permanently<small>GHL · Semantic SEO · AI</small></div>
+  </div>
+  <div class="sep"></div>
+  <div class="f rp">
+    <div class="fi"><i data-lucide="repeat-2"></i></div>
+    <div><b>Repost</b><span>Share with<br>your network</span></div>
+  </div>
+  <div class="sep"></div>
+  <div class="f brand">
+    <img src="assets/logo-tile.png" alt="">
+    <div><b>Permanent<br>SEO</b><span>Agency</span></div>
+  </div>
+</footer>
+
+<script src="assets/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>
