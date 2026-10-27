@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The 4 Pillars of SEO</title>
+<style>
+  @font-face { font-family: 'Jakarta'; src: url(assets/PlusJakartaSans.woff2) format('woff2'); font-weight: 200 800; }
+  @font-face { font-family: 'Serif'; src: url(assets/InstrumentSerif-Italic.woff2) format('woff2'); font-style: italic; }
+
+  :root {
+    --blue: #3461F5;
+    --blue-dark: #1E2C7A;
+    --navy: #121C52;
+    --blue-soft: #EAF0FF;
+    --blue-line: #D3DEFF;
+    --ink: #0F1A3D;
+    --muted: #5B6685;
+    --bg: #F4F7FF;
+    --yellow: #FFBC00;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1350px; }
+  body { font-family: 'Jakarta', sans-serif; color: var(--ink); background: var(--bg); position: relative; overflow: hidden; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative; height: 318px; padding: 40px 56px 0; text-align: center; color: #fff;
+    background:
+      radial-gradient(520px 300px at 90% 6%, rgba(26,155,255,.45), transparent 70%),
+      radial-gradient(460px 280px at 4% 100%, rgba(122,140,255,.3), transparent 70%),
+      linear-gradient(160deg, #3461F5 0%, #1E2C7A 62%, #121C52 100%);
+    border-radius: 0 0 44px 44px; overflow: hidden;
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+    background-size: 44px 44px;
+    -webkit-mask-image: linear-gradient(#000, transparent 92%);
+  }
+  .hero > * { position: relative; }
+  h1 { font-size: 104px; line-height: .98; font-weight: 800; letter-spacing: -.04em; white-space: nowrap; }
+  h1 .hl { display: inline-block; position: relative; isolation: isolate; }
+  h1 .hl::after {
+    content: ""; position: absolute; left: -8px; right: -8px; bottom: 8px; height: 26px; z-index: -1;
+    background: var(--yellow); border-radius: 8px; transform: rotate(-1.5deg);
+  }
+  .h2 { margin-top: 8px; font-size: 80px; font-weight: 800; letter-spacing: -.03em; line-height: 1.05; }
+  .h2 em { font-family: 'Serif'; font-weight: 400; font-size: 92px; color: #BFD3FF; letter-spacing: -.01em; }
+
+  .sub {
+    text-align: center; margin: 26px 56px 0; font-size: 24px; line-height: 1.4; color: var(--muted); font-weight: 500;
+  }
+  .sub b { color: var(--ink); font-weight: 800; }
+
+  /* ---------- Pyramid ---------- */
+  .pyr { margin: 26px 56px 0; display: flex; align-items: flex-start; }
+  .tri { position: relative; width: 440px; flex: none; }
+  .lvl {
+    position: relative; height: 136px; margin-bottom: 8px; display: grid; place-items: center;
+    color: #fff; font-size: 52px; font-weight: 800; letter-spacing: -.02em;
+  }
+  .lvl:last-child { margin-bottom: 0; }
+  .lvl span { position: relative; z-index: 1; text-shadow: 0 2px 10px rgba(15,26,61,.25); }
+  .l4 { background: #7FA2FF; clip-path: polygon(220px 0, 220px 0, 165px 100%, 275px 100%); }
+  .l3 { background: #5B82FF; clip-path: polygon(165px 0, 275px 0, 330px 100%, 110px 100%); }
+  .l2 { background: #3461F5; clip-path: polygon(110px 0, 330px 0, 385px 100%, 55px 100%); }
+  .l1 { background: #2A3FB0; clip-path: polygon(55px 0, 385px 0, 440px 100%, 0 100%); }
+  /* the first level is a pointed apex */
+  .l4 { clip-path: polygon(220px 0, 220px 0, 275px 100%, 165px 100%); }
+
+  .steps { flex: 1; margin-left: 30px; }
+  .step { height: 136px; margin-bottom: 8px; display: flex; flex-direction: column; justify-content: center; }
+  .step:last-child { margin-bottom: 0; }
+  .step:nth-child(1) { padding-left: 0; }
+  .step:nth-child(2) { padding-left: 22px; }
+  .step:nth-child(3) { padding-left: 44px; }
+  .step:nth-child(4) { padding-left: 66px; }
+  .pill {
+    align-self: flex-start; font-size: 22px; font-weight: 800; color: #fff; padding: 6px 16px; border-radius: 10px;
+    background: var(--c); box-shadow: 0 6px 14px rgba(15,26,61,.15);
+  }
+  .step ul { list-style: none; margin-top: 8px; display: grid; gap: 3px; }
+  .step li { display: flex; align-items: center; gap: 10px; font-size: 19px; font-weight: 600; color: #2F3A5C; }
+  .step li::before {
+    content: ""; width: 18px; height: 18px; border-radius: 50%; flex: none; background: var(--c-soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233461F5' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5L20 7'/%3E%3C/svg%3E") center / 11px no-repeat;
+  }
+  .s4 { --c: #5B82FF; --c-soft: #E6EDFF; }
+  .s3 { --c: #3461F5; --c-soft: #E6EDFF; }
+  .s2 { --c: #2A4DD6; --c-soft: #E6EDFF; }
+  .s1 { --c: #1E2C7A; --c-soft: #E6EDFF; }
+
+  /* ---------- Flow strip ---------- */
+  .flow { margin: 34px 56px 0; display: flex; align-items: center; justify-content: space-between; }
+  .node { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 180px; }
+  .node .box {
+    width: 110px; height: 110px; border-radius: 28px; background: #fff; border: 2px solid var(--blue-line);
+    display: grid; place-items: center; box-shadow: 0 12px 26px rgba(30,44,122,.08); color: var(--blue);
+  }
+  .node .box svg { width: 52px; height: 52px; stroke-width: 2.1; }
+  .node small { font-size: 18px; font-weight: 800; color: var(--ink); }
+  .arrow { color: var(--blue); margin-top: -28px; }
+  .arrow svg { width: 40px; height: 40px; stroke-width: 2.8; }
+
+  /* ---------- Footer (shared brand footer) ---------- */
+  footer {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 150px;
+    background: linear-gradient(100deg, var(--blue) 0%, var(--blue-dark) 100%);
+    color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 36px; white-space: nowrap;
+  }
+  .f { display: flex; align-items: center; gap: 14px; }
+  .sep { width: 1px; height: 70px; background: rgba(255,255,255,.28); flex: none; }
+  .me img { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; flex: none; }
+  .me b { display: block; font-size: 21px; font-weight: 800; line-height: 1.15; }
+  .me span { display: block; font-size: 16px; opacity: .85; margin-top: 4px; font-weight: 500; }
+  .fi { width: 48px; height: 48px; border-radius: 14px; flex: none; background: rgba(255,255,255,.16); display: grid; place-items: center; }
+  .fi svg { width: 25px; height: 25px; stroke-width: 2.3; }
+  .svc { font-size: 17px; line-height: 1.25; font-weight: 700; }
+  .svc small { display: block; font-size: 14px; opacity: .85; font-weight: 500; margin-top: 3px; }
+  .rp b { display: block; font-size: 20px; font-weight: 800; }
+  .rp span { display: block; font-size: 14px; opacity: .85; font-weight: 500; }
+  .brand img { width: 58px; height: 50px; border-radius: 12px; object-fit: cover; box-shadow: 0 0 0 2px rgba(255,255,255,.5); }
+  .brand b { font-size: 21px; font-weight: 800; line-height: 1.1; display: block; }
+  .brand span { display: block; margin-top: 2px; font-size: 14px; opacity: .85; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <h1><span class="hl">The 4 Pillars</span></h1>
+  <div class="h2">of <em>SEO</em></div>
+</section>
+
+<p class="sub">SEO is a balancing act: <b>content + backlinks + CRO &amp; UX + analytics</b> = results. Start with great content, then build up.</p>
+
+<div class="pyr">
+  <div class="tri">
+    <div class="lvl l4"><span>4</span></div>
+    <div class="lvl l3"><span>3</span></div>
+    <div class="lvl l2"><span>2</span></div>
+    <div class="lvl l1"><span>1</span></div>
+  </div>
+  <div class="steps">
+    <div class="step s4"><span class="pill" style="--c:#5B82FF">Analytics</span>
+      <ul><li>Analyze traffic sources</li><li>Optimize conversion paths</li><li>Reduce bounce rates</li></ul></div>
+    <div class="step s3"><span class="pill" style="--c:#3461F5">CRO &amp; UX</span>
+      <ul><li>Enhance site navigation</li><li>Improve page speed</li><li>Ensure mobile friendliness</li></ul></div>
+    <div class="step s2"><span class="pill" style="--c:#2A4DD6">Backlinks</span>
+      <ul><li>Earn high-authority links</li><li>Find relevant link sources</li><li>Diversify your link profile</li></ul></div>
+    <div class="step s1"><span class="pill" style="--c:#1E2C7A">Content Creation &amp; Upgrades</span>
+      <ul><li>Prioritize content quality</li><li>Use targeted keywords</li><li>Update content regularly</li></ul></div>
+  </div>
+</div>
+
+<div class="flow">
+  <div class="node"><div class="box"><i data-lucide="file-text"></i></div><small>Content</small></div>
+  <div class="arrow"><i data-lucide="chevron-right"></i></div>
+  <div class="node"><div class="box"><i data-lucide="link"></i></div><small>Backlinks</small></div>
+  <div class="arrow"><i data-lucide="chevron-right"></i></div>
+  <div class="node"><div class="box"><i data-lucide="mouse-pointer-click"></i></div><small>CRO &amp; UX</small></div>
+  <div class="arrow"><i data-lucide="chevron-right"></i></div>
+  <div class="node"><div class="box"><i data-lucide="chart-column"></i></div><small>Analytics</small></div>
+</div>
+
+<footer>
+  <div class="f me">
+    <img src="assets/mehrooz.jpg" alt="">
+    <div><b>Muhammad<br>Mehrooz Shafique</b><span>CEO, Permanent SEO</span></div>
+  </div>
+  <div class="sep"></div>
+  <div class="f">
+    <div class="fi"><i data-lucide="trending-up"></i></div>
+    <div class="svc">Helping brands grow<br>permanently<small>Semantic SEO · AI Search</small></div>
+  </div>
+  <div class="sep"></div>
+  <div class="f rp">
+    <div class="fi"><i data-lucide="repeat-2"></i></div>
+    <div><b>Repost</b><span>Share with<br>your network</span></div>
+  </div>
+  <div class="sep"></div>
+  <div class="f brand">
+    <img src="assets/logo-tile.png" alt="">
+    <div><b>Permanent<br>SEO</b><span>Agency</span></div>
+  </div>
+</footer>
+
+<script src="assets/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>
