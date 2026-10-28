@@ -1,12 +1,12 @@
-// Renders each .slide in carousel.html to its own 1080x1080 PNG (2x),
-// then combines them into one PDF for LinkedIn document upload.
+// Renders each .slide in carousel.html as its own separate post:
+// output/post-N/post.png (2160x2160) and output/post-N/post.pdf (one page).
 // Usage: node render.js
 const { chromium } = require('playwright');
 const path = require('path');
 const fs = require('fs');
 
 const outDir = path.join(__dirname, 'output');
-fs.mkdirSync(outDir, { recursive: true });
+fs.rmSync(outDir, { recursive: true, force: true });
 
 (async () => {
   const browser = await chromium.launch({ args: ['--allow-file-access-from-files'] });
@@ -15,9 +15,10 @@ fs.mkdirSync(outDir, { recursive: true });
   await page.evaluate(() => document.fonts.ready);
   const slides = await page.$$('.slide');
   for (let i = 0; i < slides.length; i++) {
-    const file = path.join(outDir, `slide-${i + 1}.png`);
-    await slides[i].screenshot({ path: file });
-    console.log('wrote', file);
+    const dir = path.join(outDir, `post-${i + 1}`);
+    fs.mkdirSync(dir, { recursive: true });
+    await slides[i].screenshot({ path: path.join(dir, 'post.png') });
+    console.log('wrote', dir);
   }
   await browser.close();
 })();
