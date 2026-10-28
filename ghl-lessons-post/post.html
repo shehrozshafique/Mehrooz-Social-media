@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>GHL Freelance Lessons</title>
+<style>
+  @font-face { font-family: 'Jakarta'; src: url(assets/PlusJakartaSans.woff2) format('woff2'); font-weight: 200 800; }
+  @font-face { font-family: 'Serif'; src: url(assets/InstrumentSerif-Italic.woff2) format('woff2'); font-style: italic; }
+
+  :root {
+    --blue: #3461F5;
+    --blue-dark: #1E2C7A;
+    --navy: #121C52;
+    --blue-soft: #EAF0FF;
+    --blue-line: #D3DEFF;
+    --ink: #0F1A3D;
+    --muted: #5B6685;
+    --bg: #F4F7FF;
+    /* HighLevel logo colours, used only on icon tiles */
+    --ghl-yellow: #FFBC00;
+    --ghl-blue: #1A9BFF;
+    --ghl-green: #1FC74A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1350px; }
+  body { font-family: 'Jakarta', sans-serif; color: var(--ink); background: var(--bg); position: relative; overflow: hidden; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative; height: 418px; padding: 32px 56px 0; text-align: center; color: #fff;
+    background:
+      radial-gradient(520px 300px at 88% 8%, rgba(26,155,255,.45), transparent 70%),
+      radial-gradient(460px 280px at 6% 100%, rgba(31,199,74,.22), transparent 70%),
+      linear-gradient(160deg, #3461F5 0%, #1E2C7A 62%, #121C52 100%);
+    border-radius: 0 0 44px 44px; overflow: hidden;
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+    background-size: 44px 44px;
+    -webkit-mask-image: linear-gradient(#000, transparent 92%);
+  }
+  .hero > * { position: relative; }
+  .logo-pill {
+    display: inline-flex; align-items: center; background: #fff; border-radius: 22px;
+    padding: 12px 28px; box-shadow: 0 0 0 8px rgba(255,255,255,.14), 0 18px 40px rgba(0,0,0,.25);
+  }
+  .logo-pill img { height: 52px; display: block; }
+  h1 { margin-top: 22px; font-size: 108px; line-height: .98; font-weight: 800; letter-spacing: -.04em; white-space: nowrap; }
+  h1 .amt { position: relative; color: #fff; display: inline-block; isolation: isolate; }
+  h1 .amt::after {
+    content: ""; position: absolute; left: -6px; right: -6px; bottom: 8px; height: 24px; z-index: -1;
+    background: var(--ghl-yellow); border-radius: 8px; transform: rotate(-1.5deg);
+  }
+  h1 .amt span { position: relative; z-index: 1; }
+  .h2 { margin-top: 6px; font-size: 64px; font-weight: 800; letter-spacing: -.03em; line-height: 1.05; white-space: nowrap; }
+  .h2 em { font-family: 'Serif'; font-weight: 400; font-size: 80px; letter-spacing: -.01em; color: #BFD3FF; }
+  .lead {
+    margin-top: 14px; display: inline-flex; align-items: center; gap: 12px;
+    background: rgba(255,255,255,.12); border: 1.5px solid rgba(255,255,255,.25);
+    border-radius: 99px; padding: 10px 24px 10px 12px; font-size: 22px; font-weight: 600;
+  }
+  .lead .ic { width: 36px; height: 36px; border-radius: 50%; background: var(--ghl-yellow); color: var(--navy); display: grid; place-items: center; }
+  .lead .ic svg { width: 20px; height: 20px; stroke-width: 2.6; }
+
+  /* ---------- Bento ---------- */
+  .bento { padding: 22px 56px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .card {
+    position: relative; background: #fff; border: 1.5px solid var(--blue-line); border-radius: 26px;
+    padding: 18px 24px; box-shadow: 0 12px 30px rgba(30,44,122,.07);
+  }
+  .wide { grid-column: span 2; display: flex; align-items: center; gap: 22px; }
+  .tile {
+    width: 64px; height: 64px; border-radius: 18px; flex: none; color: #fff;
+    display: grid; place-items: center; box-shadow: 0 10px 20px var(--sh, rgba(52,97,245,.3));
+  }
+  .tile svg { width: 32px; height: 32px; stroke-width: 2.2; }
+  .t-blue   { background: linear-gradient(135deg, #5B82FF, #3461F5); }
+  .t-yellow { background: linear-gradient(135deg, #FFCE3A, #FFA800); --sh: rgba(255,168,0,.35); }
+  .t-green  { background: linear-gradient(135deg, #3BDB68, #14A83C); --sh: rgba(20,168,60,.3); }
+  .t-sky    { background: linear-gradient(135deg, #4DB5FF, #1A7FFF); --sh: rgba(26,127,255,.3); }
+  .num {
+    position: absolute; top: 18px; right: 22px; font-size: 44px; font-weight: 800; letter-spacing: -.04em;
+    color: var(--blue-soft); line-height: 1;
+  }
+  .card h3 { font-size: 27px; font-weight: 800; line-height: 1.12; letter-spacing: -.015em; }
+  .card h3 em { font-family: 'Serif'; font-weight: 400; font-size: 32px; color: var(--blue); }
+  .card p { font-size: 18px; color: var(--muted); font-weight: 500; margin-top: 6px; line-height: 1.3; }
+  .head { display: flex; align-items: center; gap: 16px; }
+  .head h3 { padding-right: 58px; }
+
+  /* lesson 1: versus strip */
+  .vs { margin-left: auto; display: flex; align-items: center; gap: 10px; flex: none; }
+  .vs div { border-radius: 16px; padding: 10px 14px; text-align: center; font-size: 15px; font-weight: 700; line-height: 1.2; }
+  .vs .bad { background: #F3F4F8; color: #8A92A8; }
+  .vs .bad b { display: block; font-size: 22px; text-decoration: line-through; text-decoration-thickness: 3px; text-decoration-color: #E5484D; color: #6B7390; }
+  .vs .good { background: #E6F9EC; color: #14843A; }
+  .vs .good b { display: block; font-size: 22px; color: #0F6E2F; }
+  .vs .arr { color: var(--blue); }
+  .vs .arr svg { width: 28px; height: 28px; stroke-width: 2.6; }
+
+  /* lesson 2: value chips */
+  .gets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .gets span {
+    display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 700;
+    background: #FFF7E0; color: #8A5A00; border-radius: 12px; padding: 8px 10px;
+  }
+  .gets svg { width: 18px; height: 18px; stroke-width: 2.4; flex: none; }
+
+  /* lesson 3: mini quote */
+  .quote {
+    margin-top: 14px; background: #E9FBEF; border-radius: 14px; padding: 10px 14px;
+    font-size: 17px; font-weight: 700; color: #0F6E2F; display: flex; gap: 10px; align-items: center;
+  }
+  .quote svg { width: 20px; height: 20px; stroke-width: 2.4; flex: none; }
+
+  /* lesson 4: checklist */
+  .checks { margin-top: 12px; display: grid; gap: 6px; }
+  .checks span { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 700; }
+  .checks i, .checks svg { width: 24px; height: 24px; flex: none; }
+  .checks .ok { width: 26px; height: 26px; border-radius: 50%; background: #E3F1FF; color: #1A7FFF; display: grid; place-items: center; }
+  .checks .ok svg { width: 16px; height: 16px; stroke-width: 3; }
+
+  /* lesson 5: dark feature card */
+  .dark { background: linear-gradient(150deg, #1E2C7A, #121C52); border: none; color: #fff; overflow: hidden; }
+  .dark::after {
+    content: ""; position: absolute; width: 220px; height: 220px; right: -70px; bottom: -90px; border-radius: 50%;
+    background: radial-gradient(rgba(26,155,255,.5), transparent 70%);
+  }
+  .dark .num { color: rgba(255,255,255,.12); }
+  .dark h3 em { color: #9FC0FF; }
+  .dark p { color: rgba(255,255,255,.75); }
+  .dark .tile { background: #fff; color: var(--blue); box-shadow: none; }
+  .beats { margin-top: 14px; display: flex; align-items: center; gap: 10px; position: relative; z-index: 1; }
+  .beats span { border-radius: 12px; padding: 8px 12px; font-size: 16px; font-weight: 800; }
+  .beats .w { background: var(--ghl-green); color: #04361A; }
+  .beats .l { background: rgba(255,255,255,.12); color: rgba(255,255,255,.7); }
+  .beats b { font-size: 24px; color: var(--ghl-yellow); }
+
+  /* ---------- Comment CTA ---------- */
+  .cta {
+    margin: 20px 56px 0; border-radius: 26px; padding: 14px 22px; position: relative;
+    background: #fff; border: 2.5px solid var(--blue); box-shadow: 0 14px 34px rgba(52,97,245,.18);
+    display: flex; align-items: center; gap: 22px;
+  }
+  .cta .left { flex: none; width: 300px; }
+  .cta .kick { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 800; letter-spacing: .1em; color: var(--blue); }
+  .cta .kick svg { width: 20px; height: 20px; stroke-width: 2.4; }
+  .cta .big { font-size: 25px; font-weight: 800; line-height: 1.15; margin-top: 6px; letter-spacing: -.01em; }
+  .cta .big em { font-family: 'Serif'; font-weight: 400; font-size: 30px; color: var(--blue); }
+  .box {
+    flex: 1; display: flex; align-items: center; gap: 12px;
+    background: var(--bg); border: 1.5px solid var(--blue-line); border-radius: 99px; padding: 8px 8px 8px 8px;
+  }
+  .box img { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; flex: none; }
+  .box .typed { font-size: 30px; font-weight: 800; color: var(--ink); letter-spacing: -.01em; }
+  .box .caret { display: inline-block; width: 3px; height: 30px; background: var(--blue); margin-left: 4px; vertical-align: -4px; }
+  .box .send {
+    margin-left: auto; width: 56px; height: 56px; border-radius: 50%; flex: none;
+    background: var(--blue); color: #fff; display: grid; place-items: center;
+  }
+  .box .send svg { width: 26px; height: 26px; stroke-width: 2.4; }
+  .finger {
+    position: absolute; right: 54px; top: -24px; background: var(--ghl-yellow); color: var(--navy);
+    font-size: 15px; font-weight: 800; padding: 7px 14px; border-radius: 99px; box-shadow: 0 6px 14px rgba(255,168,0,.35);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .finger svg { width: 16px; height: 16px; stroke-width: 2.6; }
+
+  /* ---------- Footer (shared brand footer) ---------- */
+  footer {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 150px;
+    background: linear-gradient(100deg, var(--blue) 0%, var(--blue-dark) 100%);
+    color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 36px; white-space: nowrap;
+  }
+  .f { display: flex; align-items: center; gap: 14px; }
+  .sep { width: 1px; height: 70px; background: rgba(255,255,255,.28); flex: none; }
+  .me img { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; flex: none; }
+  .me b { display: block; font-size: 21px; font-weight: 800; line-height: 1.15; }
+  .me span { display: block; font-size: 16px; opacity: .85; margin-top: 4px; font-weight: 500; }
+  .fi { width: 48px; height: 48px; border-radius: 14px; flex: none; background: rgba(255,255,255,.16); display: grid; place-items: center; }
+  .fi svg { width: 25px; height: 25px; stroke-width: 2.3; }
+  .svc { font-size: 17px; line-height: 1.25; font-weight: 700; }
+  .svc small { display: block; font-size: 14px; opacity: .85; font-weight: 500; margin-top: 3px; }
+  .rp b { display: block; font-size: 20px; font-weight: 800; }
+  .rp span { display: block; font-size: 14px; opacity: .85; font-weight: 500; }
+  .brand img { width: 58px; height: 50px; border-radius: 12px; object-fit: cover; box-shadow: 0 0 0 2px rgba(255,255,255,.5); }
+  .brand b { font-size: 21px; font-weight: 800; line-height: 1.1; display: block; }
+  .brand span { display: block; margin-top: 2px; font-size: 14px; opacity: .85; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="logo-pill"><img src="assets/highlevel.png" alt="HighLevel"></div>
+  <h1><span class="amt"><span>$9,043</span></span> in 4 Months</h1>
+  <div class="h2">with <em>GoHighLevel</em></div>
+  <div class="lead"><span class="ic"><i data-lucide="lightbulb"></i></span>5 lessons I wish someone told me earlier</div>
+</section>
+
+<div class="bento">
+  <!-- 1 -->
+  <div class="card wide">
+    <div class="tile t-blue"><i data-lucide="rocket"></i></div>
+    <div>
+      <h3>Take the job you're<br><em>still learning.</em></h3>
+      <p>Real problems build real skills.</p>
+    </div>
+    <div class="vs">
+      <div class="bad"><b>50 tutorials</b>waiting to feel ready</div>
+      <div class="arr"><i data-lucide="arrow-right"></i></div>
+      <div class="good"><b>1 real project</b>learn by doing</div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="card">
+    <span class="num">02</span>
+    <div class="head"><div class="tile t-yellow"><i data-lucide="gem"></i></div>
+      <h3>Your first client<br>is worth <em>more.</em></h3></div>
+    <div class="gets">
+      <span><i data-lucide="graduation-cap"></i>Experience</span>
+      <span><i data-lucide="folder-open"></i>Portfolio</span>
+      <span><i data-lucide="star"></i>Testimonial</span>
+      <span><i data-lucide="users"></i>Referrals</span>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="card">
+    <span class="num">03</span>
+    <div class="head"><div class="tile t-green"><i data-lucide="puzzle"></i></div>
+      <h3>Be the one who<br><em>figures it out.</em></h3></div>
+    <p style="margin-top:12px">They don't pay you to know everything.</p>
+    <div class="quote"><i data-lucide="target"></i>They pay you to own the problem.</div>
+  </div>
+
+  <!-- 4 -->
+  <div class="card">
+    <span class="num">04</span>
+    <div class="head"><div class="tile t-sky"><i data-lucide="handshake"></i></div>
+      <h3>Relationships bring<br><em>repeat work.</em></h3></div>
+    <div class="checks">
+      <span><span class="ok"><i data-lucide="check"></i></span>Communicate clearly</span>
+      <span><span class="ok"><i data-lucide="check"></i></span>Meet every deadline</span>
+      <span><span class="ok"><i data-lucide="check"></i></span>Never disappear</span>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="card dark">
+    <span class="num">05</span>
+    <div class="head"><div class="tile"><i data-lucide="megaphone"></i></div>
+      <h3>Let your work<br><em>sell for you.</em></h3></div>
+    <p style="margin-top:12px">Happy clients bring the next ones.</p>
+    <div class="beats"><span class="w">Referrals</span><b>&gt;</b><span class="l">Fancy proposals</span></div>
+  </div>
+</div>
+
+<div class="cta">
+  <div class="finger"><i data-lucide="gift"></i>FREE ROADMAP</div>
+  <div class="left">
+    <div class="kick"><i data-lucide="message-circle"></i>COMMENT BELOW</div>
+    <div class="big">Get my complete<br><em>GHL roadmap</em></div>
+  </div>
+  <div class="box">
+    <img src="assets/mehrooz.jpg" alt="">
+    <span class="typed">GHL Planning<span class="caret"></span></span>
+    <span class="send"><i data-lucide="send-horizontal"></i></span>
+  </div>
+</div>
+
+<footer>
+  <div class="f me">
+    <img src="assets/mehrooz.jpg" alt="">
+    <div><b>Muhammad<br>Mehrooz Shafique</b><span>CEO, Permanent SEO</span></div>
+  </div>
+  <div class="sep"></div>
+  <div class="f">
+    <div class="fi"><i data-lucide="trending-up"></i></div>
+    <div class="svc">Helping brands grow<br>permanently<small>GHL · Semantic SEO · AI</small></div>
+  </div>
+  <div class="sep"></div>
+  <div class="f rp">
+    <div class="fi"><i data-lucide="repeat-2"></i></div>
+    <div><b>Repost</b><span>Share with<br>your network</span></div>
+  </div>
+  <div class="sep"></div>
+  <div class="f brand">
+    <img src="assets/logo-tile.png" alt="">
+    <div><b>Permanent<br>SEO</b><span>Agency</span></div>
+  </div>
+</footer>
+
+<script src="assets/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

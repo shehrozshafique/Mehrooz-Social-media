@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SEO Rankings Checklist</title>
+<style>
+  @font-face { font-family: 'Jakarta'; src: url(assets/PlusJakartaSans.woff2) format('woff2'); font-weight: 200 800; }
+  @font-face { font-family: 'Serif'; src: url(assets/InstrumentSerif-Italic.woff2) format('woff2'); font-style: italic; }
+
+  :root {
+    --blue: #3461F5;
+    --blue-dark: #1E2C7A;
+    --navy: #121C52;
+    --blue-soft: #EAF0FF;
+    --blue-line: #D3DEFF;
+    --ink: #0F1A3D;
+    --muted: #5B6685;
+    --bg: #F4F7FF;
+    --yellow: #FFBC00;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1350px; }
+  body { font-family: 'Jakarta', sans-serif; color: var(--ink); background: var(--bg); position: relative; overflow: hidden; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative; height: 318px; padding: 40px 48px 0; text-align: center; color: #fff;
+    background:
+      radial-gradient(520px 300px at 92% 0%, rgba(26,155,255,.45), transparent 70%),
+      radial-gradient(420px 260px at 4% 100%, rgba(122,140,255,.35), transparent 70%),
+      linear-gradient(160deg, #3461F5 0%, #1E2C7A 62%, #121C52 100%);
+    border-radius: 0 0 44px 44px; overflow: hidden;
+  }
+  .hero::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+    background-size: 44px 44px;
+    -webkit-mask-image: linear-gradient(#000, transparent 95%);
+  }
+  .hero > * { position: relative; }
+  .float {
+    position: absolute; width: 62px; height: 62px; border-radius: 18px; display: grid; place-items: center;
+    background: rgba(255,255,255,.12); border: 1.5px solid rgba(255,255,255,.22); color: #fff;
+  }
+  .float svg { width: 30px; height: 30px; stroke-width: 2.2; }
+  .fl1 { left: 40px; top: 36px; transform: rotate(-8deg); }
+  .fl2 { right: 40px; top: 36px; transform: rotate(8deg); }
+  .fl3 { left: 74px; top: 210px; width: 50px; height: 50px; transform: rotate(6deg); }
+  .fl4 { right: 74px; top: 210px; width: 50px; height: 50px; transform: rotate(-6deg); }
+  .fl3 svg, .fl4 svg { width: 24px; height: 24px; }
+
+  h1 { font-size: 88px; line-height: 1; font-weight: 800; letter-spacing: -.04em; white-space: nowrap; }
+  h1 .hl { display: inline-block; position: relative; isolation: isolate; }
+  h1 .hl::after {
+    content: ""; position: absolute; left: -8px; right: -8px; bottom: 4px; height: 22px; z-index: -1;
+    background: var(--yellow); border-radius: 8px; transform: rotate(-2deg);
+  }
+  .h2 { margin-top: 4px; font-size: 76px; font-weight: 800; letter-spacing: -.035em; line-height: 1.05; white-space: nowrap; }
+  .h2 em { font-family: 'Serif'; font-weight: 400; font-size: 94px; letter-spacing: -.01em; color: #BFD3FF; }
+  .lead {
+    margin-top: 16px; display: inline-flex; align-items: center; gap: 12px;
+    background: rgba(255,255,255,.12); border: 1.5px solid rgba(255,255,255,.25);
+    border-radius: 99px; padding: 9px 24px 9px 10px; font-size: 21px; font-weight: 600;
+  }
+  .lead .ic { width: 34px; height: 34px; border-radius: 50%; background: var(--yellow); color: var(--navy); display: grid; place-items: center; }
+  .lead .ic svg { width: 19px; height: 19px; stroke-width: 2.6; }
+
+  /* ---------- Grid ---------- */
+  .grid { padding: 20px 48px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+  .card {
+    position: relative; display: flex; gap: 16px; align-items: flex-start;
+    background: #fff; border: 1.5px solid var(--blue-line); border-radius: 24px;
+    padding: 16px 18px; height: 144px; box-shadow: 0 10px 26px rgba(30,44,122,.06);
+  }
+  .tile {
+    width: 58px; height: 58px; border-radius: 17px; flex: none; color: #fff; position: relative;
+    display: grid; place-items: center; box-shadow: 0 8px 18px var(--sh);
+    background: linear-gradient(135deg, var(--c1), var(--c2));
+  }
+  .tile svg { width: 29px; height: 29px; stroke-width: 2.2; }
+  .tile .no {
+    position: absolute; bottom: -8px; right: -8px; width: 26px; height: 26px; border-radius: 50%;
+    background: #fff; color: var(--c2); font-size: 13px; font-weight: 800; display: grid; place-items: center;
+    box-shadow: 0 2px 6px rgba(15,26,61,.18);
+  }
+  .card h3 { font-size: 23px; font-weight: 800; letter-spacing: -.015em; line-height: 1.1; display: flex; align-items: center; gap: 8px; }
+  .card ul { list-style: none; margin-top: 9px; display: grid; gap: 4px; }
+  .card li { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 500; color: #36405E; line-height: 1.3; }
+  .card li::before {
+    content: ""; width: 18px; height: 18px; border-radius: 50%; flex: none;
+    background: var(--c-soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23334' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5L20 7'/%3E%3C/svg%3E") center / 11px no-repeat;
+  }
+  .tag {
+    font-size: 11.5px; font-weight: 800; letter-spacing: .08em; padding: 4px 9px; border-radius: 99px;
+    background: var(--c-soft); color: var(--c2); white-space: nowrap;
+  }
+
+  /* colour themes */
+  .c-blue   { --c1: #5B82FF; --c2: #3461F5; --c-soft: #E6EDFF; --sh: rgba(52,97,245,.3); }
+  .c-sky    { --c1: #4DB5FF; --c2: #1A7FFF; --c-soft: #E2F1FF; --sh: rgba(26,127,255,.3); }
+  .c-violet { --c1: #9B7BFF; --c2: #6A44F2; --c-soft: #EFEAFF; --sh: rgba(106,68,242,.3); }
+  .c-teal   { --c1: #2BD4C2; --c2: #0FA394; --c-soft: #DFF8F5; --sh: rgba(15,163,148,.3); }
+  .c-indigo { --c1: #6D7DFF; --c2: #3B45C9; --c-soft: #E8EAFF; --sh: rgba(59,69,201,.3); }
+  .c-green  { --c1: #3BDB68; --c2: #14A83C; --c-soft: #E3F8E9; --sh: rgba(20,168,60,.3); }
+  .c-amber  { --c1: #FFCE3A; --c2: #F09A00; --c-soft: #FFF3D6; --sh: rgba(240,154,0,.32); }
+  .c-coral  { --c1: #FF8A7A; --c2: #EC4E3E; --c-soft: #FFE8E5; --sh: rgba(236,78,62,.3); }
+  .c-pink   { --c1: #FF7EB6; --c2: #E3358A; --c-soft: #FFE6F1; --sh: rgba(227,53,138,.3); }
+
+  /* feature styles */
+  .tint { background: linear-gradient(135deg, #FFFFFF 40%, #EAF0FF); border-color: #B9CCFF; }
+  .dark { background: linear-gradient(150deg, #1E2C7A, #121C52); border: none; color: #fff; overflow: hidden; }
+  .dark::after {
+    content: ""; position: absolute; width: 220px; height: 220px; right: -70px; bottom: -110px; border-radius: 50%;
+    background: radial-gradient(rgba(26,155,255,.55), transparent 70%);
+  }
+  .dark li { color: rgba(255,255,255,.85); position: relative; z-index: 1; }
+  .dark .tile { background: #fff; color: var(--blue); box-shadow: none; }
+  .dark .tile .no { background: var(--yellow); color: var(--navy); }
+  .dark .tag { background: var(--yellow); color: var(--navy); }
+  .dark li::before {
+    background: var(--yellow) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23121C52' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5L20 7'/%3E%3C/svg%3E") center / 11px no-repeat;
+  }
+
+  /* ---------- Save strip ---------- */
+  .save {
+    margin: 16px 48px 0; height: 64px; border-radius: 20px; background: #fff; border: 2px dashed var(--blue);
+    display: flex; align-items: center; justify-content: center; gap: 14px; font-size: 21px; font-weight: 700;
+  }
+  .save .ic { width: 40px; height: 40px; border-radius: 12px; background: var(--blue); color: #fff; display: grid; place-items: center; }
+  .save .ic svg { width: 21px; height: 21px; stroke-width: 2.4; }
+  .save em { font-family: 'Serif'; font-weight: 400; font-size: 27px; color: var(--blue); }
+
+  /* ---------- Footer (shared brand footer) ---------- */
+  footer {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 150px;
+    background: linear-gradient(100deg, var(--blue) 0%, var(--blue-dark) 100%);
+    color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 36px; white-space: nowrap;
+  }
+  .f { display: flex; align-items: center; gap: 14px; }
+  .sep { width: 1px; height: 70px; background: rgba(255,255,255,.28); flex: none; }
+  .me img { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; flex: none; }
+  .me b { display: block; font-size: 21px; font-weight: 800; line-height: 1.15; }
+  .me span { display: block; font-size: 16px; opacity: .85; margin-top: 4px; font-weight: 500; }
+  .fi { width: 48px; height: 48px; border-radius: 14px; flex: none; background: rgba(255,255,255,.16); display: grid; place-items: center; }
+  .fi svg { width: 25px; height: 25px; stroke-width: 2.3; }
+  .svc { font-size: 17px; line-height: 1.25; font-weight: 700; }
+  .svc small { display: block; font-size: 14px; opacity: .85; font-weight: 500; margin-top: 3px; }
+  .rp b { display: block; font-size: 20px; font-weight: 800; }
+  .rp span { display: block; font-size: 14px; opacity: .85; font-weight: 500; }
+  .brand img { width: 58px; height: 50px; border-radius: 12px; object-fit: cover; box-shadow: 0 0 0 2px rgba(255,255,255,.5); }
+  .brand b { font-size: 21px; font-weight: 800; line-height: 1.1; display: block; }
+  .brand span { display: block; margin-top: 2px; font-size: 14px; opacity: .85; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="float fl1"><i data-lucide="search"></i></div>
+  <div class="float fl2"><i data-lucide="chart-no-axes-combined"></i></div>
+  <div class="float fl3"><i data-lucide="link"></i></div>
+  <div class="float fl4"><i data-lucide="sparkles"></i></div>
+  <h1><span class="hl">10 Ways</span> to Improve</h1>
+  <div class="h2">Your <em>SEO Rankings</em></div>
+  <div class="lead"><span class="ic"><i data-lucide="list-checks"></i></span>A simple checklist to rank higher on Google &amp; AI search</div>
+</section>
+
+<div class="grid">
+  <div class="card c-blue tint">
+    <div class="tile"><i data-lucide="refresh-cw"></i><span class="no">1</span></div>
+    <div><h3>Update Content <span class="tag">QUICK WIN</span></h3>
+      <ul><li>Refresh old pages</li><li>Fix outdated info</li><li>Add missing sections</li></ul></div>
+  </div>
+  <div class="card c-sky">
+    <div class="tile"><i data-lucide="key-round"></i><span class="no">2</span></div>
+    <div><h3>Low-KD Keywords</h3>
+      <ul><li>Pick low-difficulty keywords</li><li>Target long-tail terms</li><li>Match search intent</li></ul></div>
+  </div>
+  <div class="card c-violet">
+    <div class="tile"><i data-lucide="smartphone"></i><span class="no">3</span></div>
+    <div><h3>Improve UX</h3>
+      <ul><li>Fast-loading pages</li><li>Mobile-friendly design</li><li>Easy navigation</li></ul></div>
+  </div>
+  <div class="card c-teal">
+    <div class="tile"><i data-lucide="file-text"></i><span class="no">4</span></div>
+    <div><h3>On-Page SEO</h3>
+      <ul><li>Optimize titles &amp; meta</li><li>Use clear headings</li><li>Add keywords naturally</li></ul></div>
+  </div>
+  <div class="card c-indigo">
+    <div class="tile"><i data-lucide="wrench"></i><span class="no">5</span></div>
+    <div><h3>Technical SEO</h3>
+      <ul><li>Fix crawl errors</li><li>Improve indexing</li><li>Remove broken links</li></ul></div>
+  </div>
+  <div class="card c-green">
+    <div class="tile"><i data-lucide="link-2"></i><span class="no">6</span></div>
+    <div><h3>Build Backlinks <span class="tag">HIGH IMPACT</span></h3>
+      <ul><li>Earn high-authority links</li><li>Use digital PR</li><li>Avoid spammy links</li></ul></div>
+  </div>
+  <div class="card dark">
+    <div class="tile"><i data-lucide="sparkles"></i><span class="no">7</span></div>
+    <div><h3>Optimize for AI Search <span class="tag">NEW</span></h3>
+      <ul><li>Write clear, direct answers</li><li>Use structured content</li><li>Target real questions</li></ul></div>
+  </div>
+  <div class="card c-amber">
+    <div class="tile"><i data-lucide="git-merge"></i><span class="no">8</span></div>
+    <div><h3>Merge Similar Pages</h3>
+      <ul><li>Stop keyword cannibalization</li><li>Combine weak pages</li><li>Strengthen one URL</li></ul></div>
+  </div>
+  <div class="card c-coral">
+    <div class="tile"><i data-lucide="shield-check"></i><span class="no">9</span></div>
+    <div><h3>Improve E-E-A-T</h3>
+      <ul><li>Show real expertise</li><li>Build trust signals</li><li>Add first-hand experience</li></ul></div>
+  </div>
+  <div class="card c-pink">
+    <div class="tile"><i data-lucide="mouse-pointer-click"></i><span class="no">10</span></div>
+    <div><h3>Improve CTR</h3>
+      <ul><li>Write catchy titles</li><li>Improve meta descriptions</li><li>Use emotional hooks</li></ul></div>
+  </div>
+</div>
+
+<div class="save">
+  <span class="ic"><i data-lucide="bookmark"></i></span>
+  Save this &amp; fix <em>one thing</em> this week. Small fixes, permanent rankings.
+</div>
+
+<footer>
+  <div class="f me">
+    <img src="assets/mehrooz.jpg" alt="">
+    <div><b>Muhammad<br>Mehrooz Shafique</b><span>CEO, Permanent SEO</span></div>
+  </div>
+  <div class="sep"></div>
+  <div class="f">
+    <div class="fi"><i data-lucide="trending-up"></i></div>
+    <div class="svc">Helping brands grow<br>permanently<small>Semantic SEO · AI Search</small></div>
+  </div>
+  <div class="sep"></div>
+  <div class="f rp">
+    <div class="fi"><i data-lucide="repeat-2"></i></div>
+    <div><b>Repost</b><span>Share with<br>your network</span></div>
+  </div>
+  <div class="sep"></div>
+  <div class="f brand">
+    <img src="assets/logo-tile.png" alt="">
+    <div><b>Permanent<br>SEO</b><span>Agency</span></div>
+  </div>
+</footer>
+
+<script src="assets/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

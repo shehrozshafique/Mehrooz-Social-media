@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Brand Discovery Ecosystem</title>
+<style>
+  @font-face { font-family: 'Jakarta'; src: url(assets/PlusJakartaSans.woff2) format('woff2'); font-weight: 200 800; }
+  @font-face { font-family: 'Serif'; src: url(assets/InstrumentSerif-Italic.woff2) format('woff2'); font-style: italic; }
+
+  :root {
+    --blue: #3461F5;
+    --blue-dark: #1E2C7A;
+    --blue-soft: #EAF0FF;
+    --blue-line: #C9D7FF;
+    --ink: #0F1A3D;
+    --muted: #5B6685;
+    --bg: #F7F9FF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1350px; }
+  body {
+    font-family: 'Jakarta', sans-serif; color: var(--ink); background: var(--bg);
+    background-image:
+      linear-gradient(rgba(52,97,245,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(52,97,245,.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    position: relative; overflow: hidden;
+  }
+  .wrap { padding: 52px 56px 0; }
+
+  /* Header */
+  .label {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 17px; font-weight: 700; letter-spacing: .14em; color: var(--blue);
+    background: #fff; border: 1.5px solid var(--blue-line); border-radius: 99px; padding: 9px 18px;
+  }
+  .label .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); }
+  h1 { margin-top: 20px; font-size: 64px; line-height: 1.04; font-weight: 800; letter-spacing: -.025em; }
+  h1 em { font-family: 'Serif'; font-weight: 400; font-size: 76px; color: var(--blue); letter-spacing: -.01em; }
+  .sub { margin-top: 16px; font-size: 25px; line-height: 1.4; color: var(--muted); font-weight: 500; }
+  .sub b { color: var(--ink); font-weight: 700; }
+
+  /* Grid */
+  .grid {
+    position: relative; margin-top: 34px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 22px;
+  }
+  .card {
+    background: #fff; border: 1.5px solid var(--blue-line); border-radius: 26px;
+    padding: 24px 26px 22px; height: 336px;
+    box-shadow: 0 10px 30px rgba(30,44,122,.06);
+  }
+  .card.r { padding-left: 128px; }
+  .card.l { padding-right: 128px; }
+  .card-head { display: flex; align-items: center; gap: 12px; }
+  .num {
+    width: 40px; height: 40px; border-radius: 12px; flex: none;
+    background: var(--blue); color: #fff; font-weight: 800; font-size: 21px;
+    display: grid; place-items: center;
+  }
+  .card h2 { font-size: 26px; font-weight: 800; letter-spacing: -.01em; line-height: 1.1; }
+  .card .tag { font-size: 16px; color: var(--blue); font-weight: 600; margin-top: 3px; }
+  .items { margin-top: 18px; display: grid; gap: 14px; }
+  .item { display: flex; align-items: center; gap: 14px; }
+  .ico {
+    width: 46px; height: 46px; border-radius: 13px; flex: none;
+    background: var(--blue-soft); color: var(--blue); display: grid; place-items: center;
+  }
+  .ico svg { width: 24px; height: 24px; stroke-width: 2.2; }
+  .item b { display: block; font-size: 20px; font-weight: 700; line-height: 1.15; }
+  .item span { display: block; font-size: 15.5px; color: var(--muted); font-weight: 500; margin-top: 2px; }
+
+  /* Centre ring */
+  .hub {
+    position: absolute; left: 50%; top: 50%; width: 236px; height: 236px;
+    transform: translate(-50%, -50%);
+  }
+  .hub svg { position: absolute; inset: 0; }
+  .hub .core {
+    position: absolute; inset: 34px; border-radius: 50%; background: #fff;
+    display: grid; place-items: center; text-align: center;
+    box-shadow: 0 6px 20px rgba(30,44,122,.12);
+  }
+  .core b { display: block; font-size: 24px; font-weight: 800; line-height: 1.05; }
+  .core em { display: block; font-family: 'Serif'; font-size: 34px; color: var(--blue); line-height: 1; }
+
+  /* Takeaway */
+  .take {
+    margin-top: 24px; display: flex; align-items: center; justify-content: center; gap: 14px;
+    font-size: 23px; font-weight: 600; color: var(--ink);
+  }
+  .take .arrow { color: var(--blue); font-weight: 800; font-size: 28px; }
+  .take em { font-family: 'Serif'; font-size: 30px; color: var(--blue); font-weight: 400; }
+
+  /* Footer */
+  footer {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 150px;
+    background: linear-gradient(100deg, var(--blue) 0%, var(--blue-dark) 100%);
+    color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 36px; white-space: nowrap;
+  }
+  .f { display: flex; align-items: center; gap: 14px; }
+  .sep { width: 1px; height: 70px; background: rgba(255,255,255,.28); margin: 0; flex: none; }
+  .me img { width: 84px; height: 84px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; flex: none; }
+  .me b { display: block; font-size: 21px; font-weight: 800; line-height: 1.15; }
+  .me span { display: block; font-size: 16px; opacity: .85; margin-top: 4px; font-weight: 500; }
+  .fi {
+    width: 48px; height: 48px; border-radius: 14px; flex: none;
+    background: rgba(255,255,255,.16); display: grid; place-items: center;
+  }
+  .fi svg { width: 25px; height: 25px; stroke-width: 2.3; }
+  .svc { font-size: 17px; line-height: 1.25; font-weight: 700; }
+  .svc small { display: block; font-size: 14px; opacity: .85; font-weight: 500; margin-top: 3px; }
+  .rp b { display: block; font-size: 20px; font-weight: 800; }
+  .rp span { display: block; font-size: 14px; opacity: .85; font-weight: 500; }
+  .brand img { width: 58px; height: 50px; border-radius: 12px; object-fit: cover; box-shadow: 0 0 0 2px rgba(255,255,255,.5); }
+  .brand b { font-size: 21px; font-weight: 800; line-height: 1.1; display: block; }
+  .brand span { display: block; margin-top: 2px; font-size: 14px; opacity: .85; font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="label"><span class="dot"></span>BRAND GROWTH MAP · 2026</div>
+  <h1>The Modern Brand<br><em>Discovery</em> Ecosystem</h1>
+  <p class="sub">Customers don't find you in one place anymore.<br><b>They search, scroll, check, then buy.</b> Be visible at every step.</p>
+
+  <div class="grid">
+    <div class="card l">
+      <div class="card-head"><div class="num">1</div><div><h2>Search &amp; AI</h2><div class="tag">Where people ask</div></div></div>
+      <div class="items">
+        <div class="item"><div class="ico"><i data-lucide="search"></i></div><div><b>Search Engines</b><span>Google, Bing</span></div></div>
+        <div class="item"><div class="ico"><i data-lucide="bot"></i></div><div><b>AI Assistants</b><span>ChatGPT, Gemini, Claude</span></div></div>
+        <div class="item"><div class="ico"><i data-lucide="sparkles"></i></div><div><b>AI Answers</b><span>AI Overviews, Perplexity</span></div></div>
+        <div class="item"><div class="ico"><i data-lucide="mic"></i></div><div><b>Voice Search</b><span>Siri, Alexa, Google</span></div></div>
+      </div>
+    </div>
+
+    <div class="card r">
+      <div class="card-head"><div class="num">2</div><div><h2>Social &amp; Community</h2><div class="tag">Where people scroll</div></div></div>
+      <div class="items">
+        <div class="item"><div class="ico"><i data-lucide="play"></i></div><div><b>Short Video</b><span>YouTube, TikTok, Reels</span></div></div>
+        <div class="item"><div class="ico"><i data-lucide="users"></i></div><div><b>Social Feeds</b><span>LinkedIn, Instagram, FB</span></div></div>
+        <div class="item"><div class="ico"><i data-lucide="messages-square"></i></div><div><b>Communities</b><span>Reddit, Quora, Groups</span></div></div>
+        <div class="item"><div class="ico"><i data-lucide="megaphone"></i></div><div><b>Creators &amp; UGC</b><span>Influencers, real users</span></div></div>
+      </div>
+    </div>
+
+    <div class="card l">
+      <div class="card-head"><div class="num">3</div><div><h2>Trust &amp; Proof</h2><div class="tag">Where people check</div></div></div>
+      <div class="items">
+        <div class="item"><div class="ico"><i data-lucide="star"></i></div><div><b>Reviews</b><span>Google, Trustpilot, G2</span></div></div>
+        <div class="item"><div class="ico"><i data-lucide="newspaper"></i></div><div><b>Media Mentions</b><span>News, blogs, podcasts</span></div></div>
+        <div class="item"><div class="ico"><i data-lucide="scale"></i></div><div><b>Comparisons</b><span>"Best of" &amp; vs. pages</span></div></div>
+        <div class="item"><div class="ico"><i data-lucide="badge-check"></i></div><div><b>Proof</b><span>Case studies, awards</span></div></div>
+      </div>
+    </div>
+
+    <div class="card r">
+      <div class="card-head"><div class="num">4</div><div><h2>Convert &amp; Retain</h2><div class="tag">Where people buy &amp; stay</div></div></div>
+      <div class="items">
+        <div class="item"><div class="ico"><i data-lucide="globe"></i></div><div><b>Website</b><span>Fast, clear, helpful</span></div></div>
+        <div class="item"><div class="ico"><i data-lucide="shopping-cart"></i></div><div><b>Checkout</b><span>Store, booking, forms</span></div></div>
+        <div class="item"><div class="ico"><i data-lucide="mail"></i></div><div><b>Follow-up</b><span>Email, WhatsApp, chat</span></div></div>
+        <div class="item"><div class="ico"><i data-lucide="repeat"></i></div><div><b>Loyalty</b><span>Repeat buys, referrals</span></div></div>
+      </div>
+    </div>
+
+    <div class="hub">
+      <svg viewBox="0 0 236 236">
+        <defs>
+          <marker id="tip" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+            <path d="M0 0 L10 5 L0 10 z" fill="#fff"/>
+          </marker>
+        </defs>
+        <!-- four arcs, one per stage, clockwise from top-left -->
+        <g fill="none" stroke-width="26" stroke-linecap="butt">
+          <path d="M 19 118 A 99 99 0 0 1 118 19" stroke="#3461F5"/>
+          <path d="M 118 19 A 99 99 0 0 1 217 118" stroke="#5B82FF"/>
+          <path d="M 217 118 A 99 99 0 0 1 118 217" stroke="#2747C9"/>
+          <path d="M 118 217 A 99 99 0 0 1 19 118" stroke="#1E2C7A"/>
+        </g>
+        <g fill="none" stroke="#fff" stroke-width="3" marker-end="url(#tip)">
+          <path d="M 48 48 A 99 99 0 0 1 78 28"/>
+          <path d="M 188 48 A 99 99 0 0 1 208 78"/>
+          <path d="M 188 188 A 99 99 0 0 1 158 208"/>
+          <path d="M 48 188 A 99 99 0 0 1 28 158"/>
+        </g>
+      </svg>
+      <div class="core"><div><b>Your Brand</b><em>Visibility</em></div></div>
+    </div>
+  </div>
+
+  <div class="take">Search <span class="arrow">→</span> Scroll <span class="arrow">→</span> Check <span class="arrow">→</span> Buy. &nbsp;Show up in <em>all four.</em></div>
+</div>
+
+<footer>
+  <div class="f me">
+    <img src="assets/mehrooz.jpg" alt="">
+    <div><b>Muhammad<br>Mehrooz Shafique</b><span>CEO, Permanent SEO</span></div>
+  </div>
+  <div class="sep"></div>
+  <div class="f">
+    <div class="fi"><i data-lucide="trending-up"></i></div>
+    <div class="svc">Helping brands grow<br>permanently<small>Semantic SEO · AI Search</small></div>
+  </div>
+  <div class="sep"></div>
+  <div class="f rp">
+    <div class="fi"><i data-lucide="repeat-2"></i></div>
+    <div><b>Repost</b><span>Share with<br>your network</span></div>
+  </div>
+  <div class="sep"></div>
+  <div class="f brand">
+    <img src="assets/logo-tile.png" alt="">
+    <div><b>Permanent<br>SEO</b><span>Agency</span></div>
+  </div>
+</footer>
+
+<script src="assets/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

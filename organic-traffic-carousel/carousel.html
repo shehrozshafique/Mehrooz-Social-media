@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Why Organic Traffic Isn't the Goal</title>
+<style>
+  @font-face { font-family: 'Poppins'; src: url(assets/Poppins-400.woff2) format('woff2'); font-weight: 400; }
+  @font-face { font-family: 'Poppins'; src: url(assets/Poppins-600.woff2) format('woff2'); font-weight: 600; }
+  @font-face { font-family: 'Poppins'; src: url(assets/Poppins-700.woff2) format('woff2'); font-weight: 700; }
+  @font-face { font-family: 'Poppins'; src: url(assets/Poppins-800.woff2) format('woff2'); font-weight: 800; }
+
+  :root {
+    --blue: #3461F5;
+    --blue-mid: #5B82FF;
+    --blue-dark: #1E2C7A;
+    --navy: #121C52;
+    --blue-soft: #EAF0FF;
+    --blue-line: #D3DEFF;
+    --ink: #0F1A3D;
+    --muted: #5B6685;
+    --yellow: #FFBC00;
+    --green: #14A83C;
+    --red: #E5484D;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Poppins', sans-serif; color: var(--ink); background: #ccd6f5; }
+
+  .slide {
+    width: 1080px; height: 1080px; position: relative; overflow: hidden; background: #fff;
+    background-image:
+      linear-gradient(rgba(52,97,245,.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(52,97,245,.045) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* ---------- Top bar ---------- */
+  .top {
+    position: absolute; top: 0; left: 0; right: 0; height: 96px; padding: 0 48px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; font-size: 24px; font-weight: 800; color: var(--blue); }
+  .brand img { height: 40px; display: block; }
+  .count { font-size: 18px; font-weight: 700; color: var(--blue); background: var(--blue-soft); border-radius: 99px; padding: 8px 18px; }
+
+  /* ---------- Headline: full width, centred ---------- */
+  .head { position: absolute; top: 112px; left: 48px; right: 48px; text-align: center; }
+  h1 { font-size: 80px; line-height: 1.04; font-weight: 800; letter-spacing: -.03em; color: var(--ink); }
+  h1 .b { color: var(--blue); }
+  .sub { margin-top: 14px; font-size: 24px; line-height: 1.4; color: var(--muted); font-weight: 400; }
+
+  /* ---------- Body ---------- */
+  .body { position: absolute; top: 330px; left: 48px; right: 48px; bottom: 190px; }
+
+  .card { position: relative; background: #fff; border: 1.5px solid var(--blue-line); border-radius: 26px; box-shadow: 0 12px 28px rgba(30,44,122,.07); }
+  .ico { width: 64px; height: 64px; border-radius: 50%; flex: none; color: var(--blue); background: var(--blue-soft); display: grid; place-items: center; }
+  .ico svg { width: 28px; height: 28px; stroke-width: 2.2; }
+  .ico.dark { background: var(--blue); color: #fff; }
+  .title { font-size: 26px; font-weight: 700; line-height: 1.2; }
+  .desc { font-size: 19px; color: var(--muted); font-weight: 400; line-height: 1.4; }
+  .check { width: 30px; height: 30px; border-radius: 50%; flex: none; background: var(--blue-soft); color: var(--blue); display: grid; place-items: center; }
+  .check svg { width: 17px; height: 17px; stroke-width: 3; }
+  .example { background: var(--blue-soft); border-radius: 14px; padding: 12px 16px; font-size: 18px; color: var(--muted); line-height: 1.35; }
+  .example b { color: var(--blue); font-weight: 700; }
+
+  /* ---------- Slide 1: clock wheel (ref 9) ---------- */
+  .wheel { position: absolute; left: 50%; top: 0; transform: translateX(-50%); }
+  .note { position: absolute; font-size: 19px; color: var(--muted); font-weight: 400; line-height: 1.35; width: 240px; }
+  .note b { display: block; color: var(--ink); font-weight: 700; font-size: 21px; }
+  .swipe {
+    position: absolute; right: 0; bottom: 0; display: flex; align-items: center; gap: 10px;
+    background: var(--blue); color: #fff; font-size: 20px; font-weight: 700; padding: 14px 24px; border-radius: 99px;
+  }
+  .swipe svg { width: 20px; height: 20px; stroke-width: 2.6; }
+
+  /* ---------- Slide 2: numbered cards (ref 10) ---------- */
+  .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; height: 100%; }
+  .pc { padding: 30px 28px 24px; display: flex; flex-direction: column; }
+  .pc.good { background: linear-gradient(150deg, #1E2C7A, #121C52); border: none; color: #fff; }
+  .pc .hd { display: flex; align-items: center; gap: 14px; }
+  .pc .n { width: 52px; height: 52px; border-radius: 16px; background: var(--blue); color: #fff; font-size: 24px; font-weight: 800; display: grid; place-items: center; flex: none; }
+  .pc.good .n { background: var(--yellow); color: var(--navy); }
+  .pc .title { font-size: 28px; }
+  .pc.good .title, .pc.good .desc { color: #fff; }
+  .pc.good .desc { color: rgba(255,255,255,.8); }
+  .pc .desc { margin-top: 12px; }
+  .pc ul { list-style: none; display: grid; gap: 12px; margin-top: 18px; }
+  .pc li { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 500; color: #2F3A5C; }
+  .pc.good li { color: #fff; }
+  .pc.good .check { background: rgba(255,255,255,.16); color: #7CF5A0; }
+  .pc .example { margin-top: auto; }
+  .pc.good .example { background: rgba(255,255,255,.12); color: rgba(255,255,255,.88); }
+  .pc.good .example b { color: var(--yellow); }
+
+  /* ---------- Slide 3: circle steps on a dotted line (ref 13) ---------- */
+  .spine { position: absolute; left: 50%; top: 0; bottom: 0; width: 0; border-left: 3px dotted var(--blue-line); transform: translateX(-50%); }
+  .st { position: absolute; left: 0; right: 0; height: 150px; display: grid; grid-template-columns: 1fr 130px 1fr; gap: 26px; align-items: center; }
+  .st .node { grid-column: 2; grid-row: 1; width: 130px; height: 130px; border-radius: 50%; background: #fff; border: 3px solid var(--blue); display: grid; place-items: center; color: var(--blue); box-shadow: 0 10px 24px rgba(52,97,245,.2); }
+  .st .node svg { width: 46px; height: 46px; stroke-width: 2.1; }
+  .st .card { padding: 22px 26px; }
+  .st.r .card { grid-column: 3; grid-row: 1; }
+  .st.l .card { grid-column: 1; grid-row: 1; }
+  .st .card .title { font-size: 26px; }
+  .st .card .desc { margin-top: 6px; }
+
+  /* ---------- Slide 4: funnel + side cards (ref 12) ---------- */
+  .fun { display: grid; grid-template-columns: 500px 1fr; gap: 34px; height: 100%; align-items: center; }
+  .tiers { display: grid; gap: 14px; justify-items: center; }
+  .tier { height: 112px; color: #fff; font-size: 24px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 12px; border-radius: 20px; box-shadow: 0 10px 22px rgba(15,26,61,.18); }
+  .tier svg { width: 28px; height: 28px; stroke-width: 2.3; }
+  .t1 { width: 500px; background: linear-gradient(90deg, #5B82FF, #3461F5); }
+  .t2 { width: 440px; background: linear-gradient(90deg, #3461F5, #2A4DD6); }
+  .t3 { width: 380px; background: linear-gradient(90deg, #2A4DD6, #1E2C7A); }
+  .t4 { width: 320px; background: linear-gradient(90deg, #1E2C7A, #121C52); }
+  .fc { display: grid; gap: 14px; }
+  .fc .card { height: 112px; display: flex; align-items: center; gap: 16px; padding: 0 20px; }
+  .fc .card .ico { width: 52px; height: 52px; }
+  .fc .card .ico svg { width: 24px; height: 24px; }
+  .fc .title { font-size: 22px; }
+  .fc .desc { font-size: 17px; margin-top: 2px; }
+
+  /* ---------- Slide 5: stacked glossy cards (ref 11) ---------- */
+  .stack { position: absolute; inset: 0; }
+  .glass {
+    position: absolute; width: 740px; height: 118px; border-radius: 28px; color: #fff; padding: 0 28px;
+    display: flex; align-items: center; gap: 22px;
+    background: linear-gradient(135deg, #5B82FF 0%, #3461F5 55%, #1E2C7A 100%);
+    box-shadow: 0 18px 34px rgba(30,44,122,.28), inset 0 2px 0 rgba(255,255,255,.45), inset 0 -2px 0 rgba(0,0,0,.12);
+  }
+  .glass .gi { width: 66px; height: 66px; border-radius: 20px; background: rgba(255,255,255,.18); border: 1.5px solid rgba(255,255,255,.35); display: grid; place-items: center; flex: none; }
+  .glass .gi svg { width: 30px; height: 30px; stroke-width: 2.1; }
+  .glass .title { font-size: 28px; color: #fff; }
+  .glass .desc { color: rgba(255,255,255,.82); margin-top: 4px; font-size: 19px; }
+  .glass .tag { margin-left: auto; font-size: 18px; font-weight: 700; color: var(--navy); background: #fff; padding: 6px 14px; border-radius: 99px; white-space: nowrap; }
+
+  /* ---------- Slide 6: numbered checklist + CTA (ref 13 + 10) ---------- */
+  .rows { display: grid; gap: 16px; }
+  .row { display: flex; align-items: center; gap: 22px; }
+  .row .num { width: 72px; height: 72px; border-radius: 50%; background: #fff; border: 3px solid var(--blue); color: var(--blue); font-size: 30px; font-weight: 800; display: grid; place-items: center; flex: none; box-shadow: 0 8px 18px rgba(52,97,245,.18); }
+  .row .card { flex: 1; height: 80px; padding: 0 26px; display: flex; align-items: center; gap: 16px; }
+  .row .title { font-size: 25px; }
+  .cta {
+    margin-top: 22px; height: 96px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    background: linear-gradient(150deg, #1E2C7A, #121C52); color: #fff; border-radius: 26px; padding: 0 28px;
+  }
+  .cta b { font-size: 24px; font-weight: 700; display: block; }
+  .cta span { font-size: 18px; color: rgba(255,255,255,.78); font-weight: 400; }
+  .cta .kw { display: flex; align-items: center; gap: 10px; background: var(--yellow); color: var(--navy); font-size: 21px; font-weight: 800; padding: 14px 22px; border-radius: 99px; white-space: nowrap; }
+  .cta .kw svg { width: 20px; height: 20px; stroke-width: 2.6; }
+
+  /* ---------- Footer (brand, same on every slide) ---------- */
+  footer {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 150px;
+    background: linear-gradient(100deg, var(--blue) 0%, var(--blue-dark) 100%);
+    color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; white-space: nowrap;
+  }
+  .f { display: flex; align-items: center; gap: 12px; }
+  .sep { width: 1px; height: 70px; background: rgba(255,255,255,.28); flex: none; }
+  .me img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; flex: none; }
+  .me b { display: block; font-size: 19px; font-weight: 700; line-height: 1.2; }
+  .me span { display: block; font-size: 14px; opacity: .85; margin-top: 3px; font-weight: 400; }
+  .fi { width: 46px; height: 46px; border-radius: 14px; flex: none; background: rgba(255,255,255,.16); display: grid; place-items: center; }
+  .fi svg { width: 24px; height: 24px; stroke-width: 2.3; }
+  .svc { font-size: 15px; line-height: 1.3; font-weight: 600; }
+  .svc small { display: block; font-size: 13px; opacity: .85; font-weight: 400; margin-top: 2px; }
+  .rp b { display: block; font-size: 18px; font-weight: 700; }
+  .rp span { display: block; font-size: 13px; opacity: .85; font-weight: 400; }
+  .brandf img { width: 56px; height: 48px; border-radius: 12px; object-fit: cover; box-shadow: 0 0 0 2px rgba(255,255,255,.5); }
+  .brandf b { font-size: 19px; font-weight: 800; line-height: 1.1; display: block; }
+  .brandf span { display: block; margin-top: 2px; font-size: 13px; opacity: .85; font-weight: 400; }
+</style>
+</head>
+<body>
+
+<!-- Each slide: headline + body. Top bar and brand footer are added by the script below. -->
+
+<section class="slide" data-n="1">
+  <div class="head">
+    <h1>Why organic traffic<br><span class="b">isn't the goal</span></h1>
+  </div>
+  <div class="body">
+    <svg class="wheel" width="430" height="430" viewBox="0 0 430 430" style="top:0">
+      <!-- clock-style tick ring -->
+      <g id="ticks"></g>
+      <g transform="translate(215 215)">
+        <path d="M0 0 L0 -190 A190 190 0 0 1 164.5 95 Z" fill="#C9D6F5"/>
+        <path d="M0 0 L164.5 95 A190 190 0 0 1 -164.5 95 Z" fill="#5B82FF"/>
+        <path d="M0 0 L-164.5 95 A190 190 0 0 1 0 -190 Z" fill="#121C52"/>
+        <circle r="30" fill="#fff"/>
+        <circle r="7" fill="#0F1A3D"/>
+      </g>
+      <g font-family="Poppins, sans-serif" text-anchor="middle">
+        <text x="305" y="150" font-size="17" font-weight="600" fill="#0F1A3D">STEP 1</text>
+        <text x="305" y="182" font-size="26" font-weight="800" fill="#0F1A3D">TRAFFIC</text>
+        <text x="215" y="300" font-size="17" font-weight="600" fill="#fff">STEP 2</text>
+        <text x="215" y="332" font-size="26" font-weight="800" fill="#fff">RELEVANCE</text>
+        <text x="125" y="150" font-size="17" font-weight="600" fill="#fff">STEP 3</text>
+        <text x="125" y="182" font-size="26" font-weight="800" fill="#fff">REVENUE</text>
+      </g>
+    </svg>
+    <div class="note" style="left:0;top:40px"><b>Visitors arrive</b>Traffic is the starting point, not the result.</div>
+    <div class="note" style="right:0;top:40px;text-align:right"><b>Relevance builds</b>The right people stay and read.</div>
+    <div class="note" style="left:50%;transform:translateX(-50%);bottom:0;width:520px;text-align:center"><b>Revenue is the goal</b>Real business growth comes from qualified demand.</div>
+    <div class="swipe">Swipe <i data-lucide="arrow-right"></i></div>
+  </div>
+</section>
+
+<section class="slide" data-n="2">
+  <div class="head">
+    <h1>More traffic ≠<br><span class="b">more revenue</span></h1>
+    <p class="sub">Organic traffic brings visitors. Not all of them are your ideal audience.</p>
+  </div>
+  <div class="body">
+    <div class="duo">
+      <div class="card pc">
+        <div class="hd"><div class="n">01</div><div class="title">More traffic</div></div>
+        <p class="desc">Visitors who arrive, but are not ready to buy.</p>
+        <ul>
+          <li><span class="check"><i data-lucide="x"></i></span>Low intent</li>
+          <li><span class="check"><i data-lucide="x"></i></span>Irrelevant audience</li>
+          <li><span class="check"><i data-lucide="x"></i></span>High bounce rate</li>
+        </ul>
+        <div class="example"><b>Example:</b> a viral post that nobody buys from.</div>
+      </div>
+      <div class="card pc good">
+        <div class="hd"><div class="n">02</div><div class="title">Qualified demand</div></div>
+        <p class="desc">Visitors who match your ideal client and need your help.</p>
+        <ul>
+          <li><span class="check"><i data-lucide="check"></i></span>Right audience</li>
+          <li><span class="check"><i data-lucide="check"></i></span>Higher engagement</li>
+          <li><span class="check"><i data-lucide="check"></i></span>More conversions</li>
+        </ul>
+        <div class="example"><b>Example:</b> a service page that answers one buyer's question.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-n="3">
+  <div class="head">
+    <h1>It's not just about<br><span class="b">numbers</span></h1>
+    <p class="sub">Traffic looks great on a report, but it doesn't pay the bills.</p>
+  </div>
+  <div class="body">
+    <div class="spine"></div>
+    <div class="st r" style="top:24px">
+      <div class="node"><i data-lucide="user-round"></i></div>
+      <div class="card"><div class="title">Who is visiting?</div><p class="desc">The right role and business.</p></div>
+    </div>
+    <div class="st l" style="top:224px">
+      <div class="node"><i data-lucide="search"></i></div>
+      <div class="card"><div class="title">What do they need?</div><p class="desc">Their real question, answered.</p></div>
+    </div>
+    <div class="st r" style="top:424px">
+      <div class="node"><i data-lucide="wallet"></i></div>
+      <div class="card"><div class="title">Will they buy?</div><p class="desc">Turn visits into enquiries.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-n="4">
+  <div class="head">
+    <h1>The real goal:<br><span class="b">qualified demand</span></h1>
+  </div>
+  <div class="body">
+    <div class="fun">
+      <div class="tiers">
+        <div class="tier t1"><i data-lucide="search"></i>Search intent</div>
+        <div class="tier t2"><i data-lucide="file-check"></i>Relevant page</div>
+        <div class="tier t3"><i data-lucide="shield-check"></i>Trust</div>
+        <div class="tier t4"><i data-lucide="mail"></i>Enquiry</div>
+      </div>
+      <div class="fc">
+        <div class="card"><div class="ico"><i data-lucide="search"></i></div><div><div class="title">Searching for your solution</div><p class="desc">They already want what you offer.</p></div></div>
+        <div class="card"><div class="ico"><i data-lucide="file-check"></i></div><div><div class="title">Landing on a page that answers</div><p class="desc">Clear headline, proof and next step.</p></div></div>
+        <div class="card"><div class="ico"><i data-lucide="shield-check"></i></div><div><div class="title">Trusting your business</div><p class="desc">Case studies and real results.</p></div></div>
+        <div class="card"><div class="ico dark"><i data-lucide="mail"></i></div><div><div class="title">Taking the next step</div><p class="desc">An enquiry, demo or purchase.</p></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-n="5">
+  <div class="head">
+    <h1>Think beyond<br><span class="b">traffic metrics</span></h1>
+    <p class="sub">Focus on the signals that show real business interest.</p>
+  </div>
+  <div class="body">
+    <div class="stack">
+      <div class="glass" style="top:0;left:0"><div class="gi"><i data-lucide="users-round"></i></div><div><div class="title">Qualified visitors</div><div class="desc">People who fit your ideal customer.</div></div></div>
+      <div class="glass" style="top:130px;left:50px"><div class="gi"><i data-lucide="activity"></i></div><div><div class="title">Engagement rate</div><div class="desc">Time spent and pages explored.</div></div></div>
+      <div class="glass" style="top:260px;left:100px"><div class="gi"><i data-lucide="mail-check"></i></div><div><div class="title">Enquiries &amp; conversions</div><div class="desc">Forms, calls and bookings.</div></div></div>
+      <div class="glass" style="top:390px;left:150px"><div class="gi"><i data-lucide="badge-dollar-sign"></i></div><div><div class="title">Revenue impact</div><div class="desc">Deals won from organic search.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-n="6">
+  <div class="head">
+    <h1>Quick <span class="b">checklist</span></h1>
+    <p class="sub">Pick one important page and ask:</p>
+  </div>
+  <div class="body">
+    <div class="rows">
+      <div class="row"><div class="num">1</div><div class="card"><div class="title">Who is this page for?</div></div></div>
+      <div class="row"><div class="num">2</div><div class="card"><div class="title">What decision do they need to make?</div></div></div>
+      <div class="row"><div class="num">3</div><div class="card"><div class="title">What proof builds their trust?</div></div></div>
+      <div class="row"><div class="num">4</div><div class="card"><div class="title">What is the next step?</div></div></div>
+    </div>
+    <div class="cta">
+      <div><b>Want an SEO audit?</b><span>Let's talk about your pages.</span></div>
+      <div class="kw">DM "AUDIT" <i data-lucide="send"></i></div>
+    </div>
+  </div>
+</section>
+
+<script src="assets/lucide.min.js"></script>
+<script>
+  // Add the shared top bar and brand footer to every slide.
+  const topHTML = (n) => `<div class="top"><div class="brand"><img src="assets/logo-tile.png" alt="">PermanentSEO</div><div class="count">${n}/6</div></div>`;
+  const footHTML = `
+  <footer>
+    <div class="f me"><img src="assets/mehrooz.jpg" alt=""><div><b>Muhammad<br>Mehrooz Shafique</b><span>CEO, Permanent SEO</span></div></div>
+    <div class="sep"></div>
+    <div class="f"><div class="fi"><i data-lucide="trending-up"></i></div><div class="svc">Helping brands grow<br>permanently<small>Semantic SEO · AI Search</small></div></div>
+    <div class="sep"></div>
+    <div class="f rp"><div class="fi"><i data-lucide="repeat-2"></i></div><div><b>Repost</b><span>Share with<br>your network</span></div></div>
+    <div class="sep"></div>
+    <div class="f brandf"><img src="assets/logo-tile.png" alt=""><div><b>Permanent<br>SEO</b><span>Agency</span></div></div>
+  </footer>`;
+  document.querySelectorAll('.slide').forEach((s) => {
+    s.insertAdjacentHTML('afterbegin', topHTML(s.dataset.n));
+    s.insertAdjacentHTML('beforeend', footHTML);
+  });
+
+  // Tick marks around the slide-1 clock ring (like the reference clock).
+  const ticks = document.getElementById('ticks');
+  if (ticks) {
+    let out = '';
+    for (let i = 0; i < 48; i++) {
+      const a = (i / 48) * Math.PI * 2;
+      const x1 = 215 + Math.sin(a) * 200, y1 = 215 - Math.cos(a) * 200;
+      const r2 = i % 4 === 0 ? 212 : 206;
+      const x2 = 215 + Math.sin(a) * r2, y2 = 215 - Math.cos(a) * r2;
+      out += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#0F1A3D" stroke-width="${i % 4 === 0 ? 3 : 1.5}"/>`;
+    }
+    ticks.innerHTML = out;
+  }
+
+  lucide.createIcons();
+</script>
+</body>
+</html>
