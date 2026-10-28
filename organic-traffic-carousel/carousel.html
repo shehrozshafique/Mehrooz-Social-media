@@ -24,10 +24,10 @@
   body { font-family: 'Jakarta', sans-serif; color: var(--ink); background: #ccd6f5; }
 
   .slide {
-    width: 1080px; height: 1080px; position: relative; overflow: hidden; background: var(--bg);
+    width: 1080px; height: 1080px; position: relative; overflow: hidden; background: #fff;
     background-image:
-      linear-gradient(rgba(52,97,245,.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(52,97,245,.05) 1px, transparent 1px);
+      linear-gradient(rgba(52,97,245,.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(52,97,245,.045) 1px, transparent 1px);
     background-size: 40px 40px;
   }
 
@@ -39,51 +39,56 @@
   .brand { display: flex; align-items: center; gap: 12px; font-size: 26px; font-weight: 800; color: var(--blue); letter-spacing: -.01em; }
   .brand img { height: 40px; display: block; }
   .count {
-    font-size: 19px; font-weight: 800; color: var(--blue); background: #fff; border: 1.5px solid var(--blue-line);
+    font-size: 19px; font-weight: 800; color: var(--blue); background: var(--blue-soft);
     border-radius: 99px; padding: 8px 18px;
   }
 
   /* ---------- Headline (full width) ---------- */
   .head { position: absolute; top: 118px; left: 56px; right: 56px; }
-  h1 { font-size: 80px; line-height: 1.02; font-weight: 800; letter-spacing: -.035em; color: var(--ink); }
+  h1 { font-size: 78px; line-height: 1.02; font-weight: 800; letter-spacing: -.035em; color: var(--ink); }
+  h1 .b { color: var(--blue); }
   h1 em { font-family: 'Serif'; font-weight: 400; font-style: italic; color: var(--blue); letter-spacing: -.01em; }
-  .sub { margin-top: 18px; font-size: 26px; line-height: 1.35; color: var(--muted); font-weight: 500; }
-  .sub b { color: var(--ink); font-weight: 800; }
+  .sub { margin-top: 16px; font-size: 25px; line-height: 1.35; color: var(--muted); font-weight: 500; }
 
   /* ---------- Body ---------- */
   .body { position: absolute; top: 340px; left: 56px; right: 56px; bottom: 190px; }
 
-  .card { background: #fff; border: 1.5px solid var(--blue-line); border-radius: 28px; padding: 26px 28px; box-shadow: 0 12px 28px rgba(30,44,122,.07); }
-  .tile {
-    width: 64px; height: 64px; border-radius: 18px; color: #fff; display: grid; place-items: center; flex: none;
-    background: linear-gradient(135deg, var(--c1), var(--c2)); box-shadow: 0 8px 18px var(--sh);
+  .card {
+    position: relative; background: #fff; border: 1.5px solid var(--blue-line); border-radius: 26px;
+    padding: 26px 28px; box-shadow: 0 12px 28px rgba(30,44,122,.07);
   }
-  .tile svg { width: 32px; height: 32px; stroke-width: 2.2; }
-  .c-blue   { --c1: #5B82FF; --c2: #3461F5; --sh: rgba(52,97,245,.3); }
-  .c-sky    { --c1: #4DB5FF; --c2: #1A7FFF; --sh: rgba(26,127,255,.3); }
-  .c-violet { --c1: #9B7BFF; --c2: #6A44F2; --sh: rgba(106,68,242,.3); }
-  .c-teal   { --c1: #2BD4C2; --c2: #0FA394; --sh: rgba(15,163,148,.3); }
-  .c-green  { --c1: #3BDB68; --c2: #14A83C; --sh: rgba(20,168,60,.3); }
-  .c-amber  { --c1: #FFCE3A; --c2: #F09A00; --sh: rgba(240,154,0,.32); }
-
-  .label { font-size: 22px; font-weight: 800; color: var(--ink); }
-  .list { list-style: none; display: grid; gap: 14px; margin-top: 18px; }
-  .list li { display: flex; align-items: center; gap: 12px; font-size: 23px; font-weight: 600; color: #2F3A5C; }
-  .list .ok, .list .no { width: 32px; height: 32px; border-radius: 50%; flex: none; display: grid; place-items: center; }
+  .num {
+    position: absolute; top: -18px; left: 26px; width: 44px; height: 44px; border-radius: 50%;
+    background: var(--blue); color: #fff; font-size: 22px; font-weight: 800; display: grid; place-items: center;
+    box-shadow: 0 6px 14px rgba(52,97,245,.35);
+  }
+  .ico {
+    width: 60px; height: 60px; border-radius: 50%; flex: none; color: var(--blue);
+    background: var(--blue-soft); display: grid; place-items: center;
+  }
+  .ico svg { width: 28px; height: 28px; stroke-width: 2.2; }
+  .ico.dark { background: var(--blue); color: #fff; }
+  .title { font-size: 30px; font-weight: 800; letter-spacing: -.01em; line-height: 1.15; }
+  .list { list-style: none; display: grid; gap: 12px; margin-top: 16px; }
+  .list li { display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 600; color: #2F3A5C; }
+  .list .ok, .list .no { width: 30px; height: 30px; border-radius: 50%; flex: none; display: grid; place-items: center; }
   .list .ok { background: #E3F8E9; color: var(--green); }
   .list .no { background: #FDE8E9; color: var(--red); }
-  .list svg { width: 18px; height: 18px; stroke-width: 3; }
+  .list svg { width: 17px; height: 17px; stroke-width: 3; }
+  .example {
+    margin-top: 18px; background: var(--blue-soft); border-radius: 14px; padding: 12px 16px;
+    font-size: 19px; color: var(--muted); font-weight: 500; line-height: 1.35;
+  }
+  .example b { color: var(--blue); font-weight: 800; }
 
   /* slide 1 */
-  .flow { display: flex; align-items: center; justify-content: space-between; height: 100%; }
-  .stage { width: 250px; text-align: center; }
-  .stage .tile { margin: 0 auto; width: 110px; height: 110px; border-radius: 30px; }
-  .stage .tile svg { width: 52px; height: 52px; }
-  .stage b { display: block; margin-top: 18px; font-size: 26px; font-weight: 800; }
-  .stage span { display: block; margin-top: 6px; font-size: 19px; color: var(--muted); font-weight: 500; }
-  .stage.dim .tile { background: linear-gradient(135deg, #C9D1E6, #AEB8D3); box-shadow: none; }
-  .flow .arr { color: var(--blue); }
-  .flow .arr svg { width: 46px; height: 46px; stroke-width: 2.6; }
+  .donut-wrap { display: grid; grid-template-columns: 420px 1fr; gap: 40px; align-items: center; height: 100%; }
+  .donut-wrap svg { width: 420px; height: 420px; }
+  .rows { display: grid; gap: 22px; }
+  .row { display: flex; align-items: center; gap: 18px; }
+  .row .dot { width: 22px; height: 22px; border-radius: 50%; flex: none; }
+  .row b { font-size: 28px; font-weight: 800; display: block; }
+  .row span { font-size: 20px; color: var(--muted); font-weight: 500; }
   .swipe {
     position: absolute; right: 0; bottom: 0; display: flex; align-items: center; gap: 10px;
     background: var(--blue); color: #fff; font-size: 21px; font-weight: 800; padding: 14px 24px; border-radius: 99px;
@@ -91,60 +96,69 @@
   .swipe svg { width: 22px; height: 22px; stroke-width: 2.6; }
 
   /* slide 2 */
-  .duo { display: grid; grid-template-columns: 1fr 70px 1fr; align-items: center; height: 100%; }
-  .duo .card { height: 100%; }
+  .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; height: 100%; align-items: stretch; }
+  .duo .card { padding-top: 40px; display: flex; flex-direction: column; }
   .duo .card.good { background: linear-gradient(150deg, #1E2C7A, #121C52); border: none; color: #fff; }
-  .duo .card.good .label { color: #fff; }
-  .duo .card.good .list li { color: rgba(255,255,255,.9); }
-  .duo .card.good .list .ok { background: rgba(255,255,255,.15); color: #7CF5A0; }
-  .duo .mid { display: grid; place-items: center; color: var(--blue); }
-  .duo .mid svg { width: 46px; height: 46px; stroke-width: 2.6; }
-  .duo .card .tile { margin-bottom: 14px; }
+  .duo .card.good .title { color: #fff; }
+  .duo .card.good .list li { color: rgba(255,255,255,.92); }
+  .duo .card.good .list .ok { background: rgba(255,255,255,.16); color: #7CF5A0; }
+  .duo .card.good .example { background: rgba(255,255,255,.12); color: rgba(255,255,255,.85); }
+  .duo .card.good .example b { color: var(--yellow); }
+  .duo .card.good .num { background: var(--yellow); color: var(--navy); }
+  .duo .example { margin-top: auto; }
+  .duo .card .ico { margin-bottom: 14px; }
 
   /* slide 3 */
-  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; height: 100%; }
-  .stat .big { font-size: 84px; font-weight: 800; letter-spacing: -.04em; color: var(--ink); line-height: 1; margin-top: 12px; }
-  .stat .delta { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 22px; font-weight: 800; color: var(--green); background: #E3F8E9; padding: 6px 14px; border-radius: 99px; }
-  .stat .delta svg { width: 18px; height: 18px; stroke-width: 2.8; }
-  .stat svg.spark { width: 100%; height: 150px; margin-top: 20px; }
-  .stat p { font-size: 20px; color: var(--muted); font-weight: 500; margin-top: 10px; }
-  .qs { display: grid; gap: 16px; align-content: start; }
-  .qs .card { display: flex; align-items: center; gap: 18px; padding: 20px 24px; }
-  .qs .card b { font-size: 24px; font-weight: 800; display: block; }
-  .qs .card span { font-size: 19px; color: var(--muted); font-weight: 500; }
-  .qs .lead { font-size: 26px; font-weight: 700; color: var(--ink); line-height: 1.3; margin-bottom: 4px; }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; height: 100%; align-items: stretch; }
+  .chart { display: flex; flex-direction: column; }
+  .chart .label { font-size: 22px; font-weight: 800; color: var(--muted); }
+  .chart .big { font-size: 60px; font-weight: 800; letter-spacing: -.03em; color: var(--ink); margin-top: 10px; }
+  .chart svg { width: 100%; height: 180px; margin-top: 16px; }
+  .chart p { font-size: 21px; color: var(--muted); font-weight: 500; margin-top: auto; line-height: 1.4; }
+  .qs { display: grid; gap: 16px; align-content: center; }
+  .qs .card { display: flex; align-items: center; gap: 18px; padding: 18px 22px; }
+  .qs .card .title { font-size: 25px; }
+  .qs .card span { display: block; font-size: 19px; color: var(--muted); font-weight: 500; margin-top: 4px; }
 
   /* slide 4 */
-  .funnel-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; height: 100%; align-items: center; }
-  .funnel-wrap p { font-size: 26px; line-height: 1.5; color: #36405E; font-weight: 500; }
-  .funnel-wrap p b { color: var(--ink); font-weight: 800; }
-  .funnel { display: grid; gap: 10px; justify-items: center; }
-  .funnel div {
-    height: 96px; color: #fff; font-size: 24px; font-weight: 800; display: flex; align-items: center; justify-content: center;
-    gap: 10px; border-radius: 18px; box-shadow: 0 10px 22px rgba(15,26,61,.16);
+  .fun { display: grid; grid-template-columns: 500px 1fr; gap: 36px; height: 100%; align-items: center; }
+  .tiers { display: grid; gap: 10px; justify-items: center; }
+  .tier {
+    height: 110px; color: #fff; font-size: 26px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+    gap: 12px; box-shadow: 0 10px 22px rgba(15,26,61,.16); letter-spacing: -.01em;
   }
-  .funnel div svg { width: 26px; height: 26px; stroke-width: 2.4; }
-  .f1 { width: 100%; background: linear-gradient(90deg, #5B82FF, #3461F5); }
-  .f2 { width: 86%; background: linear-gradient(90deg, #3461F5, #2A4DD6); }
-  .f3 { width: 72%; background: linear-gradient(90deg, #2A4DD6, #1E2C7A); }
-  .f4 { width: 58%; background: linear-gradient(90deg, #1E2C7A, #121C52); }
+  .tier svg { width: 28px; height: 28px; stroke-width: 2.4; }
+  .t1 { width: 500px; clip-path: polygon(0 0, 100% 0, 92% 100%, 8% 100%); background: linear-gradient(90deg, #5B82FF, #3461F5); }
+  .t2 { width: 440px; clip-path: polygon(0 0, 100% 0, 92% 100%, 8% 100%); background: linear-gradient(90deg, #3461F5, #2A4DD6); }
+  .t3 { width: 380px; clip-path: polygon(0 0, 100% 0, 92% 100%, 8% 100%); background: linear-gradient(90deg, #2A4DD6, #1E2C7A); }
+  .t4 { width: 320px; clip-path: polygon(0 0, 100% 0, 92% 100%, 8% 100%); background: linear-gradient(90deg, #1E2C7A, #121C52); }
+  .steps4 { display: grid; gap: 10px; }
+  .steps4 .card { padding: 16px 22px; height: 110px; display: flex; align-items: center; }
+  .steps4 .card b { font-size: 24px; font-weight: 800; display: block; }
+  .steps4 .card span { font-size: 19px; color: var(--muted); font-weight: 500; }
 
   /* slide 5 */
-  .grid4 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; height: 100%; align-content: center; }
-  .grid4 .card { display: flex; flex-direction: column; gap: 14px; justify-content: center; }
-  .grid4 .card b { font-size: 27px; font-weight: 800; line-height: 1.15; }
-  .grid4 .card span { font-size: 20px; color: var(--muted); font-weight: 500; line-height: 1.35; }
+  .grid4 { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; height: 100%; align-content: start; }
+  .grid4 .card { padding-top: 34px; min-height: 200px; }
+  .grid4 .card .num { top: -16px; }
+  .grid4 .card .title { font-size: 27px; }
+  .grid4 .card p { font-size: 20px; color: var(--muted); font-weight: 500; line-height: 1.4; margin-top: 10px; }
+  .tip {
+    grid-column: span 2; display: flex; align-items: center; gap: 18px; padding: 18px 24px;
+    background: var(--blue-soft); border: 1.5px dashed var(--blue); border-radius: 22px;
+    font-size: 22px; font-weight: 700; color: var(--ink);
+  }
+  .tip .ico { width: 52px; height: 52px; }
+  .tip .ico svg { width: 24px; height: 24px; }
 
   /* slide 6 */
-  .steps { display: grid; gap: 14px; }
-  .step { display: flex; align-items: center; gap: 22px; padding: 16px 22px; }
-  .step .n {
-    width: 58px; height: 58px; border-radius: 17px; flex: none; color: #fff; font-size: 26px; font-weight: 800;
-    display: grid; place-items: center; background: linear-gradient(135deg, #5B82FF, #3461F5); box-shadow: 0 8px 18px rgba(52,97,245,.3);
-  }
-  .step b { font-size: 26px; font-weight: 800; }
+  .checks { display: grid; gap: 16px; position: relative; }
+  .check { display: flex; align-items: center; gap: 22px; padding: 14px 22px; }
+  .check .ico { width: 62px; height: 62px; }
+  .check .ico.dark { font-size: 0; }
+  .check .title { font-size: 26px; }
   .cta {
-    margin-top: 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    margin-top: 6px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
     background: linear-gradient(150deg, #1E2C7A, #121C52); color: #fff; border-radius: 26px; padding: 20px 26px;
   }
   .cta b { font-size: 24px; font-weight: 800; display: block; }
@@ -179,6 +193,8 @@
 </head>
 <body>
 
+<!-- Shared footer markup is repeated in every slide (4-part brand footer). -->
+
 <!-- SLIDE 1 -->
 <section class="slide">
   <div class="top"><div class="brand"><img src="assets/logo-tile.png" alt="">PermanentSEO</div><div class="count">1/6</div></div>
@@ -187,12 +203,21 @@
     <p class="sub">Here's a more useful way to think about it.</p>
   </div>
   <div class="body">
-    <div class="flow">
-      <div class="stage dim"><div class="tile"><i data-lucide="users"></i></div><b>Traffic</b><span>Visitors arrive</span></div>
-      <div class="arr"><i data-lucide="arrow-right"></i></div>
-      <div class="stage"><div class="tile c-violet"><i data-lucide="target"></i></div><b>Relevance</b><span>Right people</span></div>
-      <div class="arr"><i data-lucide="arrow-right"></i></div>
-      <div class="stage"><div class="tile c-green"><i data-lucide="badge-dollar-sign"></i></div><b>Revenue</b><span>Business growth</span></div>
+    <div class="donut-wrap">
+      <svg viewBox="0 0 420 420">
+        <g transform="rotate(-90 210 210)" fill="none" stroke-width="150">
+          <circle cx="210" cy="210" r="135" stroke="#C9D1E6" stroke-dasharray="282.7 848.2" stroke-dashoffset="0"/>
+          <circle cx="210" cy="210" r="135" stroke="#5B82FF" stroke-dasharray="282.7 848.2" stroke-dashoffset="-282.7"/>
+          <circle cx="210" cy="210" r="135" stroke="#1E2C7A" stroke-dasharray="282.7 848.2" stroke-dashoffset="-565.4"/>
+        </g>
+        <circle cx="210" cy="210" r="70" fill="#fff"/>
+        <text x="210" y="222" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="26" font-weight="800" fill="#0F1A3D">Goal</text>
+      </svg>
+      <div class="rows">
+        <div class="row"><span class="dot" style="background:#C9D1E6"></span><div><b>Traffic</b><span>Visitors arrive</span></div></div>
+        <div class="row"><span class="dot" style="background:#5B82FF"></span><div><b>Relevance</b><span>The right people</span></div></div>
+        <div class="row"><span class="dot" style="background:#1E2C7A"></span><div><b>Revenue</b><span>Real business growth</span></div></div>
+      </div>
     </div>
     <div class="swipe">Swipe <i data-lucide="arrow-right"></i></div>
   </div>
@@ -211,29 +236,32 @@
 <section class="slide">
   <div class="top"><div class="brand"><img src="assets/logo-tile.png" alt="">PermanentSEO</div><div class="count">2/6</div></div>
   <div class="head">
-    <h1>More traffic ≠ <em>more revenue</em></h1>
+    <h1 style="font-size:72px">More traffic ≠ <span class="b">more revenue</span></h1>
     <p class="sub">Organic traffic brings visitors. Not all of them are your ideal audience.</p>
   </div>
   <div class="body">
     <div class="duo">
       <div class="card">
-        <div class="tile c-amber"><i data-lucide="eye"></i></div>
-        <div class="label" style="margin-top:14px;font-size:28px">More traffic</div>
+        <div class="num">1</div>
+        <div class="ico"><i data-lucide="eye"></i></div>
+        <div class="title">More traffic</div>
         <ul class="list">
           <li><span class="no"><i data-lucide="x"></i></span>Low intent</li>
           <li><span class="no"><i data-lucide="x"></i></span>Irrelevant audience</li>
           <li><span class="no"><i data-lucide="x"></i></span>High bounce rate</li>
         </ul>
+        <div class="example"><b>Example:</b> a viral post that nobody buys from.</div>
       </div>
-      <div class="mid"><i data-lucide="arrow-right"></i></div>
       <div class="card good">
-        <div class="tile c-blue"><i data-lucide="target"></i></div>
-        <div class="label" style="margin-top:14px;font-size:28px">Qualified demand</div>
+        <div class="num">2</div>
+        <div class="ico dark"><i data-lucide="target"></i></div>
+        <div class="title">Qualified demand</div>
         <ul class="list">
           <li><span class="ok"><i data-lucide="check"></i></span>Right audience</li>
           <li><span class="ok"><i data-lucide="check"></i></span>Higher engagement</li>
           <li><span class="ok"><i data-lucide="check"></i></span>More conversions</li>
         </ul>
+        <div class="example"><b>Example:</b> a service page that answers one buyer's question.</div>
       </div>
     </div>
   </div>
@@ -252,26 +280,36 @@
 <section class="slide">
   <div class="top"><div class="brand"><img src="assets/logo-tile.png" alt="">PermanentSEO</div><div class="count">3/6</div></div>
   <div class="head">
-    <h1>It's not just about <em>numbers</em></h1>
+    <h1>It's not just about <span class="b">numbers</span></h1>
   </div>
   <div class="body">
     <div class="split">
-      <div class="card stat">
-        <div class="label" style="font-size:24px;color:var(--muted)">Total visitors</div>
-        <div class="big">12,450</div>
-        <div class="delta"><i data-lucide="trending-up"></i>+12%</div>
-        <svg class="spark" viewBox="0 0 300 150" preserveAspectRatio="none">
+      <div class="card chart">
+        <div class="label">Visitors over time</div>
+        <div class="big">Looks good</div>
+        <svg viewBox="0 0 300 180" preserveAspectRatio="none">
           <defs><linearGradient id="sp" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3461F5" stop-opacity=".25"/><stop offset="1" stop-color="#3461F5" stop-opacity="0"/></linearGradient></defs>
-          <path d="M0 120 L40 100 L80 110 L120 80 L160 90 L200 55 L240 62 L300 20 L300 150 L0 150 Z" fill="url(#sp)"/>
-          <path d="M0 120 L40 100 L80 110 L120 80 L160 90 L200 55 L240 62 L300 20" fill="none" stroke="#3461F5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M0 150 L40 128 L80 138 L120 100 L160 112 L200 72 L240 80 L300 22 L300 180 L0 180 Z" fill="url(#sp)"/>
+          <path d="M0 150 L40 128 L80 138 L120 100 L160 112 L200 72 L240 80 L300 22" fill="none" stroke="#3461F5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <p>Looks great on a report, but it doesn't pay the bills.</p>
+        <p>On a report, traffic looks great. But it doesn't pay the bills.</p>
       </div>
       <div class="qs">
-        <div class="lead">What matters is who visits, what they need, and whether they become customers.</div>
-        <div class="card"><div class="tile c-sky"><i data-lucide="user-round"></i></div><div><b>Who is visiting?</b><span>The right role and business</span></div></div>
-        <div class="card"><div class="tile c-teal"><i data-lucide="search"></i></div><div><b>What do they need?</b><span>Their real question</span></div></div>
-        <div class="card"><div class="tile c-green"><i data-lucide="wallet"></i></div><div><b>Will they buy?</b><span>Turn visits into enquiries</span></div></div>
+        <div class="card">
+          <div class="num">1</div>
+          <div class="ico"><i data-lucide="user-round"></i></div>
+          <div><div class="title">Who is visiting?</div><span>The right role and business</span></div>
+        </div>
+        <div class="card">
+          <div class="num">2</div>
+          <div class="ico"><i data-lucide="search"></i></div>
+          <div><div class="title">What do they need?</div><span>Their real question</span></div>
+        </div>
+        <div class="card">
+          <div class="num">3</div>
+          <div class="ico dark"><i data-lucide="wallet"></i></div>
+          <div><div class="title">Will they buy?</div><span>Turn visits into enquiries</span></div>
+        </div>
       </div>
     </div>
   </div>
@@ -290,16 +328,21 @@
 <section class="slide">
   <div class="top"><div class="brand"><img src="assets/logo-tile.png" alt="">PermanentSEO</div><div class="count">4/6</div></div>
   <div class="head">
-    <h1>The real goal:<br><em>qualified demand</em></h1>
+    <h1>The real goal:<br><span class="b"><em>qualified demand</em></span></h1>
   </div>
   <div class="body">
-    <div class="funnel-wrap">
-      <p>You want people who are <b>searching for your solution</b>, <b>trust your business</b>, and take the next step: an enquiry, demo or purchase.</p>
-      <div class="funnel">
-        <div class="f1"><i data-lucide="search"></i>Search intent</div>
-        <div class="f2"><i data-lucide="file-check"></i>Relevant page</div>
-        <div class="f3"><i data-lucide="shield-check"></i>Trust</div>
-        <div class="f4"><i data-lucide="mail"></i>Enquiry</div>
+    <div class="fun">
+      <div class="tiers">
+        <div class="tier t1"><i data-lucide="search"></i>Search intent</div>
+        <div class="tier t2"><i data-lucide="file-check"></i>Relevant page</div>
+        <div class="tier t3"><i data-lucide="shield-check"></i>Trust</div>
+        <div class="tier t4"><i data-lucide="mail"></i>Enquiry</div>
+      </div>
+      <div class="steps4">
+        <div class="card"><div><b>Searching for your solution</b><span>They already want what you offer</span></div></div>
+        <div class="card"><div><b>Landing on a page that answers</b><span>Clear headline, proof and next step</span></div></div>
+        <div class="card"><div><b>Trusting your business</b><span>Case studies and real results</span></div></div>
+        <div class="card"><div><b>Taking the next step</b><span>An enquiry, demo or purchase</span></div></div>
       </div>
     </div>
   </div>
@@ -318,15 +361,16 @@
 <section class="slide">
   <div class="top"><div class="brand"><img src="assets/logo-tile.png" alt="">PermanentSEO</div><div class="count">5/6</div></div>
   <div class="head">
-    <h1>Think beyond <em>traffic metrics</em></h1>
+    <h1 style="font-size:72px">Think beyond <span class="b">traffic metrics</span></h1>
     <p class="sub">Focus on the signals that show real business interest.</p>
   </div>
   <div class="body">
     <div class="grid4">
-      <div class="card"><div class="tile c-sky"><i data-lucide="users-round"></i></div><b>Qualified visitors</b><span>People who fit your ideal customer</span></div>
-      <div class="card"><div class="tile c-violet"><i data-lucide="activity"></i></div><b>Engagement rate</b><span>Time spent and pages explored</span></div>
-      <div class="card"><div class="tile c-teal"><i data-lucide="mail-check"></i></div><b>Enquiries &amp; conversions</b><span>Forms, calls and bookings</span></div>
-      <div class="card"><div class="tile c-green"><i data-lucide="badge-dollar-sign"></i></div><b>Revenue impact</b><span>Deals won from organic search</span></div>
+      <div class="card"><div class="num">1</div><div class="ico"><i data-lucide="users-round"></i></div><p class="title" style="margin-top:12px">Qualified visitors</p><p>People who fit your ideal customer.</p></div>
+      <div class="card"><div class="num">2</div><div class="ico"><i data-lucide="activity"></i></div><p class="title" style="margin-top:12px">Engagement rate</p><p>Time spent and pages explored.</p></div>
+      <div class="card"><div class="num">3</div><div class="ico"><i data-lucide="mail-check"></i></div><p class="title" style="margin-top:12px">Enquiries &amp; conversions</p><p>Forms, calls and bookings.</p></div>
+      <div class="card"><div class="num">4</div><div class="ico"><i data-lucide="badge-dollar-sign"></i></div><p class="title" style="margin-top:12px">Revenue impact</p><p>Deals won from organic search.</p></div>
+      <div class="tip"><div class="ico dark"><i data-lucide="lightbulb"></i></div>Pro tip: track what leads to enquiries, not just visits.</div>
     </div>
   </div>
   <footer>
@@ -344,15 +388,15 @@
 <section class="slide">
   <div class="top"><div class="brand"><img src="assets/logo-tile.png" alt="">PermanentSEO</div><div class="count">6/6</div></div>
   <div class="head">
-    <h1>Quick <em>checklist</em></h1>
+    <h1>Quick <span class="b">checklist</span></h1>
     <p class="sub">Pick one important page and ask:</p>
   </div>
   <div class="body">
-    <div class="steps">
-      <div class="card step"><div class="n">1</div><b>Who is this page for?</b></div>
-      <div class="card step"><div class="n">2</div><b>What decision do they need to make?</b></div>
-      <div class="card step"><div class="n">3</div><b>What proof builds their trust?</b></div>
-      <div class="card step"><div class="n">4</div><b>What is the next step?</b></div>
+    <div class="checks">
+      <div class="card check"><div class="ico dark"><i data-lucide="user-round"></i></div><div class="title">Who is this page for?</div></div>
+      <div class="card check"><div class="ico dark"><i data-lucide="signpost"></i></div><div class="title">What decision do they need to make?</div></div>
+      <div class="card check"><div class="ico dark"><i data-lucide="shield-check"></i></div><div class="title">What proof builds their trust?</div></div>
+      <div class="card check"><div class="ico dark"><i data-lucide="arrow-right"></i></div><div class="title">What is the next step?</div></div>
       <div class="cta">
         <div><b>Want an SEO audit?</b><span>Let's talk about your pages.</span></div>
         <div class="kw">DM "AUDIT" <i data-lucide="send"></i></div>

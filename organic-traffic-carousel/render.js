@@ -6,7 +6,6 @@ const path = require('path');
 const fs = require('fs');
 
 const outDir = path.join(__dirname, 'output');
-fs.rmSync(outDir, { recursive: true, force: true });
 
 (async () => {
   const browser = await chromium.launch({ args: ['--allow-file-access-from-files'] });
