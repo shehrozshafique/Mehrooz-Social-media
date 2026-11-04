@@ -1,0 +1,83 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+  @font-face{font-family:"InterL";src:local("Inter Black"),url("file:///usr/share/fonts/opentype/inter/Inter-Black.otf");font-weight:900}
+  @font-face{font-family:"InterL";src:local("Inter ExtraBold"),url("file:///usr/share/fonts/opentype/inter/Inter-ExtraBold.otf");font-weight:800}
+  @font-face{font-family:"InterL";src:url("file:///usr/share/fonts/opentype/inter/Inter-Bold.otf");font-weight:700}
+  @font-face{font-family:"InterL";src:url("file:///usr/share/fonts/opentype/inter/Inter-SemiBold.otf");font-weight:600}
+  @font-face{font-family:"InterL";src:url("file:///usr/share/fonts/opentype/inter/Inter-Medium.otf");font-weight:500}
+  @font-face{font-family:"InterL";src:url("file:///usr/share/fonts/opentype/inter/Inter-Regular.otf");font-weight:400}
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:1200px;height:1500px;overflow:hidden}
+  body{font-family:"InterL",Inter,sans-serif;-webkit-font-smoothing:antialiased;
+    background:linear-gradient(180deg,#2B43B1 0%,#2B43B1 30%,#5A6FCB 48%,#C9D2F0 66%,#F4F7FD 82%,#F4F7FD 100%);position:relative}
+  /* soft corner light */
+  .light{position:absolute;inset:0;background:
+      radial-gradient(900px 700px at 100% 0%,rgba(255,255,255,.16),transparent 60%),
+      radial-gradient(700px 500px at 0% 100%,rgba(43,67,177,.06),transparent 70%)}
+  .deco{position:absolute;inset:0}
+  .portrait-glow{position:absolute;left:520px;top:430px;width:760px;height:760px;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,255,255,.55) 0%,rgba(255,255,255,.18) 42%,transparent 70%)}
+  .portrait{position:absolute;right:-70px;bottom:0;height:1010px;
+    filter:drop-shadow(0 30px 50px rgba(18,32,96,.28)) contrast(1.03) saturate(1.02)}
+  .left{position:absolute;left:88px;top:118px;width:610px}
+  .eyebrow{display:inline-flex;align-items:center;gap:14px;color:rgba(255,255,255,.82);font-weight:600;font-size:21px;letter-spacing:.2em;text-transform:uppercase}
+  .eyebrow i{display:block;width:44px;height:2px;background:rgba(255,255,255,.7)}
+  h1{margin-top:34px;color:#fff;font-weight:900;font-size:80px;line-height:1.02;letter-spacing:-.025em;text-transform:uppercase}
+  h1 .em{color:#CFE0FF}
+  .name{margin-top:46px;color:#fff;font-weight:800;font-size:46px;letter-spacing:-.015em}
+  .role{margin-top:12px;color:rgba(255,255,255,.88);font-weight:500;font-size:23px;line-height:1.45}
+  .role b{font-weight:600;color:#fff}
+  .values{position:absolute;left:88px;top:1000px;display:flex;flex-direction:column;gap:18px}
+  .val{display:flex;align-items:center;gap:18px;padding:16px 26px 16px 16px;border-radius:18px;
+    background:rgba(255,255,255,.82);border:1px solid rgba(43,67,177,.12);box-shadow:0 10px 26px rgba(30,48,140,.08);width:max-content}
+  .ico{width:46px;height:46px;border-radius:12px;background:#EAF0FF;display:grid;place-items:center}
+  .val span{color:#16245E;font-weight:700;font-size:25px;letter-spacing:-.01em}
+  .footer{position:absolute;left:88px;bottom:72px;display:flex;align-items:center;gap:16px}
+  .footer img{width:58px;height:58px;border-radius:14px;box-shadow:0 6px 16px rgba(30,48,140,.2)}
+  .footer .t1{color:#16245E;font-weight:700;font-size:21px}
+  .footer .t2{color:#5B6690;font-weight:500;font-size:17px;margin-top:2px}
+</style></head>
+<body>
+  <div class="light"></div>
+  <!-- subtle search + growth motifs -->
+  <svg class="deco" width="1200" height="1500" viewBox="0 0 1200 1500">
+    <g fill="none" stroke="#FFFFFF" stroke-opacity=".10" stroke-width="3">
+      <circle cx="1020" cy="250" r="190"/>
+      <circle cx="1020" cy="250" r="128" stroke-opacity=".07"/>
+      <line x1="1155" y1="385" x2="1250" y2="480" stroke-width="22" stroke-linecap="round" stroke-opacity=".08"/>
+    </g>
+    <g fill="#FFFFFF" fill-opacity=".14">
+      <circle cx="770" cy="120" r="3"/><circle cx="800" cy="120" r="3"/><circle cx="830" cy="120" r="3"/>
+      <circle cx="770" cy="150" r="3"/><circle cx="800" cy="150" r="3"/><circle cx="830" cy="150" r="3"/>
+      <circle cx="770" cy="180" r="3"/><circle cx="800" cy="180" r="3"/><circle cx="830" cy="180" r="3"/>
+    </g>
+    
+  </svg>
+  <div class="portrait-glow"></div>
+  <img class="portrait" src="portrait.png" alt="">
+
+  <div class="left">
+    <div class="eyebrow"><i></i>CEO &amp; Founder, Permanent SEO</div>
+    <h1>I help<br>businesses<br>get found &amp;<br><span class="em">chosen</span> on<br>Google<span style="margin-left:-.06em">.</span></h1>
+    <div class="name">Shehroz Shafique</div>
+    <div class="role">SEO &amp; Growth Strategist<br><b>Founder, Permanent SEO</b></div>
+  </div>
+
+  <div class="values">
+    <div class="val"><div class="ico">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2B43B1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/></svg>
+    </div><span>Qualified Leads</span></div>
+    <div class="val"><div class="ico">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2B43B1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>
+    </div><span>Sustainable Growth</span></div>
+    <div class="val"><div class="ico">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#2B43B1" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>
+    </div><span>Buyer-Focused SEO</span></div>
+  </div>
+
+  <div class="footer">
+    <img src="logo_tile.png" alt="Permanent SEO logo">
+    <div><div class="t1">Permanent SEO</div><div class="t2">permanentseo.com</div></div>
+  </div>
+</body></html>
